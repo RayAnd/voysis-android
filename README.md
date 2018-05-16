@@ -26,7 +26,7 @@ Overview
 -------------
 
 
-The `Voysis.Service` class is the main interface used to process voice recognition requests.
+The `Service` class is the main interface used to process voice recognition requests.
 It is accessed via the `ServiceProvider().make(context , config)` method. See demo application for more details.
 The sdk communicates to the network using a websocket connection accomplished using `Okhttp websocket`.
 
@@ -35,7 +35,7 @@ Usage
 -------------
 
 
-- The first step is to create a `Voysis.Servie` instance
+- The first step is to create a `Servie` instance
 ```kotlin
  val config = DataConfig(isVadEnabled = true, url = URL("INSERT_URL"), refreshToken = "INSERT_TOKEN")
  val service = ServiceProvider().make(context, config)
@@ -60,7 +60,7 @@ Usage
              }
          })
 ```
-- The `Voysis.Event` object contains two fields: `EventType` and `ApiResposne`.
+- The `Event` object contains two fields: `EventType` and `ApiResposne`.
  `EventType` is a status enum which will always be populated.
  `ApiResponse` is an interface whose concrete implementation is a data class representation of the 
  json response and will only be populated when the `EventType` is either `.AUDIO_QUERY_CREATED`, or `.AUDIO_QUERY_COMPLETE`. 
