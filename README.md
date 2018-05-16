@@ -21,7 +21,7 @@ Overview
 -------------
 
 
-The `Voysis.Service` class is the main interface used to process voice recognition requests.
+The `Service` class is the main interface used to process voice recognition requests.
 It is accessed via the `ServiceProvider().make(context , config)` method. See demo application for more details.
 The sdk communicates to the network using a websocket connection accomplished using `Okhttp websocket`.
 
