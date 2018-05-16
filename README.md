@@ -60,7 +60,7 @@ Usage
              }
          })
 ```
-- The `Event` object contains two fields: `EventType` and `ApiResposne`.
+- The `Event` object contains two fields: `EventType` and `ApiResponse`.
  `EventType` is a status enum which will always be populated.
  `ApiResponse` is an interface whose concrete implementation is a data class representation of the 
  json response and will only be populated when the `EventType` is either `.AUDIO_QUERY_CREATED`, or `.AUDIO_QUERY_COMPLETE`. 
@@ -71,7 +71,7 @@ When the `EventType` is `EventType.AUDIO_QUERY_CREATED` you can extract the *ini
  val query = event.getResponse<AudioQueryResponse>() 
 
 ```
-Note: This response indicates that a successful connection was made and returns meta-data. This resposne can be ignored by most users.
+Note: This response indicates that a successful connection was made and returns meta-data. This response can be ignored by most users.
 
 When the `EventType` is `.AUDIO_QUERY_COMPLETED` you can extract the *final* response by doing the following.
     
