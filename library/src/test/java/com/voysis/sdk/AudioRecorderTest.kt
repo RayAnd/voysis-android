@@ -2,11 +2,15 @@ package com.voysis.sdk
 
 import android.content.Context
 import android.media.AudioRecord
-import android.media.MediaPlayer
+import android.media.AudioRecord.RECORDSTATE_RECORDING
+import android.media.AudioRecord.RECORDSTATE_STOPPED
 import com.nhaarman.mockito_kotlin.any
+import com.nhaarman.mockito_kotlin.anyOrNull
 import com.nhaarman.mockito_kotlin.doAnswer
 import com.nhaarman.mockito_kotlin.doReturn
+import com.nhaarman.mockito_kotlin.mock
 import com.nhaarman.mockito_kotlin.whenever
+import com.voysis.recorder.AudioPlayer
 import com.voysis.recorder.AudioRecorder
 import com.voysis.recorder.AudioRecorderImpl
 import com.voysis.recorder.OnDataResponse
@@ -22,46 +26,44 @@ import java.util.concurrent.ExecutorService
 
 @RunWith(MockitoJUnitRunner::class)
 class AudioRecorderTest {
-
-    @Mock
-    private lateinit var start: MediaPlayer
-    @Mock
-    private lateinit var stop: MediaPlayer
-    @Mock
-    private lateinit var record: AudioRecord
     @Mock
     private lateinit var context: Context
     @Mock
     private lateinit var executorService: ExecutorService
     @Mock
+    private lateinit var player: AudioPlayer
+    @Mock
     private lateinit var onDataResposne: OnDataResponse
+
+    var record = mock<AudioRecord> {
+        on { recordingState } doReturn RECORDSTATE_RECORDING doReturn RECORDSTATE_STOPPED
+    }
 
     private lateinit var audioRecorder: AudioRecorder
 
     @Before
     fun setup() {
-        audioRecorder = spy(AudioRecorderImpl(context, record, start, stop, executorService))
+        audioRecorder = spy(AudioRecorderImpl(context, player, record, executorService))
     }
 
     @Test
     fun testRecordingStart() {
+        callCompletionListener()
         audioRecorder.start(onDataResposne)
-        verify<MediaPlayer>(start).setVolume(5f, 5f)
-        verify<MediaPlayer>(start).start()
+        verify(player).playStartAudio(any())
+        verify(executorService).execute(any())
     }
 
     @Test
     fun testRecordingStop() {
         audioRecorder.start(onDataResposne)
         audioRecorder.stop()
-        verify<MediaPlayer>(stop).setVolume(5f, 5f)
-        verify<MediaPlayer>(stop).start()
+        verify(player).playStopAudio()
     }
 
     @Test
     fun testReadLoop() {
         callCompletionListener()
-        doReturn(AudioRecord.RECORDSTATE_RECORDING).doReturn(AudioRecord.RECORDSTATE_STOPPED).whenever(record).recordingState
         doAnswer { invocation ->
             (invocation.getArgument<Any>(0) as Runnable).run()
             null
@@ -73,8 +75,7 @@ class AudioRecorderTest {
 
     private fun callCompletionListener() {
         doAnswer { invocation ->
-            (invocation.getArgument<Any>(0) as MediaPlayer.OnCompletionListener).onCompletion(null)
-            null
-        }.whenever(start).setOnCompletionListener(ArgumentMatchers.any(MediaPlayer.OnCompletionListener::class.java))
+            (invocation.getArgument<Any>(0) as () -> Unit).invoke()
+        }.whenever(player).playStartAudio(anyOrNull())
     }
 }
