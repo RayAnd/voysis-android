@@ -109,7 +109,7 @@ Local Build
 -------------
 
 
-To build the project locally you can clone the project and open the root directory in Android Studio.
+To build the project locally, clone the project and open the root directory in Android Studio.
 
 	
 IMPORTANT NOTE

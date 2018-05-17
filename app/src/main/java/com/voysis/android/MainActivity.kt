@@ -1,15 +1,13 @@
-package voysis.com.android
+package com.voysis.android
 
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
-import android.util.Log
 import android.widget.Toast
 import android.widget.Toast.LENGTH_SHORT
 import com.google.gson.GsonBuilder
-import com.voysis.android.R
 import com.voysis.api.Service
 import com.voysis.api.ServiceProvider
 import com.voysis.api.State
@@ -67,7 +65,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun init() {
-        service = ServiceProvider().make(this, config)
+        service = ServiceProvider().make(applicationContext, config)
         start.setOnClickListener { onStartClicked() }
         stop.setOnClickListener { service.finish() }
         cancel.setOnClickListener { service.cancel() }
