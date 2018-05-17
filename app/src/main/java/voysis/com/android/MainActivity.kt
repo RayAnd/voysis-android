@@ -9,6 +9,7 @@ import android.util.Log
 import android.widget.Toast
 import android.widget.Toast.LENGTH_SHORT
 import com.google.gson.GsonBuilder
+import com.voysis.android.R
 import com.voysis.api.Service
 import com.voysis.api.ServiceProvider
 import com.voysis.api.State
@@ -24,7 +25,6 @@ import kotlinx.android.synthetic.main.activity_main.eventText
 import kotlinx.android.synthetic.main.activity_main.responseText
 import kotlinx.android.synthetic.main.activity_main.start
 import kotlinx.android.synthetic.main.activity_main.stop
-import voysis_android.voysis.com.voysisandroid.R
 import java.net.URL
 import java.util.concurrent.Executors
 
@@ -38,10 +38,8 @@ class MainActivity : AppCompatActivity() {
     private val gson = GsonBuilder().setPrettyPrinting().create();
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        service = ServiceProvider().make(this, config)
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-
         //audio permissions must be accepted before using the Voysis Service.
         acceptAudioPermission()
     }
@@ -69,6 +67,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun init() {
+        service = ServiceProvider().make(this, config)
         start.setOnClickListener { onStartClicked() }
         stop.setOnClickListener { service.finish() }
         cancel.setOnClickListener { service.cancel() }
