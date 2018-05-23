@@ -29,3 +29,7 @@ data class Headers(@field:SerializedName("X-Voysis-Audio-Profile-Id") val audioP
                    @field:SerializedName("Accept") val accept: String? = "application/vnd.voysisquery.v1+json")
 
 data class Token(var expiresAt: String, var token: String) : ApiResponse()
+
+data class FeedbackEntity(val durations: Duration = Duration()) : ApiRequest
+
+data class Duration(var vad: Long? = null, var complete: Long? = null)

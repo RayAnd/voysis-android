@@ -2,6 +2,7 @@ package com.voysis.rest
 
 import com.voysis.api.Client
 import com.voysis.events.VoysisException
+import com.voysis.model.request.FeedbackEntity
 import com.voysis.model.response.AudioQueryResponse
 import com.voysis.sevice.AudioResponseFuture
 import com.voysis.sevice.Converter
@@ -35,11 +36,7 @@ class RestClient(private val converter: Converter, private val url: URL, private
         setAuthorizationHeader(token)
         setAcceptHeader("application/vnd.voysisquery.v1+json")
         val future = QueryFuture()
-        val body = mutableMapOf(
-                "locale" to "en-US",
-                "queryType" to "audio",
-                "audioQuery" to mapOf("mimeType" to "audio/pcm")
-        )
+        val body = getBody()
         context?.let {
             body["context"] = context
         }
@@ -57,6 +54,31 @@ class RestClient(private val converter: Converter, private val url: URL, private
         val request = createRequest(RequestBody.create(type, ""), queriesUrl.toString())
         execute(future, request)
         return future
+    }
+
+    override fun sendFeedback(path: String, feedback: FeedbackEntity, token: String): Future<String> {
+        setAuthorizationHeader(token)
+        setAcceptHeader("application/vnd.voysisquery.v1+json")
+        val future = QueryFuture()
+        val body = getBody()
+
+        feedback.durations.let {
+            body["duration"] = mutableMapOf(
+                    "vad" to it.vad,
+                    "complete" to it.complete)
+        }
+        val queriesUrl = URL(url, path)
+        val request = createRequest(RequestBody.create(type, converter.toJson(body)), queriesUrl.toString())
+        execute(future, request)
+        return future
+    }
+
+    private fun getBody(): MutableMap<String, Any> {
+        return mutableMapOf(
+                "locale" to "en-US",
+                "queryType" to "audio",
+                "audioQuery" to mapOf("mimeType" to "audio/pcm")
+        )
     }
 
     override fun streamAudio(channel: ReadableByteChannel, audioQueryResponse: AudioQueryResponse): AudioResponseFuture {

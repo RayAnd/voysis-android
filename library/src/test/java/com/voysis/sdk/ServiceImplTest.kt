@@ -4,7 +4,7 @@ import com.google.gson.Gson
 import com.nhaarman.mockito_kotlin.anyOrNull
 import com.nhaarman.mockito_kotlin.doAnswer
 import com.nhaarman.mockito_kotlin.doReturn
-import com.nhaarman.mockito_kotlin.spy
+import com.nhaarman.mockito_kotlin.eq
 import com.nhaarman.mockito_kotlin.times
 import com.nhaarman.mockito_kotlin.verify
 import com.nhaarman.mockito_kotlin.whenever
@@ -12,6 +12,8 @@ import com.voysis.api.Client
 import com.voysis.api.State
 import com.voysis.api.StreamingStoppedReason.VAD_RECEIVED
 import com.voysis.events.Callback
+import com.voysis.events.VoysisException
+import com.voysis.model.request.FeedbackEntity
 import com.voysis.recorder.AudioRecorder
 import com.voysis.recorder.OnDataResponse
 import com.voysis.sevice.AudioResponseFuture
@@ -48,7 +50,7 @@ class ServiceImplTest : ClientTest() {
     @Before
     fun setup() {
         val converter = Converter(headers, Gson())
-        serviceImpl = spy(ServiceImpl(client, manager, converter, refreshToken))
+        serviceImpl = ServiceImpl(client, manager, converter, refreshToken)
     }
 
     @Test
@@ -64,7 +66,7 @@ class ServiceImplTest : ClientTest() {
 
     private fun successfulExecutionResponses() {
         doReturn(tokenResponseExpired).whenever(tokenFuture).get()
-        doReturn(response).whenever(audioQueryFuture).get()
+        doReturn(queryFutureResponse).whenever(audioQueryFuture).get()
         doReturn(notification).whenever(queryFuture).get()
         doReturn(VAD_RECEIVED).whenever(queryFuture).responseReason
         doReturn(tokenFuture).whenever(client).refreshSessionToken(anyOrNull())
@@ -104,6 +106,21 @@ class ServiceImplTest : ClientTest() {
         serviceImpl.startAudioQuery(callback = callback)
         serviceImpl.startAudioQuery(callback = callback)
         verify(client, times(1)).refreshSessionToken(anyOrNull())
+    }
+
+    @Test(expected = VoysisException::class)
+    fun testInValidFeedback() {
+        serviceImpl.sendFeedback(FeedbackEntity())
+    }
+
+    @Test
+    fun testValidFeedback() {
+        successfulExecutionResponses()
+        answerRecordingStarted()
+        val feedback = FeedbackEntity()
+        serviceImpl.startAudioQuery(callback = callback)
+        serviceImpl.sendFeedback(feedback)
+        verify(client, times(1)).sendFeedback(eq("/queries/1/feedback"), eq(feedback), anyOrNull())
     }
 
     fun answerRecordingStarted() {

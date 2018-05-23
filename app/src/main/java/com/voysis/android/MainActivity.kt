@@ -5,6 +5,7 @@ import android.os.Build
 import android.os.Bundle
 import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
+import android.util.Log
 import android.widget.Toast
 import android.widget.Toast.LENGTH_SHORT
 import com.google.gson.GsonBuilder
@@ -15,6 +16,7 @@ import com.voysis.events.Callback
 import com.voysis.events.Event
 import com.voysis.events.EventType
 import com.voysis.events.VoysisException
+import com.voysis.model.request.FeedbackEntity
 import com.voysis.model.response.ApiResponse
 import com.voysis.model.response.AudioStreamResponse
 import com.voysis.sevice.DataConfig
@@ -34,6 +36,7 @@ class MainActivity : AppCompatActivity() {
     private val executor = Executors.newSingleThreadExecutor()
     private var context: Map<String, Any>? = null
     private val gson = GsonBuilder().setPrettyPrinting().create();
+    private var feedbackEntity = FeedbackEntity()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -85,7 +88,7 @@ class MainActivity : AppCompatActivity() {
                 when (event.eventType) {
                     EventType.RECORDING_STARTED -> setText("Recording Started")
                     EventType.RECORDING_FINISHED -> setText("Recording Finished")
-                    EventType.VAD_RECEIVED -> setText("Vad Received")
+                    EventType.VAD_RECEIVED -> vadReceived()
                     EventType.AUDIO_QUERY_CREATED -> setText("Query Created")
                     EventType.AUDIO_QUERY_COMPLETED -> onResponse(event.getResponse<AudioStreamResponse>())
                 }
@@ -97,11 +100,27 @@ class MainActivity : AppCompatActivity() {
         })
     }
 
+    private fun vadReceived() {
+        setText("Vad Received")
+        feedbackEntity.durations.vad = System.currentTimeMillis();
+    }
+
     private fun onResponse(query: ApiResponse) {
+        feedbackEntity.durations.complete = System.currentTimeMillis();
+        executor.submit({ sendFeedback() })
         context = (query as AudioStreamResponse).context
         runOnUiThread {
             setText("Query Complete")
             responseText.text = gson.toJson(query, AudioStreamResponse::class.java)
+        }
+    }
+
+    private fun sendFeedback() {
+        try {
+            service.sendFeedback(feedbackEntity)
+            Log.d("MainActivity", "feedback sent")
+        } catch (e: Exception) {
+            Log.e("MainActivity", e.message)
         }
     }
 

@@ -3,6 +3,7 @@ package com.voysis.android.core.impl
 import com.google.gson.Gson
 import com.nhaarman.mockito_kotlin.whenever
 import com.voysis.api.StreamingStoppedReason
+import com.voysis.model.request.FeedbackEntity
 import com.voysis.sdk.ClientTest
 import com.voysis.sevice.Converter
 import com.voysis.websocket.WebSocketClient
@@ -64,6 +65,14 @@ class WebSocketClientTest : ClientTest() {
         val future = webSocketClient.refreshSessionToken(token)
         val token = future.get()
         assertTrue(this.tokenResponseValid == token)
+    }
+
+    @Test
+    fun testSuccessfulFeedbackSent() {
+        getResponseFromStringSend()
+        val future = webSocketClient.sendFeedback("" , FeedbackEntity(), token)
+        val response = future.get()
+        assertTrue(this.response.contains(response))
     }
 
     @Test

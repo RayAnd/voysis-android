@@ -1,6 +1,7 @@
 package com.voysis.api
 
 import com.voysis.events.Callback
+import com.voysis.model.request.FeedbackEntity
 import com.voysis.model.request.Token
 
 import java.io.IOException
@@ -42,6 +43,9 @@ interface Service {
      */
     @Throws(ExecutionException::class)
     fun refreshSessionToken(): Token
+
+    @Throws(ExecutionException::class)
+    fun sendFeedback(feedback: FeedbackEntity)
 
     /**
      * Call to manually stop recording audio and process request
