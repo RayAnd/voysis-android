@@ -1,6 +1,7 @@
 package com.voysis.api
 
 import com.voysis.events.Callback
+import com.voysis.events.VoysisException
 import com.voysis.model.request.FeedbackEntity
 import com.voysis.model.request.Token
 
@@ -44,7 +45,12 @@ interface Service {
     @Throws(ExecutionException::class)
     fun refreshSessionToken(): Token
 
-    @Throws(ExecutionException::class)
+    /**
+     * Call this method send feedback following a successful query.
+     * @throws ExecutionException if reading/writing error occurs
+     * @throws VoysisException if query had not been made or token is invalid
+     */
+    @Throws(ExecutionException::class, VoysisException::class)
     fun sendFeedback(feedback: FeedbackEntity)
 
     /**
