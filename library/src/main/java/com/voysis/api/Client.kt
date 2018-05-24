@@ -1,5 +1,6 @@
 package com.voysis.api
 
+import com.voysis.model.request.FeedbackData
 import com.voysis.model.response.AudioQueryResponse
 import com.voysis.sevice.QueryFuture
 import java.io.IOException
@@ -34,4 +35,6 @@ interface Client {
      * @return future containing Token json string or error.
      */
     fun refreshSessionToken(refreshToken: String): Future<String>
+
+    fun sendFeedback(queryId: String, feedback: FeedbackData, token: String): Future<String>
 }

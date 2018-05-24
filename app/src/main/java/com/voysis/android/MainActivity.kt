@@ -5,6 +5,7 @@ import android.os.Build
 import android.os.Bundle
 import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
+import android.util.Log
 import android.widget.Toast
 import android.widget.Toast.LENGTH_SHORT
 import com.google.gson.GsonBuilder
@@ -15,6 +16,7 @@ import com.voysis.events.Callback
 import com.voysis.events.Event
 import com.voysis.events.EventType
 import com.voysis.events.VoysisException
+import com.voysis.model.request.FeedbackData
 import com.voysis.model.response.ApiResponse
 import com.voysis.model.response.AudioStreamResponse
 import com.voysis.sevice.DataConfig
@@ -34,6 +36,8 @@ class MainActivity : AppCompatActivity() {
     private val executor = Executors.newSingleThreadExecutor()
     private var context: Map<String, Any>? = null
     private val gson = GsonBuilder().setPrettyPrinting().create();
+    private var feedbackData = FeedbackData()
+    private var startTime: Long? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -83,9 +87,9 @@ class MainActivity : AppCompatActivity() {
         service.startAudioQuery(context = context, callback = object : Callback {
             override fun call(event: Event) {
                 when (event.eventType) {
-                    EventType.RECORDING_STARTED -> setText("Recording Started")
+                    EventType.RECORDING_STARTED -> recordingStarted()
                     EventType.RECORDING_FINISHED -> setText("Recording Finished")
-                    EventType.VAD_RECEIVED -> setText("Vad Received")
+                    EventType.VAD_RECEIVED -> vadReceived()
                     EventType.AUDIO_QUERY_CREATED -> setText("Query Created")
                     EventType.AUDIO_QUERY_COMPLETED -> onResponse(event.getResponse<AudioStreamResponse>())
                 }
@@ -97,11 +101,33 @@ class MainActivity : AppCompatActivity() {
         })
     }
 
+    private fun recordingStarted() {
+        startTime = System.currentTimeMillis()
+        setText("Recording Started")
+    }
+
+    private fun vadReceived() {
+        setText("Vad Received")
+        feedbackData.durations.vad = System.currentTimeMillis() - startTime!!
+    }
+
     private fun onResponse(query: ApiResponse) {
-        context = (query as AudioStreamResponse).context
+        feedbackData.durations.complete = System.currentTimeMillis() - startTime!!
+        val queryId = (query as AudioStreamResponse).id
+        executor.submit({ sendFeedback(queryId) })
+        context = query.context
         runOnUiThread {
             setText("Query Complete")
             responseText.text = gson.toJson(query, AudioStreamResponse::class.java)
+        }
+    }
+
+    private fun sendFeedback(queryId: String) {
+        try {
+            service.sendFeedback(queryId, feedbackData)
+            Log.d("MainActivity", "feedback sent")
+        } catch (e: Exception) {
+            Log.e("MainActivity", e.message)
         }
     }
 
