@@ -3,7 +3,7 @@ package com.voysis.android.core.impl
 import com.google.gson.Gson
 import com.nhaarman.mockito_kotlin.whenever
 import com.voysis.api.StreamingStoppedReason
-import com.voysis.model.request.FeedbackEntity
+import com.voysis.model.request.FeedbackData
 import com.voysis.sdk.ClientTest
 import com.voysis.sevice.Converter
 import com.voysis.websocket.WebSocketClient
@@ -70,7 +70,7 @@ class WebSocketClientTest : ClientTest() {
     @Test
     fun testSuccessfulFeedbackSent() {
         getResponseFromStringSend()
-        val future = webSocketClient.sendFeedback("" , FeedbackEntity(), token)
+        val future = webSocketClient.sendFeedback("" , FeedbackData(), token)
         val response = future.get()
         assertTrue(this.response.contains(response))
     }

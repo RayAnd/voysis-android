@@ -30,6 +30,6 @@ data class Headers(@field:SerializedName("X-Voysis-Audio-Profile-Id") val audioP
 
 data class Token(var expiresAt: String, var token: String) : ApiResponse()
 
-data class FeedbackEntity(val durations: Duration = Duration()) : ApiRequest
+data class FeedbackData(val durations: Duration = Duration(), var rating: String? = null, var description: String? = null) : ApiRequest
 
 data class Duration(var vad: Long? = null, var complete: Long? = null)

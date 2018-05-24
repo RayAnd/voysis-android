@@ -1,6 +1,6 @@
 package com.voysis.api
 
-import com.voysis.model.request.FeedbackEntity
+import com.voysis.model.request.FeedbackData
 import com.voysis.model.response.AudioQueryResponse
 import com.voysis.sevice.QueryFuture
 import java.io.IOException
@@ -36,5 +36,5 @@ interface Client {
      */
     fun refreshSessionToken(refreshToken: String): Future<String>
 
-    fun sendFeedback(path: String, feedback: FeedbackEntity, token: String): Future<String>
+    fun sendFeedback(path: String, feedback: FeedbackData, token: String): Future<String>
 }

@@ -7,7 +7,7 @@ import com.voysis.api.StreamingStoppedReason.VAD_RECEIVED
 import com.voysis.events.PermissionDeniedException
 import com.voysis.events.VoysisException
 import com.voysis.model.request.ApiRequest
-import com.voysis.model.request.FeedbackEntity
+import com.voysis.model.request.FeedbackData
 import com.voysis.model.request.RequestEntity
 import com.voysis.model.response.AudioQueryResponse
 import com.voysis.model.response.SocketResponse
@@ -48,7 +48,7 @@ internal class WebSocketClient(private val converter: Converter,
         return sendString("/tokens", null, refreshToken)
     }
 
-    override fun sendFeedback(path: String, feedback: FeedbackEntity, token: String): Future<String> {
+    override fun sendFeedback(path: String, feedback: FeedbackData, token: String): Future<String> {
         return sendString(path, feedback, token)
     }
 

@@ -2,7 +2,7 @@ package com.voysis.api
 
 import com.voysis.events.Callback
 import com.voysis.events.VoysisException
-import com.voysis.model.request.FeedbackEntity
+import com.voysis.model.request.FeedbackData
 import com.voysis.model.request.Token
 
 import java.io.IOException
@@ -51,7 +51,7 @@ interface Service {
      * @throws VoysisException if query had not been made or token is invalid
      */
     @Throws(ExecutionException::class, VoysisException::class)
-    fun sendFeedback(feedback: FeedbackEntity)
+    fun sendFeedback(queryId: String, feedback: FeedbackData)
 
     /**
      * Call to manually stop recording audio and process request

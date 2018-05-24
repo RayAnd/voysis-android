@@ -16,7 +16,7 @@ import com.voysis.events.Callback
 import com.voysis.events.Event
 import com.voysis.events.EventType
 import com.voysis.events.VoysisException
-import com.voysis.model.request.FeedbackEntity
+import com.voysis.model.request.FeedbackData
 import com.voysis.model.response.ApiResponse
 import com.voysis.model.response.AudioStreamResponse
 import com.voysis.sevice.DataConfig
@@ -36,7 +36,8 @@ class MainActivity : AppCompatActivity() {
     private val executor = Executors.newSingleThreadExecutor()
     private var context: Map<String, Any>? = null
     private val gson = GsonBuilder().setPrettyPrinting().create();
-    private var feedbackEntity = FeedbackEntity()
+    private var feedbackData = FeedbackData()
+    private var queryId : String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -102,13 +103,14 @@ class MainActivity : AppCompatActivity() {
 
     private fun vadReceived() {
         setText("Vad Received")
-        feedbackEntity.durations.vad = System.currentTimeMillis();
+        feedbackData.durations.vad = System.currentTimeMillis();
     }
 
     private fun onResponse(query: ApiResponse) {
-        feedbackEntity.durations.complete = System.currentTimeMillis();
+        feedbackData.durations.complete = System.currentTimeMillis();
+        queryId = (query as AudioStreamResponse).id
         executor.submit({ sendFeedback() })
-        context = (query as AudioStreamResponse).context
+        context = query.context
         runOnUiThread {
             setText("Query Complete")
             responseText.text = gson.toJson(query, AudioStreamResponse::class.java)
@@ -117,7 +119,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun sendFeedback() {
         try {
-            service.sendFeedback(feedbackEntity)
+            service.sendFeedback(queryId!!, feedbackData)
             Log.d("MainActivity", "feedback sent")
         } catch (e: Exception) {
             Log.e("MainActivity", e.message)

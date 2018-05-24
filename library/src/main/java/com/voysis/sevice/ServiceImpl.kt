@@ -8,7 +8,7 @@ import com.voysis.events.Callback
 import com.voysis.events.Event
 import com.voysis.events.EventType
 import com.voysis.events.VoysisException
-import com.voysis.model.request.FeedbackEntity
+import com.voysis.model.request.FeedbackData
 import com.voysis.model.request.Token
 import com.voysis.model.response.AudioQueryResponse
 import com.voysis.model.response.AudioStreamResponse
@@ -31,7 +31,6 @@ internal class ServiceImpl(private val client: Client,
                            private val refreshToken: String) : Service {
     private var response: Future<String>? = null
     private var sessionToken: Token? = null
-    private var feedbackPath: String? = null
     private lateinit var pipe: Pipe
     override var state = State.IDLE
 
@@ -56,13 +55,11 @@ internal class ServiceImpl(private val client: Client,
     }
 
     @Throws(ExecutionException::class)
-    override fun sendFeedback(feedback: FeedbackEntity) {
-        if (feedbackPath == null) {
-            throw VoysisException("feedback path error")
-        } else if (sessionToken == null) {
-            throw VoysisException("token error")
+    override fun sendFeedback(queryId: String, feedback: FeedbackData) {
+        if (!tokenIsValid()) {
+            refreshSessionToken()
         }
-        client.sendFeedback(feedbackPath!!, feedback, sessionToken!!.token)
+        client.sendFeedback("/queries/$queryId/feedback", feedback, sessionToken!!.token)
     }
 
     override fun finish() {
@@ -115,7 +112,6 @@ internal class ServiceImpl(private val client: Client,
         response = client.createAudioQuery(context, sessionToken!!.token)
         val stringResponse = validateResponse(response!!.get())
         val audioQuery = converter.convertResponse(stringResponse, AudioQueryResponse::class.java)
-        feedbackPath = audioQuery.href.replace("audio", "feedback")
         callback.call(Event(audioQuery, EventType.AUDIO_QUERY_CREATED))
         return audioQuery
     }

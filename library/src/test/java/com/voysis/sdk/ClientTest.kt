@@ -13,8 +13,8 @@ import java.util.Locale
 open class ClientTest {
 
     var headers = Headers("id", "agent")
-    val tokenResponseValid = """{"token":"1","expiresAt":"$expiresIn1Minute"}"""
-    var tokenResponseExpired = """{"token":"1","expiresAt":"$expiresIn25Seconds"}"""
+    val tokenResponseValid = """{"token":"token","expiresAt":"$expiresIn1Minute"}"""
+    var tokenResponseExpired = """{"token":"token","expiresAt":"$expiresIn25Seconds"}"""
     var response = """{"type":"response","entity":{"id":"2b95ff76-0de3-42d6-91c5-f61be84083bb","locale":"en-US","_links":{"self":{"href":"/queries/2b95ff76-0de3-42d6-91c5-f61be84083bb"},"audio":{"href":"/queries/2b95ff76-0de3-42d6-91c5-f61be84083bb/audio"}},"_embedded":{}},"requestId":"2","responseCode":201,"responseMessage":"Created"}"""
     var queryFutureResponse = """{"id":"12","locale":"en-US","conversationId":"1","queryType":"audio","audioQuery":{"mimeType":"audio/pcm"},"_links":{"self":{"href":"/queries/1"},"audio":{"href":"/queries/1/audio"}},"_embedded":{}}"""
     var notification = """{"type":"notification","notificationType":"query_complete","entity":{"id":"1","queryType":"audio","audioQuery":{"mimeType":"audio/pcm"},"intent":"Play Playlist","reply":{"text":"Playing My Favourite Music"},"entities":{"playlist_name":"My Favourite Music"},"_links":{"self":{"href":"/conversations/1/queries/1"},"audio":{"href":"/conversations/1/queries/1/audio"},"conversation":{"href":"/conversations/1"}}}}"""

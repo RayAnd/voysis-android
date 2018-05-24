@@ -2,7 +2,7 @@ package com.voysis.rest
 
 import com.voysis.api.Client
 import com.voysis.events.VoysisException
-import com.voysis.model.request.FeedbackEntity
+import com.voysis.model.request.FeedbackData
 import com.voysis.model.response.AudioQueryResponse
 import com.voysis.sevice.AudioResponseFuture
 import com.voysis.sevice.Converter
@@ -56,7 +56,7 @@ class RestClient(private val converter: Converter, private val url: URL, private
         return future
     }
 
-    override fun sendFeedback(path: String, feedback: FeedbackEntity, token: String): Future<String> {
+    override fun sendFeedback(path: String, feedback: FeedbackData, token: String): Future<String> {
         setAuthorizationHeader(token)
         setAcceptHeader("application/vnd.voysisquery.v1+json")
         val future = QueryFuture()
@@ -66,6 +66,12 @@ class RestClient(private val converter: Converter, private val url: URL, private
             body["duration"] = mutableMapOf(
                     "vad" to it.vad,
                     "complete" to it.complete)
+        }
+        feedback.description.let {
+            body["description"] = "description"
+        }
+        feedback.rating.let {
+            body["rating"] = "rating"
         }
         val queriesUrl = URL(url, path)
         val request = createRequest(RequestBody.create(type, converter.toJson(body)), queriesUrl.toString())

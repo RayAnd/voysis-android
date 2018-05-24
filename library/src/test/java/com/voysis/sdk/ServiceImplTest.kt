@@ -12,8 +12,7 @@ import com.voysis.api.Client
 import com.voysis.api.State
 import com.voysis.api.StreamingStoppedReason.VAD_RECEIVED
 import com.voysis.events.Callback
-import com.voysis.events.VoysisException
-import com.voysis.model.request.FeedbackEntity
+import com.voysis.model.request.FeedbackData
 import com.voysis.recorder.AudioRecorder
 import com.voysis.recorder.OnDataResponse
 import com.voysis.sevice.AudioResponseFuture
@@ -108,19 +107,14 @@ class ServiceImplTest : ClientTest() {
         verify(client, times(1)).refreshSessionToken(anyOrNull())
     }
 
-    @Test(expected = VoysisException::class)
-    fun testInValidFeedback() {
-        serviceImpl.sendFeedback(FeedbackEntity())
-    }
-
     @Test
     fun testValidFeedback() {
         successfulExecutionResponses()
         answerRecordingStarted()
-        val feedback = FeedbackEntity()
+        val feedback = FeedbackData()
         serviceImpl.startAudioQuery(callback = callback)
-        serviceImpl.sendFeedback(feedback)
-        verify(client, times(1)).sendFeedback(eq("/queries/1/feedback"), eq(feedback), anyOrNull())
+        serviceImpl.sendFeedback("1", feedback)
+        verify(client, times(1)).sendFeedback(eq("/queries/1/feedback"), eq(feedback), eq("token"))
     }
 
     fun answerRecordingStarted() {
