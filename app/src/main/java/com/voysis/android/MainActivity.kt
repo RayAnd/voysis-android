@@ -37,7 +37,7 @@ class MainActivity : AppCompatActivity() {
     private var context: Map<String, Any>? = null
     private val gson = GsonBuilder().setPrettyPrinting().create();
     private var feedbackData = FeedbackData()
-    private var queryId : String? = null
+    private var startTime: Long? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -87,7 +87,7 @@ class MainActivity : AppCompatActivity() {
         service.startAudioQuery(context = context, callback = object : Callback {
             override fun call(event: Event) {
                 when (event.eventType) {
-                    EventType.RECORDING_STARTED -> setText("Recording Started")
+                    EventType.RECORDING_STARTED -> recordingStarted()
                     EventType.RECORDING_FINISHED -> setText("Recording Finished")
                     EventType.VAD_RECEIVED -> vadReceived()
                     EventType.AUDIO_QUERY_CREATED -> setText("Query Created")
@@ -101,15 +101,20 @@ class MainActivity : AppCompatActivity() {
         })
     }
 
+    private fun recordingStarted() {
+        startTime = System.currentTimeMillis()
+        setText("Recording Started")
+    }
+
     private fun vadReceived() {
         setText("Vad Received")
-        feedbackData.durations.vad = System.currentTimeMillis();
+        feedbackData.durations.vad = System.currentTimeMillis() - startTime!!
     }
 
     private fun onResponse(query: ApiResponse) {
-        feedbackData.durations.complete = System.currentTimeMillis();
-        queryId = (query as AudioStreamResponse).id
-        executor.submit({ sendFeedback() })
+        feedbackData.durations.complete = System.currentTimeMillis() - startTime!!
+        val queryId = (query as AudioStreamResponse).id
+        executor.submit({ sendFeedback(queryId) })
         context = query.context
         runOnUiThread {
             setText("Query Complete")
@@ -117,9 +122,9 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun sendFeedback() {
+    private fun sendFeedback(queryId: String) {
         try {
-            service.sendFeedback(queryId!!, feedbackData)
+            service.sendFeedback(queryId, feedbackData)
             Log.d("MainActivity", "feedback sent")
         } catch (e: Exception) {
             Log.e("MainActivity", e.message)
