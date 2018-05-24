@@ -36,5 +36,5 @@ interface Client {
      */
     fun refreshSessionToken(refreshToken: String): Future<String>
 
-    fun sendFeedback(path: String, feedback: FeedbackData, token: String): Future<String>
+    fun sendFeedback(queryId: String, feedback: FeedbackData, token: String): Future<String>
 }

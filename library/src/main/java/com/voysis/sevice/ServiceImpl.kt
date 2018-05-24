@@ -59,7 +59,7 @@ internal class ServiceImpl(private val client: Client,
         if (!tokenIsValid()) {
             refreshSessionToken()
         }
-        client.sendFeedback("/queries/$queryId/feedback", feedback, sessionToken!!.token)
+        client.sendFeedback(queryId, feedback, sessionToken!!.token)
     }
 
     override fun finish() {

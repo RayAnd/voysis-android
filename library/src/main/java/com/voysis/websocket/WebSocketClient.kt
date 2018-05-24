@@ -48,8 +48,8 @@ internal class WebSocketClient(private val converter: Converter,
         return sendString("/tokens", null, refreshToken)
     }
 
-    override fun sendFeedback(path: String, feedback: FeedbackData, token: String): Future<String> {
-        return sendString(path, feedback, token)
+    override fun sendFeedback(queryId: String, feedback: FeedbackData, token: String): Future<String> {
+        return sendString("/queries/$queryId/feedback", feedback, token)
     }
 
     @Throws(IOException::class)

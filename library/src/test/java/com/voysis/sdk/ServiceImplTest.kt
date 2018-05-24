@@ -114,7 +114,7 @@ class ServiceImplTest : ClientTest() {
         val feedback = FeedbackData()
         serviceImpl.startAudioQuery(callback = callback)
         serviceImpl.sendFeedback("1", feedback)
-        verify(client, times(1)).sendFeedback(eq("/queries/1/feedback"), eq(feedback), eq("token"))
+        verify(client, times(1)).sendFeedback(eq("1"), eq(feedback), eq("token"))
     }
 
     fun answerRecordingStarted() {

@@ -36,7 +36,11 @@ class RestClient(private val converter: Converter, private val url: URL, private
         setAuthorizationHeader(token)
         setAcceptHeader("application/vnd.voysisquery.v1+json")
         val future = QueryFuture()
-        val body = getBody()
+        val body = mutableMapOf(
+                "locale" to "en-US",
+                "queryType" to "audio",
+                "audioQuery" to mapOf("mimeType" to "audio/pcm")
+        )
         context?.let {
             body["context"] = context
         }
@@ -56,15 +60,16 @@ class RestClient(private val converter: Converter, private val url: URL, private
         return future
     }
 
-    override fun sendFeedback(path: String, feedback: FeedbackData, token: String): Future<String> {
+    override fun sendFeedback(queryId: String, feedback: FeedbackData, token: String): Future<String> {
         setAuthorizationHeader(token)
         setAcceptHeader("application/vnd.voysisquery.v1+json")
         val future = QueryFuture()
-        val body = getBody()
+        val body = mutableMapOf<String, Any>()
 
         feedback.durations.let {
             body["duration"] = mutableMapOf(
                     "vad" to it.vad,
+                    "userStop" to it.userStop,
                     "complete" to it.complete)
         }
         feedback.description.let {
@@ -73,18 +78,10 @@ class RestClient(private val converter: Converter, private val url: URL, private
         feedback.rating.let {
             body["rating"] = "rating"
         }
-        val queriesUrl = URL(url, path)
+        val queriesUrl = URL(url, "/queries/$queryId/feedback")
         val request = createRequest(RequestBody.create(type, converter.toJson(body)), queriesUrl.toString())
         execute(future, request)
         return future
-    }
-
-    private fun getBody(): MutableMap<String, Any> {
-        return mutableMapOf(
-                "locale" to "en-US",
-                "queryType" to "audio",
-                "audioQuery" to mapOf("mimeType" to "audio/pcm")
-        )
     }
 
     override fun streamAudio(channel: ReadableByteChannel, audioQueryResponse: AudioQueryResponse): AudioResponseFuture {

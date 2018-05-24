@@ -32,4 +32,4 @@ data class Token(var expiresAt: String, var token: String) : ApiResponse()
 
 data class FeedbackData(val durations: Duration = Duration(), var rating: String? = null, var description: String? = null) : ApiRequest
 
-data class Duration(var vad: Long? = null, var complete: Long? = null)
+data class Duration(var userStop: Long? = null, var vad: Long? = null, var complete: Long? = null)
