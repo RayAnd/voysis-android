@@ -28,8 +28,29 @@ Overview
 
 The `Service` class is the main interface used to process voice recognition requests.
 It is accessed via the `ServiceProvider().make(context , config)` method. See demo application for more details.
-The sdk communicates to the network using a websocket connection accomplished using `Okhttp websocket`.
+The sdk supports both REST and Websocket connections depending on how the config file is setup.
+*NOTE*: It is preferable to use the Websocket connection as it offers more flexibility. 
+The sdk uses `Okhttp` under the hood for network connections.
 
+
+Config 
+-------------
+
+To create a service instance you need to provide config information at construction time. 
+The config file is comprised of several fields.
+
+- **isVadEnabled** - *Boolean:* `VAD` stands for Voice Activation Detection. 
+If set to true the library will automatically detect when the user has stopped speaking and process requests. 
+This is made possible via an `okHttp` Websocket connection. See [Websocket docs](https://developers.voysis.com/docs/websocket-api) for more info on our Websocket api.
+If turned off the library will default to a REST interface and the user will need to manually call `service.finish()` to process requests. See [REST docs](https://developers.voysis.com/docs/rest-api) for more info on our REST api.
+*NOTE*: It is preferable to have `isVadEnabled` set to `true` as the Websocket provides the user with more functionallity and flexability.
+
+- **url** - *URL:* This is the endpoint that network requests will be executed against. 
+The url is provided when your Voysis service is delivered. To sign up for a Voysis service visit our [homepage](https://voysis.com/)   
+
+- **refreshToken** - *String:* The refresh token is used for authenticating unique users and for refreshing session tokens. 
+This is all taken care of from within the library once the `refreshToken` is provided. 
+For information on how to generate a refresh token see [here](https://developers.voysis.com/docs/authorization#section-introduction)
 
 Usage
 -------------
