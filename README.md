@@ -43,7 +43,7 @@ The config file is comprised of several fields.
 If set to true the library will automatically detect when the user has stopped speaking and process requests. 
 This is made possible via an `okHttp` Websocket connection. See [Websocket docs](https://developers.voysis.com/docs/websocket-api) for more info on our Websocket api.
 If turned off the library will default to a REST interface and the user will need to manually call `service.finish()` to process requests. See [REST docs](https://developers.voysis.com/docs/rest-api) for more info on our REST api.
-*NOTE*: It is preferable to have `isVadEnabled` set to `true` as the Websocket provides the user with more functionallity and flexability.
+*NOTE*: It is preferable to have `isVadEnabled` set to `true` as the Websocket provides the user with more functionality and flexibility.
 
 - **url** - *URL:* This is the endpoint that network requests will be executed against. 
 The url is provided when your Voysis service is delivered. To sign up for a Voysis service visit our [homepage](https://voysis.com/)   
