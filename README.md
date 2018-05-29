@@ -39,7 +39,7 @@ Config
 To create a service instance you need to provide config information at construction time. 
 The config file is comprised of several fields.
 
-- **isVadEnabled** - *Boolean:* `VAD` stands for Voice Activation Detection. 
+- **isVadEnabled** - *Boolean:* [VAD] stands for Voice Activation Detection. 
 If set to true the library will automatically detect when the user has stopped speaking and process requests. 
 This is made possible via an `okHttp` Websocket connection. See [Websocket docs](https://developers.voysis.com/docs/websocket-api) for more info on our Websocket api.
 If turned off the library will default to a REST interface and the user will need to manually call `service.finish()` to process requests. See [REST docs](https://developers.voysis.com/docs/rest-api) for more info on our REST api.
@@ -56,7 +56,7 @@ Usage
 -------------
 
 
-- The first step is to create a `Servie` instance
+- The first step is to create a `Service` instance
 ```kotlin
  val config = DataConfig(isVadEnabled = true, url = URL("INSERT_URL"), refreshToken = "INSERT_TOKEN")
  val service = ServiceProvider().make(context, config)
