@@ -28,7 +28,8 @@ Overview
 
 The `Service` class is the main interface used to process voice recognition requests.
 It is accessed via the `ServiceProvider().make(context , config)` method. See demo application for more details.
-The sdk uses either a REST or Websocket connection depending on how the config file is setup. 
+The sdk supports both REST and Websocket connections depending on how the config file is setup.
+*NOTE*: It is preferable to use the Websocket connection as it offers more flexibility. 
 The sdk uses `Okhttp` under the hood for network connections.
 
 
@@ -47,7 +48,7 @@ If turned off the library will default to a REST interface and the user will nee
 - **url** - *URL:* This is the endpoint that network requests will be executed against. 
 The url is provided when your Voysis service is delivered. To sign up for a Voysis service visit our [homepage](https://voysis.com/)   
 
-- **refreshToken** - *String:* The refresh token is used for authenticating unique users and for refreshnig session tokens. 
+- **refreshToken** - *String:* The refresh token is used for authenticating unique users and for refreshing session tokens. 
 This is all taken care of from within the library once the `refreshToken` is provided. 
 For information on how to generate a refresh token see [here](https://developers.voysis.com/docs/authorization#section-introduction)
 
