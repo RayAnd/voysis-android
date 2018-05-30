@@ -32,7 +32,7 @@ class RestClient(private val converter: Converter, private val url: URL, private
             .addHeader("Accept", acceptJson)
             .addHeader("User-Agent", converter.headers.userAgent)
 
-    override fun createAudioQuery(context: Map<String, Any>?, token: String): Future<String> {
+    override fun createAudioQuery(context: Map<String, Any>?, userId: String?, token: String): Future<String> {
         setAuthorizationHeader(token)
         setAcceptHeader("application/vnd.voysisquery.v1+json")
         val future = QueryFuture()
@@ -41,6 +41,9 @@ class RestClient(private val converter: Converter, private val url: URL, private
                 "queryType" to "audio",
                 "audioQuery" to mapOf("mimeType" to "audio/pcm")
         )
+        userId?.let {
+            body["userId"] = userId
+        }
         context?.let {
             body["context"] = context
         }

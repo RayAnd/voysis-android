@@ -45,11 +45,12 @@ class ServiceImplTest : ClientTest() {
 
     private lateinit var serviceImpl: ServiceImpl
     private val refreshToken = "refreshToken"
+    private val userId = "userId"
 
     @Before
     fun setup() {
         val converter = Converter(headers, Gson())
-        serviceImpl = ServiceImpl(client, manager, converter, refreshToken)
+        serviceImpl = ServiceImpl(client, manager, converter, userId, refreshToken)
     }
 
     @Test
@@ -69,7 +70,7 @@ class ServiceImplTest : ClientTest() {
         doReturn(notification).whenever(queryFuture).get()
         doReturn(VAD_RECEIVED).whenever(queryFuture).responseReason
         doReturn(tokenFuture).whenever(client).refreshSessionToken(anyOrNull())
-        doReturn(audioQueryFuture).whenever(client).createAudioQuery(any(), anyOrNull())
+        doReturn(audioQueryFuture).whenever(client).createAudioQuery(any(), anyOrNull(), anyOrNull())
         doReturn(queryFuture).whenever(client).streamAudio(anyOrNull(), anyOrNull())
     }
 

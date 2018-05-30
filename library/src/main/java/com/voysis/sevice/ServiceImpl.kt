@@ -28,6 +28,7 @@ import java.util.concurrent.Future
 internal class ServiceImpl(private val client: Client,
                            private val recorder: AudioRecorder,
                            private val converter: Converter,
+                           private val userId: String?,
                            private val refreshToken: String) : Service {
     private var response: Future<String>? = null
     private var sessionToken: Token? = null
@@ -45,6 +46,16 @@ internal class ServiceImpl(private val client: Client,
         }
     }
 
+    override fun finish() {
+        recorder.stop()
+    }
+
+    override fun cancel() {
+        response?.cancel(true)
+        recorder.stop()
+        state = State.IDLE
+    }
+
     @Throws(ExecutionException::class)
     override fun refreshSessionToken(): Token {
         val response = client.refreshSessionToken(refreshToken)
@@ -60,16 +71,6 @@ internal class ServiceImpl(private val client: Client,
             refreshSessionToken()
         }
         client.sendFeedback(queryId, feedback, sessionToken!!.token)
-    }
-
-    override fun finish() {
-        recorder.stop()
-    }
-
-    override fun cancel() {
-        response?.cancel(true)
-        recorder.stop()
-        state = State.IDLE
     }
 
     private fun startRecording(callback: Callback) {
@@ -109,7 +110,7 @@ internal class ServiceImpl(private val client: Client,
     }
 
     private fun executeAudioQueryRequest(callback: Callback, context: Map<String, Any>?): AudioQueryResponse {
-        response = client.createAudioQuery(context, sessionToken!!.token)
+        response = client.createAudioQuery(context, userId, sessionToken!!.token)
         val stringResponse = validateResponse(response!!.get())
         val audioQuery = converter.convertResponse(stringResponse, AudioQueryResponse::class.java)
         callback.call(Event(audioQuery, EventType.AUDIO_QUERY_CREATED))

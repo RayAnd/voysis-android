@@ -19,7 +19,7 @@ data class SocketRequest(val restUri: String? = null,
 data class RequestEntity(val context: Map<String, Any>? = null,
                          val queryType: String? = "audio",
                          val audioQuery: Query? = Query("audio/pcm"),
-                         val id: String? = "",
+                         val userId: String? = null,
                          val locale: String = "en-US") : ApiRequest
 
 data class Headers(@field:SerializedName("X-Voysis-Audio-Profile-Id") val audioProfileId: String,
