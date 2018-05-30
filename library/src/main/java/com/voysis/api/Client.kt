@@ -13,7 +13,7 @@ interface Client {
      * Call this method to create a new audioQueryRequest.
      *
      * @param context (optional) context response from previous request.
-     * @param userId (optional) uuid used to improve response quality over time.
+     * @param userId (optional) uuid that uniquely identified a user.
      * @param token session token assigned to the query.
      * @return future containing audioQueryResponse json string or error.
      */
