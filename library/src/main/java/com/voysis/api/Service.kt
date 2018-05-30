@@ -34,6 +34,16 @@ interface Service {
     fun startAudioQuery(context: Map<String, Any>? = null, callback: Callback)
 
     /**
+     * Call to manually stop recording audio and process request
+     */
+    fun finish()
+
+    /**
+     * Call to cancel request.
+     */
+    fun cancel()
+
+    /**
      * Call this method to manually refresh the session token.
      * Note: The sdk automatically handles checking/refreshing and storing the session token.
      * This method is called internally by `startAudioQuery`.
@@ -52,16 +62,6 @@ interface Service {
      */
     @Throws(ExecutionException::class, VoysisException::class)
     fun sendFeedback(queryId: String, feedback: FeedbackData)
-
-    /**
-     * Call to manually stop recording audio and process request
-     */
-    fun finish()
-
-    /**
-     * Call to cancel request.
-     */
-    fun cancel()
 }
 
 enum class State {

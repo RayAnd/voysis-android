@@ -40,8 +40,8 @@ internal class WebSocketClient(private val converter: Converter,
         const val CLOSING = "closing"
     }
 
-    override fun createAudioQuery(context: Map<String, Any>?, token: String): Future<String> {
-        return sendString("/queries", RequestEntity(context = context), token)
+    override fun createAudioQuery(context: Map<String, Any>?, userId: String?, token: String): Future<String> {
+        return sendString("/queries", RequestEntity(context = context, userId = userId), token)
     }
 
     override fun refreshSessionToken(refreshToken: String): Future<String> {

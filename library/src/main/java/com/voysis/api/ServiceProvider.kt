@@ -31,7 +31,7 @@ class ServiceProvider {
              audioRecorder: AudioRecorder = AudioRecorderImpl(context)): Service {
         val converter = Converter(getHeaders(context), Gson())
         val client = createClient(config, generateOkHttpClient(okClient), converter)
-        return ServiceImpl(client, audioRecorder, converter, config.refreshToken)
+        return ServiceImpl(client, audioRecorder, converter, config.userId, config.refreshToken)
     }
 
     /**

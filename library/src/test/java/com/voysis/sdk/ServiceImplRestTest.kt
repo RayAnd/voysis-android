@@ -56,7 +56,7 @@ class ServiceImplRestTest : ClientTest() {
     @Throws(Exception::class)
     fun testSuccessCreateAudioQuery() {
         doReturn("result").whenever(body).string()
-        val future = restClient.createAudioQuery(token = "token")
+        val future = restClient.createAudioQuery(userId = "userId", token = "token")
         doReturn(true).whenever(networkResponse).isSuccessful
         voysisEventArgumentCaptor.value.onResponse(call, networkResponse)
         assertEquals(future.get(), "result")
