@@ -7,7 +7,8 @@ import java.nio.ByteBuffer
 interface Callback {
 
     /**
-     * @param response represents successful response from server
+     * Called when a successful has been returned from server.
+     * @param response object representation of successful json response.
      */
     fun success(response: StreamResponse)
 
@@ -17,7 +18,7 @@ interface Callback {
     fun failure(error: VoysisException)
 
     /**
-     * called when microphone is turned on and recording begins.
+     * Called when microphone is turned on and recording begins.
      */
     fun recordingStarted() {
         //no implementation
@@ -25,7 +26,7 @@ interface Callback {
 
     /**
      * Called when successful connection is made to server.
-     * @param query
+     * @param query information about the connection.
      */
     fun queryResponse(query: QueryResponse) {
         //no implementation
