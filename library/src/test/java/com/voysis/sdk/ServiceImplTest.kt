@@ -59,7 +59,10 @@ class ServiceImplTest : ClientTest() {
         successfulExecutionResponses()
         answerRecordingStarted()
         serviceImpl.startAudioQuery(callback = callback)
-        verify(callback, times(4)).call(anyOrNull())
+        verify(callback).recordingStarted()
+        verify(callback).recordingFinished(anyOrNull())
+        verify(callback).queryResponse(anyOrNull())
+        verify(callback).success(anyOrNull())
         verify(manager).start(anyOrNull())
         verify(manager).stop()
     }
@@ -86,7 +89,7 @@ class ServiceImplTest : ClientTest() {
         doReturn(null).whenever(tokenFuture).get()
         doReturn(tokenFuture).whenever(client).refreshSessionToken(anyOrNull())
         serviceImpl.startAudioQuery(callback = callback)
-        verify(callback).onError(anyOrNull())
+        verify(callback).failure(anyOrNull())
         verify(manager).stop()
     }
 

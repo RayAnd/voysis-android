@@ -5,13 +5,12 @@ import com.voysis.api.Service
 import com.voysis.api.State
 import com.voysis.api.StreamingStoppedReason
 import com.voysis.events.Callback
-import com.voysis.events.Event
-import com.voysis.events.EventType
+import com.voysis.events.FinishedReason
 import com.voysis.events.VoysisException
 import com.voysis.model.request.FeedbackData
 import com.voysis.model.request.Token
-import com.voysis.model.response.AudioQueryResponse
-import com.voysis.model.response.AudioStreamResponse
+import com.voysis.model.response.QueryResponse
+import com.voysis.model.response.StreamResponse
 import com.voysis.recorder.AudioRecorder
 import com.voysis.recorder.OnDataResponse
 import com.voysis.websocket.WebSocketClient.Companion.CLOSING
@@ -42,7 +41,7 @@ internal class ServiceImpl(private val client: Client,
             startRecording(callback)
             execute(callback, context)
         } else {
-            callback.onError(VoysisException("duplicate request"))
+            callback.failure(VoysisException("duplicate request"))
         }
     }
 
@@ -79,10 +78,11 @@ internal class ServiceImpl(private val client: Client,
         recorder.start(object : OnDataResponse {
             override fun onDataResponse(buffer: ByteBuffer) {
                 sink.write(buffer)
+                callback.audioData(buffer)
             }
 
             override fun onRecordingStarted() {
-                callback.call(Event(null, EventType.RECORDING_STARTED))
+                callback.recordingStarted()
             }
 
             override fun onComplete() {
@@ -105,31 +105,33 @@ internal class ServiceImpl(private val client: Client,
 
     private fun handleException(callback: Callback, e: Exception) {
         recorder.stop()
-        callback.onError(VoysisException(e))
+        callback.failure(VoysisException(e))
         state = State.IDLE
     }
 
-    private fun executeAudioQueryRequest(callback: Callback, context: Map<String, Any>?): AudioQueryResponse {
+    private fun executeAudioQueryRequest(callback: Callback, context: Map<String, Any>?): QueryResponse {
         response = client.createAudioQuery(context, userId, sessionToken!!.token)
         val stringResponse = validateResponse(response!!.get())
-        val audioQuery = converter.convertResponse(stringResponse, AudioQueryResponse::class.java)
-        callback.call(Event(audioQuery, EventType.AUDIO_QUERY_CREATED))
+        val audioQuery = converter.convertResponse(stringResponse, QueryResponse::class.java)
+        callback.queryResponse(audioQuery)
         return audioQuery
     }
 
-    private fun executeStreamRequest(audioQuery: AudioQueryResponse, callback: Callback) {
-        response = client.streamAudio(pipe.source(), audioQuery)
+    private fun executeStreamRequest(query: QueryResponse, callback: Callback) {
+        response = client.streamAudio(pipe.source(), query)
         checkStreamStoppedReason(callback)
         val stringResponse = validateResponse(response!!.get())
-        val streamResponse = converter.convertResponse(stringResponse, AudioStreamResponse::class.java)
-        callback.call(Event(streamResponse, EventType.AUDIO_QUERY_COMPLETED))
+        val streamResponse = converter.convertResponse(stringResponse, StreamResponse::class.java)
+        callback.success(streamResponse)
         state = State.IDLE
     }
 
     private fun checkStreamStoppedReason(callback: Callback) {
         if ((response as AudioResponseFuture).responseReason === StreamingStoppedReason.VAD_RECEIVED) {
-            callback.call(Event(null, EventType.VAD_RECEIVED))
+            callback.recordingFinished(FinishedReason.VAD_RECEIVED)
             recorder.stop()
+        } else {
+            callback.recordingFinished(FinishedReason.MANUAL_STOP)
         }
     }
 
