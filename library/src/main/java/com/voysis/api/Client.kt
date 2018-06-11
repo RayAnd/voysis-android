@@ -1,7 +1,7 @@
 package com.voysis.api
 
 import com.voysis.model.request.FeedbackData
-import com.voysis.model.response.AudioQueryResponse
+import com.voysis.model.response.QueryResponse
 import com.voysis.sevice.QueryFuture
 import java.io.IOException
 import java.nio.channels.ReadableByteChannel
@@ -23,12 +23,12 @@ interface Client {
      * Call this method to stream audio to server and return an audioStreamResponse
      *
      * @param channel ReadableByteChannel containing bytes to be sent to server
-     * @param audioQueryResponse returned from `createAudioQuery(context, token)`
+     * @param queryResponse returned from `createAudioQuery(context, token)`
      * @return queryFuture containing audioStreamResponse json string or error.
      * @throws IOException if there is an issue reading from ReadableByteChannel
      */
     @Throws(IOException::class)
-    fun streamAudio(channel: ReadableByteChannel, audioQueryResponse: AudioQueryResponse): QueryFuture
+    fun streamAudio(channel: ReadableByteChannel, queryResponse: QueryResponse): QueryFuture
 
     /**
      * Call this method to manually refresh the session token.

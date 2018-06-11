@@ -12,6 +12,7 @@ import com.voysis.api.Client
 import com.voysis.api.State
 import com.voysis.api.StreamingStoppedReason.VAD_RECEIVED
 import com.voysis.events.Callback
+import com.voysis.events.FinishedReason
 import com.voysis.model.request.FeedbackData
 import com.voysis.recorder.AudioRecorder
 import com.voysis.recorder.OnDataResponse
@@ -59,7 +60,10 @@ class ServiceImplTest : ClientTest() {
         successfulExecutionResponses()
         answerRecordingStarted()
         serviceImpl.startAudioQuery(callback = callback)
-        verify(callback, times(4)).call(anyOrNull())
+        verify(callback).recordingStarted()
+        verify(callback).recordingFinished(eq(FinishedReason.VAD_RECEIVED))
+        verify(callback).queryResponse(anyOrNull())
+        verify(callback).success(anyOrNull())
         verify(manager).start(anyOrNull())
         verify(manager).stop()
     }
@@ -86,7 +90,7 @@ class ServiceImplTest : ClientTest() {
         doReturn(null).whenever(tokenFuture).get()
         doReturn(tokenFuture).whenever(client).refreshSessionToken(anyOrNull())
         serviceImpl.startAudioQuery(callback = callback)
-        verify(callback).onError(anyOrNull())
+        verify(callback).failure(anyOrNull())
         verify(manager).stop()
     }
 

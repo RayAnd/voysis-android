@@ -2,7 +2,7 @@ package com.voysis.sdk
 
 import com.voysis.model.request.Headers
 import com.voysis.model.response.Audio
-import com.voysis.model.response.AudioQueryResponse
+import com.voysis.model.response.QueryResponse
 import com.voysis.model.response.Links
 import com.voysis.model.response.Queries
 import com.voysis.model.response.Query
@@ -44,8 +44,8 @@ open class ClientTest {
         return format.format(cal.time)
     }
 
-    fun createAudioQueryResponse(): AudioQueryResponse {
-        val audioQueryResponse = AudioQueryResponse(Query(), "")
+    fun createAudioQueryResponse(): QueryResponse {
+        val audioQueryResponse = QueryResponse(Query(), "")
         audioQueryResponse.links = links
         return audioQueryResponse
     }

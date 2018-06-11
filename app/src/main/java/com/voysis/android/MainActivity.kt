@@ -13,12 +13,10 @@ import com.voysis.api.Service
 import com.voysis.api.ServiceProvider
 import com.voysis.api.State
 import com.voysis.events.Callback
-import com.voysis.events.Event
-import com.voysis.events.EventType
+import com.voysis.events.FinishedReason
 import com.voysis.events.VoysisException
 import com.voysis.model.request.FeedbackData
-import com.voysis.model.response.ApiResponse
-import com.voysis.model.response.AudioStreamResponse
+import com.voysis.model.response.StreamResponse
 import com.voysis.sevice.DataConfig
 import kotlinx.android.synthetic.main.activity_main.cancel
 import kotlinx.android.synthetic.main.activity_main.eventText
@@ -29,7 +27,8 @@ import java.net.URL
 import java.util.concurrent.Executors
 
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), Callback {
+
     private val url = "INSERT_URL"
     private val config = DataConfig(isVadEnabled = true, url = URL(url), refreshToken = "INSERT_TOKEN", userId = "")
     private lateinit var service: Service
@@ -84,41 +83,35 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun startAudioQuery() {
-        service.startAudioQuery(context = context, callback = object : Callback {
-            override fun call(event: Event) {
-                when (event.eventType) {
-                    EventType.RECORDING_STARTED -> recordingStarted()
-                    EventType.RECORDING_FINISHED -> setText("Recording Finished")
-                    EventType.VAD_RECEIVED -> vadReceived()
-                    EventType.AUDIO_QUERY_CREATED -> setText("Query Created")
-                    EventType.AUDIO_QUERY_COMPLETED -> onResponse(event.getResponse<AudioStreamResponse>())
-                }
-            }
-
-            override fun onError(error: VoysisException) {
-                setText(error.message.toString())
-            }
-        })
+        service.startAudioQuery(context = context, callback = this)
     }
 
-    private fun recordingStarted() {
+    override fun success(response: StreamResponse) {
+        feedbackData.durations.complete = System.currentTimeMillis() - startTime!!
+        val queryId = response.id
+        executor.submit({ sendFeedback(queryId) })
+        context = response.context
+        runOnUiThread {
+            setText("Query Complete")
+            responseText.text = gson.toJson(response, StreamResponse::class.java)
+        }
+    }
+
+    override fun failure(error: VoysisException) {
+        setText(error.message.toString())
+    }
+
+    override fun recordingStarted() {
         startTime = System.currentTimeMillis()
         setText("Recording Started")
     }
 
-    private fun vadReceived() {
-        setText("Vad Received")
-        feedbackData.durations.vad = System.currentTimeMillis() - startTime!!
-    }
-
-    private fun onResponse(query: ApiResponse) {
-        feedbackData.durations.complete = System.currentTimeMillis() - startTime!!
-        val queryId = (query as AudioStreamResponse).id
-        executor.submit({ sendFeedback(queryId) })
-        context = query.context
-        runOnUiThread {
-            setText("Query Complete")
-            responseText.text = gson.toJson(query, AudioStreamResponse::class.java)
+    override fun recordingFinished(reason: FinishedReason) {
+        if (reason == FinishedReason.VAD_RECEIVED) {
+            setText("Vad Received")
+            feedbackData.durations.vad = System.currentTimeMillis() - startTime!!
+        } else if (reason == FinishedReason.MANUAL_STOP) {
+            setText("Recording Finished")
         }
     }
 

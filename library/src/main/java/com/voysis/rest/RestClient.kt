@@ -3,7 +3,7 @@ package com.voysis.rest
 import com.voysis.api.Client
 import com.voysis.events.VoysisException
 import com.voysis.model.request.FeedbackData
-import com.voysis.model.response.AudioQueryResponse
+import com.voysis.model.response.QueryResponse
 import com.voysis.sevice.AudioResponseFuture
 import com.voysis.sevice.Converter
 import com.voysis.sevice.QueryFuture
@@ -87,9 +87,9 @@ class RestClient(private val converter: Converter, private val url: URL, private
         return future
     }
 
-    override fun streamAudio(channel: ReadableByteChannel, audioQueryResponse: AudioQueryResponse): AudioResponseFuture {
+    override fun streamAudio(channel: ReadableByteChannel, queryResponse: QueryResponse): AudioResponseFuture {
         val future = AudioResponseFuture()
-        val request = createRequest(RestRequestBody(channel), audioQueryResponse.href)
+        val request = createRequest(RestRequestBody(channel), queryResponse.href)
         execute(future, request)
         return future
     }

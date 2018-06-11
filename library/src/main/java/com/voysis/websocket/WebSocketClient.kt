@@ -9,7 +9,7 @@ import com.voysis.events.VoysisException
 import com.voysis.model.request.ApiRequest
 import com.voysis.model.request.FeedbackData
 import com.voysis.model.request.RequestEntity
-import com.voysis.model.response.AudioQueryResponse
+import com.voysis.model.response.QueryResponse
 import com.voysis.model.response.SocketResponse
 import com.voysis.recorder.AudioRecorderImpl.Companion.BUFFER_SIZE
 import com.voysis.sevice.AudioResponseFuture
@@ -53,7 +53,7 @@ internal class WebSocketClient(private val converter: Converter,
     }
 
     @Throws(IOException::class)
-    override fun streamAudio(channel: ReadableByteChannel, audioQueryResponse: AudioQueryResponse): AudioResponseFuture {
+    override fun streamAudio(channel: ReadableByteChannel, queryResponse: QueryResponse): AudioResponseFuture {
         val future = AudioResponseFuture()
         webSocketListener.addFuture(1, future)
         sendLoop(channel, future)
