@@ -90,11 +90,11 @@ class ExampleActivity : AppCompatActivity(), Callback {
     }
 
     override fun recordingFinished(reason: FinishedReason) {
-        //Optional: called when recording stops. Includes fnishedReason enum.
+        //Optional: called when recording stops. Includes finishedReason enum.
     }
     
     override fun audioData(buffer: ByteBuffer) {
-        //Optional: returns audio data to the user that can be used for dynamic animations analytics etc.
+        //Optional: returns audio data to the user that can be used generating for dynamic animations, analytics etc.
     }
 }
 
