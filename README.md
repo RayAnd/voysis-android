@@ -56,54 +56,54 @@ Usage
 -------------
 
 
-- The first step is to create a `Service` instance
+- The first step is to create a `Service` instance using the android context and config object.
 ```kotlin
  val config = DataConfig(isVadEnabled = true, url = URL("INSERT_URL"), refreshToken = "INSERT_TOKEN")
  val service = ServiceProvider().make(context, config)
 ```
 
 
-- Next, to make a request you can do the following. **Note:** This call issues a network request and should not be done on the main thread.
-```kotlin
-  service.startAudioQuery(context = context, callback = object : Callback {
-             override fun call(event: Event) {
-                 when (event.eventType) {
-                     EventType.RECORDING_STARTED -> print("Recording Started")
-                     EventType.RECORDING_FINISHED -> print("Recording Finished")
-                     EventType.VAD_RECEIVED -> print("Vad Received")
-                     EventType.AUDIO_QUERY_CREATED -> print("Query Created")
-                     EventType.AUDIO_QUERY_COMPLETED -> onResponse(event.getResponse<AudioStreamResponse>())
-                 }
-             }
+- Next: to make a request, call `service.startAudioQuery` with the mandatory `Callback` parameter and optional voysis `Context` (See context section below for details).
  
-             override fun onError(error: VoysisException) {
-                 print(error.message.toString())
-             }
-         })
-```
-- The `Event` object contains two fields: `EventType` and `ApiResponse`.
- `EventType` is a status enum which will always be populated.
- `ApiResponse` is an interface whose concrete implementation is a data class representation of the 
- json response and will only be populated when the `EventType` is either `.AUDIO_QUERY_CREATED`, or `.AUDIO_QUERY_COMPLETE`. 
- 
-When the `EventType` is `EventType.AUDIO_QUERY_CREATED` you can extract the *initial* response by doing the following:
-   
+ **Note:** This call issues a network request and should not be done on the main thread. Note also that callbacks may not occur on the main thread.
 ```kotlin
- val query = event.getResponse<AudioQueryResponse>() 
+class ExampleActivity : AppCompatActivity(), Callback {
 
-```
-Note: This response indicates that a successful connection was made and returns meta-data. This response can be ignored by most users.
+    private fun onClick() {
+        service.startAudioQuery(context = context, callback = this)
+    }
 
-When the `EventType` is `.AUDIO_QUERY_COMPLETED` you can extract the *final* response by doing the following.
+    override fun success(response: StreamResponse) {
+        // Mandatory: called when final response returned from server.
+    }
+
+    override fun failure(error: VoysisException) {
+        // Mandatory: called when any error occurs
+    }
+
+    override fun recordingStarted() {
+        //Optional: called when microphone begins recording.
+    }
+
+    override fun queryResponse(query: QueryResponse) {
+        //Optional: called when successful connection is made to the server.
+    }
+
+    override fun recordingFinished(reason: FinishedReason) {
+        //Optional: called when recording stops. Includes fnishedReason enum.
+    }
     
-```kotlin
- val query = event.getResponse<AudioStreamResponse>() 
+    override fun audioData(buffer: ByteBuffer) {
+        //Optional: returns audio data to the user that can be used for dynamic animations analytics etc.
+    }
+}
+
 ```
 
 Voysis Context
 -----------------
 
-One of the features of the Voysis service is that it can use the `AudioStreamResponse.context` 
+One of the features of the Voysis service is that it can use the `StreamResponse.context` 
 (Not to be confused with Android [context](https://developer.android.com/reference/android/content/Context)) to refine and improve subsequent requests. In order to avail of this 
 the developer must store the `context` response from the `AudioStreamResponse` and send it in the following `startAudioQuery(context , callback)` request.  
 
