@@ -122,7 +122,7 @@ Step 1. Add the JitPack repository to your build file. Add it in your root `buil
 Step 2. Add the dependency
 
 	dependencies {
-	        implementation 'com.github.voysis:voysis-android:1.x'
+	        implementation 'com.github.voysis:voysis-android:2.x.x'
 	}
 	
 
