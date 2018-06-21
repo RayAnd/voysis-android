@@ -34,7 +34,7 @@ class MainActivity : AppCompatActivity(), Callback {
     private lateinit var service: Service
     private val executor = Executors.newSingleThreadExecutor()
     private var context: Map<String, Any>? = null
-    private val gson = GsonBuilder().setPrettyPrinting().create();
+    private val gson = GsonBuilder().setPrettyPrinting().create()
     private var feedbackData = FeedbackData()
     private var startTime: Long? = null
 

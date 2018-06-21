@@ -25,6 +25,7 @@ class ServiceProvider {
      * @param audioRecorder optional to override default recorder
      * @return new `Service` instance
      */
+    @JvmOverloads
     fun make(context: Context,
              config: Config,
              okClient: OkHttpClient? = null,
