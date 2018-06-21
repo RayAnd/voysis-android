@@ -50,9 +50,8 @@ public class MainActivityJava extends AppCompatActivity implements Callback {
         responseText = findViewById(R.id.responseText);
         eventText = findViewById(R.id.eventText);
 
-
         try {
-            Config config = new DataConfig(true, new URL("INSERT_URL"), "INSERT_TOKEN", "");
+            Config config = new DataConfig(true, new URL("INSERT_URL"), "INSERT_TOKEN", "INSERT_USERID");
             ServiceProvider serviceprovider = new ServiceProvider();
             service = serviceprovider.make(this, config);
         } catch (MalformedURLException e) {
@@ -135,6 +134,14 @@ public class MainActivityJava extends AppCompatActivity implements Callback {
         });
     }
 
+    private void checkPermissionAndStartQuery() {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+            requestRecordPermission();
+        } else {
+            startAudioQuery();
+        }
+    }
+
     private void startAudioQuery() {
         executor.submit(new Runnable() {
             @Override
@@ -155,14 +162,6 @@ public class MainActivityJava extends AppCompatActivity implements Callback {
                 eventText.setText(text);
             }
         });
-    }
-
-    private void checkPermissionAndStartQuery() {
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
-            requestRecordPermission();
-        } else {
-            startAudioQuery();
-        }
     }
 
     private void requestRecordPermission() {
