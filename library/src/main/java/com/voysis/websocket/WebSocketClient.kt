@@ -116,8 +116,11 @@ internal class WebSocketClient(private val converter: Converter,
 
         override fun onMessage(webSocket: WebSocket, stringResponse: String) {
             val response = converter.decodeResponse(stringResponse)
-            if (response.responseCode == 401 || response.responseCode == 403) {
+            val responseCode = response.responseCode
+            if (responseCode == 401 || responseCode == 403) {
                 onFailure(PermissionDeniedException("error code : " + response.responseCode))
+            }else if (responseCode >= 400) {
+                onFailure(VoysisException(stringResponse))
             } else {
                 onSuccess(response)
             }
