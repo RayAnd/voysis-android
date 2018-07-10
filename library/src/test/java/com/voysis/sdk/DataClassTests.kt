@@ -14,5 +14,4 @@ class DataClassTests {
         val audioQuery = Query()
         assertEquals(audioQuery.mimeType, "audio/pcm;bits=16;rate=16000")
     }
-
 }
