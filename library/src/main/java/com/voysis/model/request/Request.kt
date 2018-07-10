@@ -18,7 +18,7 @@ data class SocketRequest(val restUri: String? = null,
 
 data class RequestEntity(val context: Map<String, Any>? = null,
                          val queryType: String? = "audio",
-                         val audioQuery: Query? = Query("audio/pcm"),
+                         val audioQuery: Query? = Query(),
                          val userId: String? = null,
                          val locale: String = "en-US") : ApiRequest
 

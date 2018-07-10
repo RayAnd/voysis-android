@@ -24,7 +24,7 @@ data class TextQuery(val userExpressions: List<String>? = null, val text: String
 
 data class Reply(val text: String? = null, val audioUri: String? = null)
 
-data class Query(val mimeType: String? = null)
+data class Query(val mimeType: String? = "audio/pcm;bits=16;rate=16000")
 
 data class Queries(val href: String? = null)
 
