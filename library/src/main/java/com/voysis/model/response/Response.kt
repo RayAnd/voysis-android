@@ -22,9 +22,9 @@ data class Links(val self: Self? = null, val queries: Queries? = null, val audio
 
 data class TextQuery(val userExpressions: List<String>? = null, val text: String? = null)
 
-data class Reply(val text: String? = null, val audioUri: String? = null)
+data class AudioQuery(val mimeType: String? = "audio/pcm;bits=16;rate=16000")
 
-data class Query(val mimeType: String? = "audio/pcm;bits=16;rate=16000")
+data class Reply(val text: String? = null, val audioUri: String? = null)
 
 data class Queries(val href: String? = null)
 

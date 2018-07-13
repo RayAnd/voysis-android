@@ -4,7 +4,7 @@ import com.voysis.model.request.Headers
 import com.voysis.model.response.Audio
 import com.voysis.model.response.Links
 import com.voysis.model.response.Queries
-import com.voysis.model.response.Query
+import com.voysis.model.response.AudioQuery
 import com.voysis.model.response.QueryResponse
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -49,7 +49,7 @@ open class ClientTest {
     }
 
     fun createAudioQueryResponse(): QueryResponse {
-        val audioQueryResponse = QueryResponse(Query(), "")
+        val audioQueryResponse = QueryResponse(AudioQuery(), "")
         audioQueryResponse.links = links
         return audioQueryResponse
     }

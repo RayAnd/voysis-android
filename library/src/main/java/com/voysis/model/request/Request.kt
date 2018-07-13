@@ -2,7 +2,7 @@ package com.voysis.model.request
 
 import com.google.gson.annotations.SerializedName
 import com.voysis.model.response.ApiResponse
-import com.voysis.model.response.Query
+import com.voysis.model.response.AudioQuery
 import com.voysis.model.response.TextQuery
 
 /**
@@ -19,7 +19,7 @@ data class SocketRequest(val restUri: String? = null,
 
 data class RequestEntity(val context: Map<String, Any>? = null,
                          val queryType: String? = "audio",
-                         val audioQuery: Query? = null,
+                         val audioQuery: AudioQuery? = null,
                          val textQuery: TextQuery? = null,
                          val userId: String? = null,
                          val locale: String = "en-US") : ApiRequest

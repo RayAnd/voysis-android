@@ -9,7 +9,7 @@ import com.voysis.events.VoysisException
 import com.voysis.model.request.ApiRequest
 import com.voysis.model.request.FeedbackData
 import com.voysis.model.request.RequestEntity
-import com.voysis.model.response.Query
+import com.voysis.model.response.AudioQuery
 import com.voysis.model.response.QueryResponse
 import com.voysis.model.response.SocketResponse
 import com.voysis.model.response.TextQuery
@@ -43,11 +43,11 @@ internal class WebSocketClient(private val converter: Converter,
     }
 
     override fun createAudioQuery(context: Map<String, Any>?, userId: String?, token: String): Future<String> {
-        return sendString("/queries", RequestEntity(context = context, userId = userId, audioQuery = Query()), token)
+        return sendString("/queries", RequestEntity(context = context, userId = userId, audioQuery = AudioQuery()), token)
     }
 
     override fun sendTextQuery(context: Map<String, Any>?, text: String, userId: String?, token: String): Future<String> {
-        return sendString("/queries", RequestEntity(audioQuery = null, queryType = "text", context = context, userId = userId, textQuery = TextQuery(text = text)), token)
+        return sendString("/queries", RequestEntity(queryType = "text", context = context, userId = userId, textQuery = TextQuery(text = text)), token)
     }
 
     override fun refreshSessionToken(refreshToken: String): Future<String> {

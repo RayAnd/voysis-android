@@ -4,7 +4,7 @@ import com.google.gson.Gson
 
 data class StreamResponse(private val entities: Any? = null,
                           val context: Map<String, Any>? = null,
-                          val audioQuery: Query? = null,
+                          val audioQuery: AudioQuery? = null,
                           val textQuery: TextQuery? = null,
                           val reply: Reply? = null,
                           val intent: String? = null) : ApiResponse() {
