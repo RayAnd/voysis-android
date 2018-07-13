@@ -7,7 +7,8 @@ import com.voysis.model.response.Queries
 import com.voysis.model.response.Query
 import com.voysis.model.response.QueryResponse
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Calendar
+import java.util.Locale
 
 open class ClientTest {
 
