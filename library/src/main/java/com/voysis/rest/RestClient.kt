@@ -33,28 +33,18 @@ class RestClient(private val converter: Converter, private val url: URL, private
             .addHeader("User-Agent", converter.headers.userAgent)
 
     override fun sendTextQuery(context: Map<String, Any>?, text: String, userId: String?, token: String): Future<String> {
-        //todo implement
-        return QueryFuture()
+        setAuthorizationHeader(token)
+        setAcceptHeader("application/vnd.voysisquery.v1+json")
+        val future = QueryFuture()
+        execute(future, createRequest(text, userId, context))
+        return future
     }
 
     override fun createAudioQuery(context: Map<String, Any>?, userId: String?, token: String): Future<String> {
         setAuthorizationHeader(token)
         setAcceptHeader("application/vnd.voysisquery.v1+json")
         val future = QueryFuture()
-        val body = mutableMapOf(
-                "locale" to "en-US",
-                "queryType" to "audio",
-                "audioQuery" to mapOf("mimeType" to "audio/pcm")
-        )
-        userId?.let {
-            body["userId"] = userId
-        }
-        context?.let {
-            body["context"] = context
-        }
-        val queriesUrl = URL(url, "queries")
-        val request = createRequest(RequestBody.create(type, converter.toJson(body)), queriesUrl.toString())
-        execute(future, request)
+        execute(future, createRequest(null, userId, context))
         return future
     }
 
@@ -63,7 +53,7 @@ class RestClient(private val converter: Converter, private val url: URL, private
         setAcceptHeader(acceptJson)
         val future = QueryFuture()
         val queriesUrl = URL(url, "tokens")
-        val request = createRequest(RequestBody.create(type, ""), queriesUrl.toString())
+        val request = buildRequest(RequestBody.create(type, ""), queriesUrl.toString())
         execute(future, request)
         return future
     }
@@ -87,19 +77,46 @@ class RestClient(private val converter: Converter, private val url: URL, private
             body["rating"] = "rating"
         }
         val queriesUrl = URL(url, "/queries/$queryId/feedback")
-        val request = createRequest(RequestBody.create(type, converter.toJson(body)), queriesUrl.toString())
+        val request = buildRequest(RequestBody.create(type, converter.toJson(body)), queriesUrl.toString())
         execute(future, request)
         return future
     }
 
     override fun streamAudio(channel: ReadableByteChannel, queryResponse: QueryResponse): AudioResponseFuture {
         val future = AudioResponseFuture()
-        val request = createRequest(RestRequestBody(channel), queryResponse.href)
+        val request = buildRequest(RestRequestBody(channel), queryResponse.href)
         execute(future, request)
         return future
     }
 
-    private fun createRequest(body: RequestBody, url: String): Request {
+    private fun createRequest(text: String? = null, userId: String?, context: Map<String, Any>?): Request {
+        val body = createBody(text, userId, context)
+        val queriesUrl = URL(url, "queries")
+        return buildRequest(RequestBody.create(type, converter.toJson(body)), queriesUrl.toString())
+    }
+
+    private fun createBody(text: String?, userId: String?, context: Map<String, Any>?): MutableMap<String, Any> {
+        val body = if (text == null) {
+            mutableMapOf(
+                    "locale" to "en-US",
+                    "queryType" to "audio",
+                    "audioQuery" to mapOf("mimeType" to "audio/pcm;bits=16;rate=16000"))
+        } else {
+            mutableMapOf(
+                    "locale" to "en-US",
+                    "queryType" to "text",
+                    "textQuery" to mapOf("text" to text))
+        }
+        userId?.let {
+            body["userId"] = userId
+        }
+        context?.let {
+            body["context"] = context
+        }
+        return body
+    }
+
+    private fun buildRequest(body: RequestBody, url: String): Request {
         return builder.post(body).url(url).build()
     }
 
