@@ -20,6 +20,17 @@ interface Client {
     fun createAudioQuery(context: Map<String, Any>? = null, userId: String?, token: String): Future<String>
 
     /**
+     * Call this method to execute a text query.
+     *
+     * @param context (optional) context response from previous request.
+     * @param text query to be executed.
+     * @param userId (optional) user ID that uniquely identified a user.
+     * @param token session token assigned to the query.
+     * @return future containing response json string or error.
+     */
+    fun sendTextQuery(context: Map<String, Any>?, text: String, userId: String?, token: String): Future<String>
+
+    /**
      * Call this method to stream audio to server and return an audioStreamResponse
      *
      * @param channel ReadableByteChannel containing bytes to be sent to server

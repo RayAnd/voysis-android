@@ -1,19 +1,21 @@
 package com.voysis.android.core.impl
 
 import com.google.gson.Gson
+import com.nhaarman.mockito_kotlin.argumentCaptor
+import com.nhaarman.mockito_kotlin.verify
 import com.nhaarman.mockito_kotlin.whenever
 import com.voysis.api.StreamingStoppedReason
 import com.voysis.model.request.FeedbackData
 import com.voysis.sdk.ClientTest
 import com.voysis.sevice.Converter
 import com.voysis.websocket.WebSocketClient
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.WebSocket
 import okhttp3.WebSocketListener
 import okio.ByteString
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -59,6 +61,16 @@ class WebSocketClientTest : ClientTest() {
         val future = webSocketClient.createAudioQuery(context, userId, token)
         val response = future.get()
         assertTrue(this.response.contains(response))
+    }
+
+    @Test
+    fun testExecuteTextQuery() {
+        webSocketClient.sendTextQuery(null, "text", "1", "123")
+        val textEntity = """"entity":{"queryType":"text","textQuery":{"text":"text"},"userId":"1","locale":"en-US"}"""
+        argumentCaptor<String>().apply {
+            verify(webSocket).send(capture())
+            assertTrue(firstValue.contains(textEntity))
+        }
     }
 
     fun testSuccessfulGetToken() {

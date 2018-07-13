@@ -32,6 +32,11 @@ class RestClient(private val converter: Converter, private val url: URL, private
             .addHeader("Accept", acceptJson)
             .addHeader("User-Agent", converter.headers.userAgent)
 
+    override fun sendTextQuery(context: Map<String, Any>?, text: String, userId: String?, token: String): Future<String> {
+        //todo implement
+        return QueryFuture()
+    }
+
     override fun createAudioQuery(context: Map<String, Any>?, userId: String?, token: String): Future<String> {
         setAuthorizationHeader(token)
         setAcceptHeader("application/vnd.voysisquery.v1+json")
