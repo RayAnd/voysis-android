@@ -36,7 +36,7 @@ interface Service {
 
     /**
      * This method executes a text query.
-     * Note: this method will call back to the same thread that called `startAudioQuery`
+     * Note: this method will call back to the same thread that called `startTextQuery`
      *
      * @param context (optional) context of previous query
      * @param text query to be executed
