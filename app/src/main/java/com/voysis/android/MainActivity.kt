@@ -97,7 +97,7 @@ class MainActivity : AppCompatActivity(), Callback {
         submitFeedback(response)
         context = response.context
         runOnUiThread {
-            setText("AudioQuery Complete")
+            setText("Query Complete")
             responseText.text = gson.toJson(response, StreamResponse::class.java)
         }
     }
