@@ -39,7 +39,16 @@ internal class ServiceImpl(private val client: Client,
         if (state == State.IDLE) {
             state = State.BUSY
             startRecording(callback)
-            execute(callback, context)
+            executeAudio(callback, context)
+        } else {
+            callback.failure(VoysisException("duplicate request"))
+        }
+    }
+
+    override fun sendTextQuery(context: Map<String, Any>?, text: String, callback: Callback) {
+        if (state == State.IDLE) {
+            state = State.BUSY
+            executeText(callback, text, context)
         } else {
             callback.failure(VoysisException("duplicate request"))
         }
@@ -66,9 +75,7 @@ internal class ServiceImpl(private val client: Client,
 
     @Throws(ExecutionException::class)
     override fun sendFeedback(queryId: String, feedback: FeedbackData) {
-        if (!tokenIsValid()) {
-            refreshSessionToken()
-        }
+        checkToken()
         client.sendFeedback(queryId, feedback, sessionToken!!.token)
     }
 
@@ -91,11 +98,9 @@ internal class ServiceImpl(private val client: Client,
         })
     }
 
-    private fun execute(callback: Callback, context: Map<String, Any>?) {
+    private fun executeAudio(callback: Callback, context: Map<String, Any>?) {
         try {
-            if (!tokenIsValid()) {
-                refreshSessionToken()
-            }
+            checkToken()
             val audioQueryResponse = executeAudioQueryRequest(callback, context)
             executeStreamRequest(audioQueryResponse, callback)
         } catch (e: Exception) {
@@ -103,10 +108,13 @@ internal class ServiceImpl(private val client: Client,
         }
     }
 
-    private fun handleException(callback: Callback, e: Exception) {
-        recorder.stop()
-        callback.failure(VoysisException(e))
-        state = State.IDLE
+    private fun executeText(callback: Callback, text: String, context: Map<String, Any>?) {
+        try {
+            checkToken()
+            executeTextRequest(context, text, callback)
+        } catch (e: Exception) {
+            handleException(callback, e)
+        }
     }
 
     private fun executeAudioQueryRequest(callback: Callback, context: Map<String, Any>?): QueryResponse {
@@ -120,10 +128,12 @@ internal class ServiceImpl(private val client: Client,
     private fun executeStreamRequest(query: QueryResponse, callback: Callback) {
         response = client.streamAudio(pipe.source(), query)
         checkStreamStoppedReason(callback)
-        val stringResponse = validateResponse(response!!.get())
-        val streamResponse = converter.convertResponse(stringResponse, StreamResponse::class.java)
-        callback.success(streamResponse)
-        state = State.IDLE
+        handleSuccess(callback)
+    }
+
+    private fun executeTextRequest(context: Map<String, Any>?, text: String, callback: Callback) {
+        response = client.sendTextQuery(context, text, userId, sessionToken!!.token)
+        handleSuccess(callback)
     }
 
     private fun checkStreamStoppedReason(callback: Callback) {
@@ -143,6 +153,12 @@ internal class ServiceImpl(private val client: Client,
         return stringResponse
     }
 
+    private fun checkToken() {
+        if (!tokenIsValid()) {
+            refreshSessionToken()
+        }
+    }
+
     private fun tokenIsValid(): Boolean {
         return if (sessionToken == null) {
             false
@@ -155,5 +171,18 @@ internal class ServiceImpl(private val client: Client,
             val expiryDate = cal.time
             expiryDate.after(currentTime)
         }
+    }
+
+    private fun handleSuccess(callback: Callback) {
+        val stringResponse = validateResponse(response!!.get())
+        val streamResponse = converter.convertResponse(stringResponse, StreamResponse::class.java)
+        callback.success(streamResponse)
+        state = State.IDLE
+    }
+
+    private fun handleException(callback: Callback, e: Exception) {
+        recorder.stop()
+        callback.failure(VoysisException(e))
+        state = State.IDLE
     }
 }

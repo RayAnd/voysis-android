@@ -27,11 +27,22 @@ interface Service {
      * Note: this method will call back to the same thread that called `startAudioQuery`
      * for more information on the websocket api calls see https://developers.voysis.com/docs
      *
+     * @param context (optional) context of previous query
      * @param callback used by client application
      * @throws IOException if reading/writing error occurs
      */
     @Throws(IOException::class)
     fun startAudioQuery(context: Map<String, Any>? = null, callback: Callback)
+
+    /**
+     * This method executes a text query.
+     * Note: this method will call back to the same thread that called `startTextQuery`
+     *
+     * @param context (optional) context of previous query
+     * @param text query to be executed
+     * @param callback used by client application
+     */
+    fun sendTextQuery(context: Map<String, Any>?, text: String, callback: Callback)
 
     /**
      * Call to manually stop recording audio and process request

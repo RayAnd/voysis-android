@@ -2,6 +2,7 @@ package com.voysis.sdk
 
 import com.google.gson.Gson
 import com.nhaarman.mockito_kotlin.anyOrNull
+import com.nhaarman.mockito_kotlin.argThat
 import com.nhaarman.mockito_kotlin.doAnswer
 import com.nhaarman.mockito_kotlin.doReturn
 import com.nhaarman.mockito_kotlin.eq
@@ -122,7 +123,19 @@ class ServiceImplTest : ClientTest() {
         verify(client, times(1)).sendFeedback(eq("1"), eq(feedback), eq("token"))
     }
 
-    fun answerRecordingStarted() {
+    @Test
+    fun testSuccessfulTextRequest() {
+        val exampleRequest = "I'm looking for things."
+        doReturn(tokenResponseValid).whenever(tokenFuture).get()
+        doReturn(tokenFuture).whenever(client).refreshSessionToken(anyOrNull())
+        doReturn(queryFuture).whenever(client).sendTextQuery(anyOrNull(), eq(exampleRequest), anyOrNull(), anyOrNull())
+        doReturn(streamResponse).whenever(queryFuture).get()
+        serviceImpl.sendTextQuery(context = null, text = exampleRequest, callback = callback)
+        verify(client).sendTextQuery(anyOrNull(), eq(exampleRequest), anyOrNull(), anyOrNull())
+        verify(callback).success(argThat { id == "5" })
+    }
+
+    private fun answerRecordingStarted() {
         doAnswer { invocation ->
             (invocation.getArgument<Any>(0) as OnDataResponse).onRecordingStarted()
             null
