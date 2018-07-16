@@ -44,7 +44,7 @@ class RestClient(private val converter: Converter, private val url: URL, private
         setAuthorizationHeader(token)
         setAcceptHeader("application/vnd.voysisquery.v1+json")
         val future = QueryFuture()
-        execute(future, createRequest(null, userId, context))
+        execute(future, createRequest(userId = userId, context = context))
         return future
     }
 
