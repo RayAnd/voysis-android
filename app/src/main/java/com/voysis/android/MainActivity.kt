@@ -21,11 +21,12 @@ import com.voysis.sevice.DataConfig
 import kotlinx.android.synthetic.main.activity_main.cancel
 import kotlinx.android.synthetic.main.activity_main.eventText
 import kotlinx.android.synthetic.main.activity_main.responseText
+import kotlinx.android.synthetic.main.activity_main.send
 import kotlinx.android.synthetic.main.activity_main.start
 import kotlinx.android.synthetic.main.activity_main.stop
+import kotlinx.android.synthetic.main.activity_main.textInput
 import java.net.URL
 import java.util.concurrent.Executors
-
 
 class MainActivity : AppCompatActivity(), Callback {
 
@@ -52,10 +53,10 @@ class MainActivity : AppCompatActivity(), Callback {
                     .setTitle("Alert")
                     .setCancelable(false)
                     .create()
-            alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK", { dialog, _ ->
+            alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK") { dialog, _ ->
                 dialog.dismiss()
                 this@MainActivity.acceptAudioPermission()
-            })
+            }
             alertDialog.show()
         } else {
             init()
@@ -71,12 +72,18 @@ class MainActivity : AppCompatActivity(), Callback {
         service = ServiceProvider().make(applicationContext, config)
         start.setOnClickListener { onStartClicked() }
         stop.setOnClickListener { service.finish() }
+        send.setOnClickListener { onSendClicked() }
         cancel.setOnClickListener { service.cancel() }
+    }
+
+    private fun onSendClicked() {
+        val text = textInput.text.toString()
+        executor.submit { service.sendTextQuery(context, text, this) }
     }
 
     private fun onStartClicked() {
         if (service.state == State.IDLE) {
-            executor.submit({ startAudioQuery() })
+            executor.submit { startAudioQuery() }
         } else {
             Toast.makeText(this, "query in progress ", LENGTH_SHORT).show()
         }
@@ -87,13 +94,19 @@ class MainActivity : AppCompatActivity(), Callback {
     }
 
     override fun success(response: StreamResponse) {
-        feedbackData.durations.complete = System.currentTimeMillis() - startTime!!
-        val queryId = response.id
-        executor.submit({ sendFeedback(queryId) })
+        submitFeedback(response)
         context = response.context
         runOnUiThread {
             setText("Query Complete")
             responseText.text = gson.toJson(response, StreamResponse::class.java)
+        }
+    }
+
+    private fun submitFeedback(response: StreamResponse) {
+        if (startTime != null) {
+            feedbackData.durations.complete = System.currentTimeMillis() - startTime!!
+            val queryId = response.id
+            executor.submit { sendFeedback(queryId) }
         }
     }
 
