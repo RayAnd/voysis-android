@@ -20,7 +20,7 @@ data class SocketResponse<out T>(val notificationType: String? = null,
 
 data class Links(val self: Self? = null, val queries: Queries? = null, val audio: Audio? = null)
 
-data class TextQuery(val userExpressions: List<String>? = null, val text: String? = null)
+data class TextQuery(val text: String? = null)
 
 data class AudioQuery(val mimeType: String? = "audio/pcm;bits=16;rate=16000")
 
