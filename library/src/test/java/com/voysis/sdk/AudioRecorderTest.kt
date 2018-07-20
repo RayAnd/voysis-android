@@ -75,7 +75,7 @@ class AudioRecorderTest {
     }
 
     @Test
-    fun testOnCompleteCalledWheStopRecordingBeforeSoundBiteCompletes(){
+    fun testOnCompleteCalledWheStopRecordingBeforeSoundBiteCompletes() {
         doAnswer { invocation ->
             audioRecorder.stop()
             (invocation.getArgument<Any>(0) as () -> Unit).invoke()
