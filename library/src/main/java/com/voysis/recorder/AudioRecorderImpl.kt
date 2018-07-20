@@ -35,6 +35,8 @@ class AudioRecorderImpl(context: Context,
     private fun execute(callback: OnDataResponse) {
         if (inProgress.get()) {
             executor.execute { write(callback) }
+        } else {
+            callback.onComplete()
         }
     }
 
