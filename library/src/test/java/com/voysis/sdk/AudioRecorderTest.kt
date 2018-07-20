@@ -9,6 +9,7 @@ import com.nhaarman.mockito_kotlin.anyOrNull
 import com.nhaarman.mockito_kotlin.doAnswer
 import com.nhaarman.mockito_kotlin.doReturn
 import com.nhaarman.mockito_kotlin.mock
+import com.nhaarman.mockito_kotlin.times
 import com.nhaarman.mockito_kotlin.whenever
 import com.voysis.recorder.AudioPlayer
 import com.voysis.recorder.AudioRecorder
@@ -70,6 +71,17 @@ class AudioRecorderTest {
         }.whenever(executorService).execute(ArgumentMatchers.any(Runnable::class.java))
         audioRecorder.start(onDataResposne)
         verify(onDataResposne).onDataResponse(any())
+        verify(onDataResposne).onComplete()
+    }
+
+    @Test
+    fun testOnCompleteCalledWheStopRecordingBeforeSoundBiteCompletes(){
+        doAnswer { invocation ->
+            audioRecorder.stop()
+            (invocation.getArgument<Any>(0) as () -> Unit).invoke()
+        }.whenever(player).playStartAudio(anyOrNull())
+        audioRecorder.start(onDataResposne)
+        verify(onDataResposne, times(0)).onDataResponse(any())
         verify(onDataResposne).onComplete()
     }
 
