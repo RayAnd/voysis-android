@@ -43,9 +43,8 @@ class AudioRecorderImpl(context: Context,
     @Synchronized
     override fun stop() {
         stopRecorder()
-        if (inProgress.get()) {
+        if (inProgress.compareAndSet(true, false)) {
             player.playStopAudio()
-            inProgress.set(false)
         }
     }
 
