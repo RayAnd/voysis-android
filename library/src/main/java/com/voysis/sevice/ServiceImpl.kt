@@ -165,7 +165,7 @@ internal class ServiceImpl(private val client: Client,
         } else {
             val cal = Calendar.getInstance()
             val currentTime = cal.time
-            val format = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.ENGLISH)
+            val format = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSX", Locale.ENGLISH)
             cal.time = format.parse(sessionToken?.expiresAt)
             cal.add(Calendar.SECOND, -30)
             val expiryDate = cal.time
