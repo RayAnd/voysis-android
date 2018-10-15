@@ -12,6 +12,7 @@ class AudioPlayer(private val context: Context,
         audioStart = audioStart ?: MediaPlayer.create(context, R.raw.voysis_on)
         audioStart?.setOnCompletionListener {
             callback()
+            audioStart?.reset()
             audioStart?.release()
             audioStart = null
         }
@@ -22,6 +23,7 @@ class AudioPlayer(private val context: Context,
     fun playStopAudio() {
         audioStop = audioStop ?: MediaPlayer.create(context, R.raw.voysis_off)
         audioStop?.setOnCompletionListener {
+            audioStop?.reset()
             audioStop?.release()
             audioStop = null
         }
