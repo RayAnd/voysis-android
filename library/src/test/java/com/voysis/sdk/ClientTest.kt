@@ -2,13 +2,14 @@ package com.voysis.sdk
 
 import com.voysis.model.request.Headers
 import com.voysis.model.response.Audio
+import com.voysis.model.response.AudioQuery
 import com.voysis.model.response.Links
 import com.voysis.model.response.Queries
-import com.voysis.model.response.AudioQuery
 import com.voysis.model.response.QueryResponse
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
+import java.util.TimeZone
 
 open class ClientTest {
 
@@ -41,10 +42,12 @@ open class ClientTest {
             return getExpiry(60)
         }
 
-    private fun getExpiry(time: Int): String {
+    fun getExpiry(time: Int): String {
         val cal = Calendar.getInstance()
         cal.add(Calendar.SECOND, time)
-        val format = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSX", Locale.ENGLISH)
+        cal.timeZone = TimeZone.getTimeZone("UTC")
+        val format = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.ENGLISH)
+        format.timeZone = cal.timeZone
         return format.format(cal.time)
     }
 

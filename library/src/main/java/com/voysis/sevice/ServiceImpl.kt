@@ -15,12 +15,12 @@ import com.voysis.recorder.AudioRecorder
 import com.voysis.recorder.OnDataResponse
 import com.voysis.websocket.WebSocketClient.Companion.CLOSING
 import java.io.IOException
-import java.lang.Exception
 import java.nio.ByteBuffer
 import java.nio.channels.Pipe
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
+import java.util.Date
 import java.util.concurrent.ExecutionException
 import java.util.concurrent.Future
 
@@ -165,12 +165,38 @@ internal class ServiceImpl(private val client: Client,
         } else {
             val cal = Calendar.getInstance()
             val currentTime = cal.time
-            val format = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSX", Locale.ENGLISH)
-            cal.time = format.parse(sessionToken?.expiresAt)
+            cal.time = parseExpiresAtDate()
             cal.add(Calendar.SECOND, -30)
             val expiryDate = cal.time
             expiryDate.after(currentTime)
         }
+    }
+
+    /*
+     * This uses a try catch to account for the following SimpleDateFormat parse exception
+     * that occurs on older api levels: IllegalArgumentException: Unknown pattern character 'X'
+     */
+    private fun parseExpiresAtDate(): Date {
+        try {
+            return generateISODate()
+        } catch (e: Exception) {
+            return generateRFCDate()
+        }
+    }
+
+    private fun generateISODate(): Date {
+        val expiresAt = sessionToken?.expiresAt
+        val format = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSX", Locale.ENGLISH)
+        return format.parse(expiresAt)
+    }
+
+    private fun generateRFCDate(): Date {
+        var expiresAt = sessionToken?.expiresAt
+        if (expiresAt!!.endsWith("Z")) {
+            expiresAt = expiresAt.replace("Z", "+0000")
+        }
+        val format = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ", Locale.ENGLISH)
+        return format.parse(expiresAt)
     }
 
     private fun handleSuccess(callback: Callback) {

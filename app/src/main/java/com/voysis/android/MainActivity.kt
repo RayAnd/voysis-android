@@ -150,6 +150,8 @@ class MainActivity : AppCompatActivity(), Callback {
             } else {
                 init()
             }
+        } else {
+            init()
         }
     }
 
