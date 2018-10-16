@@ -9,6 +9,7 @@ import com.voysis.recorder.AudioRecorderImpl
 import com.voysis.rest.RestClient
 import com.voysis.sevice.Converter
 import com.voysis.sevice.ServiceImpl
+import com.voysis.sevice.TokenManager
 import com.voysis.websocket.WebSocketClient
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -32,7 +33,7 @@ class ServiceProvider {
              audioRecorder: AudioRecorder = AudioRecorderImpl(context)): Service {
         val converter = Converter(getHeaders(context), Gson())
         val client = createClient(config, generateOkHttpClient(okClient), converter)
-        return ServiceImpl(client, audioRecorder, converter, config.userId, config.refreshToken)
+        return ServiceImpl(client, audioRecorder, converter, config.userId, TokenManager(config.refreshToken))
     }
 
     /**

@@ -15,12 +15,12 @@ import com.voysis.api.StreamingStoppedReason.VAD_RECEIVED
 import com.voysis.events.Callback
 import com.voysis.events.FinishedReason
 import com.voysis.model.request.FeedbackData
-import com.voysis.model.request.Token
 import com.voysis.recorder.AudioRecorder
 import com.voysis.recorder.OnDataResponse
 import com.voysis.sevice.AudioResponseFuture
 import com.voysis.sevice.Converter
 import com.voysis.sevice.ServiceImpl
+import com.voysis.sevice.TokenManager
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -45,19 +45,14 @@ class ServiceImplTest : ClientTest() {
     private lateinit var tokenFuture: Future<String>
     @Mock
     private lateinit var queryFuture: AudioResponseFuture
-    @Mock
-    private lateinit var converter: Converter
-    @Mock
-    private lateinit var token: Token
-
     private lateinit var serviceImpl: ServiceImpl
-    private val refreshToken = "refreshToken"
+    private val tokenManager = TokenManager("refreshToken")
     private val userId = "userId"
 
     @Before
     fun setup() {
         val converter = Converter(headers, Gson())
-        serviceImpl = ServiceImpl(client, manager, converter, userId, refreshToken)
+        serviceImpl = ServiceImpl(client, manager, converter, userId, tokenManager)
     }
 
     @Test
@@ -101,21 +96,9 @@ class ServiceImplTest : ClientTest() {
     }
 
     @Test
-    fun testExpiredTokenRefreshedISO() {
+    fun testExpiredTokenRefreshed() {
         doReturn(tokenResponseExpired).whenever(tokenFuture).get()
         doReturn(tokenFuture).whenever(client).refreshSessionToken(anyOrNull())
-        serviceImpl.startAudioQuery(callback = callback)
-        serviceImpl.startAudioQuery(callback = callback)
-        verify(client, times(2)).refreshSessionToken(anyOrNull())
-    }
-
-    @Test
-    fun testExpiredTokenRefreshedRFC() {
-        serviceImpl = ServiceImpl(client, manager, converter, userId, refreshToken)
-        doReturn(tokenResponseExpired).whenever(tokenFuture).get()
-        doReturn(tokenFuture).whenever(client).refreshSessionToken(anyOrNull())
-        doReturn(token).whenever(converter).convertResponse(eq(tokenResponseExpired), eq(Token::class.java))
-        doReturn("", getExpiry(25)).whenever(token).expiresAt
         serviceImpl.startAudioQuery(callback = callback)
         serviceImpl.startAudioQuery(callback = callback)
         verify(client, times(2)).refreshSessionToken(anyOrNull())

@@ -17,10 +17,6 @@ import com.voysis.websocket.WebSocketClient.Companion.CLOSING
 import java.io.IOException
 import java.nio.ByteBuffer
 import java.nio.channels.Pipe
-import java.text.SimpleDateFormat
-import java.util.Calendar
-import java.util.Locale
-import java.util.Date
 import java.util.concurrent.ExecutionException
 import java.util.concurrent.Future
 
@@ -28,9 +24,8 @@ internal class ServiceImpl(private val client: Client,
                            private val recorder: AudioRecorder,
                            private val converter: Converter,
                            private val userId: String?,
-                           private val refreshToken: String) : Service {
+                           private val tokenManager: TokenManager) : Service {
     private var response: Future<String>? = null
-    private var sessionToken: Token? = null
     private lateinit var pipe: Pipe
     override var state = State.IDLE
 
@@ -66,17 +61,17 @@ internal class ServiceImpl(private val client: Client,
 
     @Throws(ExecutionException::class)
     override fun refreshSessionToken(): Token {
-        val response = client.refreshSessionToken(refreshToken)
+        val response = client.refreshSessionToken(tokenManager.refreshToken)
         val stringResponse = validateResponse(response.get())
         val token = converter.convertResponse(stringResponse, Token::class.java)
-        sessionToken = token
+        tokenManager.sessionToken = token
         return token
     }
 
     @Throws(ExecutionException::class)
     override fun sendFeedback(queryId: String, feedback: FeedbackData) {
         checkToken()
-        client.sendFeedback(queryId, feedback, sessionToken!!.token)
+        client.sendFeedback(queryId, feedback, tokenManager.token)
     }
 
     private fun startRecording(callback: Callback) {
@@ -118,7 +113,7 @@ internal class ServiceImpl(private val client: Client,
     }
 
     private fun executeAudioQueryRequest(callback: Callback, context: Map<String, Any>?): QueryResponse {
-        response = client.createAudioQuery(context, userId, sessionToken!!.token)
+        response = client.createAudioQuery(context, userId, tokenManager.token)
         val stringResponse = validateResponse(response!!.get())
         val audioQuery = converter.convertResponse(stringResponse, QueryResponse::class.java)
         callback.queryResponse(audioQuery)
@@ -132,7 +127,7 @@ internal class ServiceImpl(private val client: Client,
     }
 
     private fun executeTextRequest(context: Map<String, Any>?, text: String, callback: Callback) {
-        response = client.sendTextQuery(context, text, userId, sessionToken!!.token)
+        response = client.sendTextQuery(context, text, userId, tokenManager.token)
         handleSuccess(callback)
     }
 
@@ -154,49 +149,9 @@ internal class ServiceImpl(private val client: Client,
     }
 
     private fun checkToken() {
-        if (!tokenIsValid()) {
+        if (!tokenManager.tokenIsValid()) {
             refreshSessionToken()
         }
-    }
-
-    private fun tokenIsValid(): Boolean {
-        return if (sessionToken == null) {
-            false
-        } else {
-            val cal = Calendar.getInstance()
-            val currentTime = cal.time
-            cal.time = parseExpiresAtDate()
-            cal.add(Calendar.SECOND, -30)
-            val expiryDate = cal.time
-            expiryDate.after(currentTime)
-        }
-    }
-
-    /*
-     * This uses a try catch to account for the following SimpleDateFormat parse exception
-     * that occurs on older api levels: IllegalArgumentException: Unknown pattern character 'X'
-     */
-    private fun parseExpiresAtDate(): Date {
-        try {
-            return generateISODate()
-        } catch (e: Exception) {
-            return generateRFCDate()
-        }
-    }
-
-    private fun generateISODate(): Date {
-        val expiresAt = sessionToken?.expiresAt
-        val format = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSX", Locale.ENGLISH)
-        return format.parse(expiresAt)
-    }
-
-    private fun generateRFCDate(): Date {
-        var expiresAt = sessionToken?.expiresAt
-        if (expiresAt!!.endsWith("Z")) {
-            expiresAt = expiresAt.replace("Z", "+0000")
-        }
-        val format = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ", Locale.ENGLISH)
-        return format.parse(expiresAt)
     }
 
     private fun handleSuccess(callback: Callback) {

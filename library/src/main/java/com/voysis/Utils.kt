@@ -9,7 +9,10 @@ import android.util.Log
 import com.voysis.model.request.Headers
 import com.voysis.sdk.BuildConfig
 import okhttp3.OkHttpClient
+import java.text.SimpleDateFormat
 import java.util.UUID
+import java.util.Date
+import java.util.Locale
 import java.util.concurrent.TimeUnit
 
 fun getHeaders(context: Context): Headers {
@@ -82,6 +85,20 @@ fun getOrCreateAudioProfileId(context: Context): String {
  */
 fun createAudioRecorder(): AudioRecord {
     return AudioRecord(MediaRecorder.AudioSource.VOICE_RECOGNITION, 16000, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT, bufferSize)
+}
+
+fun generateISODate(expiresAt: String): Date {
+    val format = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSX", Locale.ENGLISH)
+    return format.parse(expiresAt)
+}
+
+fun generateRFCDate(expiresAt: String): Date {
+    var local = expiresAt
+    if (expiresAt.endsWith("Z")) {
+        local = expiresAt.replace("Z", "+0000")
+    }
+    val format = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ", Locale.ENGLISH)
+    return format.parse(local)
 }
 
 /**
