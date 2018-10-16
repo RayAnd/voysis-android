@@ -1,7 +1,7 @@
 package com.voysis.sdk
 import org.junit.Assert.assertTrue
 import com.voysis.generateRFCDate
-import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNotNull
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.junit.MockitoJUnitRunner
@@ -10,10 +10,10 @@ import org.mockito.junit.MockitoJUnitRunner
 class UtilsTest : ClientTest() {
 
     @Test
-    fun testParseRFCToLocalTimeZone() {
+    fun testParseRFC() {
         val dateString = getExpiry(25)
         assertTrue(dateString.contains("Z"))
         val date = generateRFCDate(dateString)
-        assertFalse(date.toString().contains("UTC"))
+        assertNotNull(date)
     }
 }
