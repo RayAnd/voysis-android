@@ -146,19 +146,19 @@ class MainActivity : AppCompatActivity(), Callback {
     }
 
     private fun acceptAudioPermissionIfNeeded() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            checkAudioPermission()
-        } else {
-            init()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !checkAudioPermission()) {
+            return
         }
+        init()
     }
 
     @TargetApi(Build.VERSION_CODES.M)
-    private fun checkAudioPermission() {
-        if (checkSelfPermission(Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+    private fun checkAudioPermission(): Boolean {
+        return if (checkSelfPermission(Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
             requestPermissions(arrayOf(Manifest.permission.RECORD_AUDIO), 123)
+            false
         } else {
-            init()
+            true
         }
     }
 
