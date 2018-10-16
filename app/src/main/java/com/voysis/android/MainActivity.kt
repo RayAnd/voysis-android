@@ -1,5 +1,7 @@
 package com.voysis.android
 
+import android.Manifest
+import android.annotation.TargetApi
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
@@ -43,7 +45,7 @@ class MainActivity : AppCompatActivity(), Callback {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         //audio permissions must be accepted before using the Voysis Service.
-        acceptAudioPermission()
+        acceptAudioPermissionIfNeeded()
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
@@ -55,7 +57,7 @@ class MainActivity : AppCompatActivity(), Callback {
                     .create()
             alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK") { dialog, _ ->
                 dialog.dismiss()
-                this@MainActivity.acceptAudioPermission()
+                this@MainActivity.acceptAudioPermissionIfNeeded()
             }
             alertDialog.show()
         } else {
@@ -143,13 +145,18 @@ class MainActivity : AppCompatActivity(), Callback {
         }
     }
 
-    private fun acceptAudioPermission() {
+    private fun acceptAudioPermissionIfNeeded() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (checkSelfPermission(android.Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
-                requestPermissions(arrayOf(android.Manifest.permission.RECORD_AUDIO), 123)
-            } else {
-                init()
-            }
+            checkAudioPermission()
+        } else {
+            init()
+        }
+    }
+
+    @TargetApi(Build.VERSION_CODES.M)
+    private fun checkAudioPermission() {
+        if (checkSelfPermission(Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(arrayOf(Manifest.permission.RECORD_AUDIO), 123)
         } else {
             init()
         }
