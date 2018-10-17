@@ -67,13 +67,13 @@ private fun getBuilder(client: OkHttpClient?): OkHttpClient.Builder {
 fun getOrCreateAudioProfileId(context: Context): String {
     val preferences = context.getSharedPreferences("VOYSIS_PREFERENCE", Context.MODE_PRIVATE)
     val id = preferences.getString("ID", null)
-    if (id == null) {
+    return if (id == null) {
         val uuid = UUID.randomUUID().toString()
         preferences.edit().putString("ID", uuid).apply()
-        return uuid
+        uuid
     } else {
         Log.d("getAudioProfileId", id)
-        return id
+        id
     }
 }
 

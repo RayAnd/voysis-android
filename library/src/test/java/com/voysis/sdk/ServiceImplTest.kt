@@ -20,6 +20,7 @@ import com.voysis.recorder.OnDataResponse
 import com.voysis.sevice.AudioResponseFuture
 import com.voysis.sevice.Converter
 import com.voysis.sevice.ServiceImpl
+import com.voysis.sevice.TokenManager
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -44,15 +45,14 @@ class ServiceImplTest : ClientTest() {
     private lateinit var tokenFuture: Future<String>
     @Mock
     private lateinit var queryFuture: AudioResponseFuture
-
     private lateinit var serviceImpl: ServiceImpl
-    private val refreshToken = "refreshToken"
+    private val tokenManager = TokenManager("refreshToken")
     private val userId = "userId"
 
     @Before
     fun setup() {
         val converter = Converter(headers, Gson())
-        serviceImpl = ServiceImpl(client, manager, converter, userId, refreshToken)
+        serviceImpl = ServiceImpl(client, manager, converter, userId, tokenManager)
     }
 
     @Test

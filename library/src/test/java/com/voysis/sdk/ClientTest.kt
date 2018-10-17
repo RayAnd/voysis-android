@@ -2,9 +2,9 @@ package com.voysis.sdk
 
 import com.voysis.model.request.Headers
 import com.voysis.model.response.Audio
+import com.voysis.model.response.AudioQuery
 import com.voysis.model.response.Links
 import com.voysis.model.response.Queries
-import com.voysis.model.response.AudioQuery
 import com.voysis.model.response.QueryResponse
 import java.text.SimpleDateFormat
 import java.util.Calendar

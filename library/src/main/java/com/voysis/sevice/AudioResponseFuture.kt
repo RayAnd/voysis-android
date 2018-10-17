@@ -9,7 +9,7 @@ class AudioResponseFuture : QueryFuture() {
     private val reason = AtomicReference(NONE)
 
     /**
-     * @param reason enum reason for stream to complete
+     * @param enum reason for stream to complete
      */
     var responseReason: StreamingStoppedReason
         get() = reason.get()
