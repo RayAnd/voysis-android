@@ -4,7 +4,6 @@ import com.voysis.model.request.Token
 import org.threeten.bp.LocalDateTime
 import org.threeten.bp.format.DateTimeFormatter
 
-
 internal class TokenManager(val refreshToken: String) {
     internal var sessionToken: Token? = null
     private var formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSX")

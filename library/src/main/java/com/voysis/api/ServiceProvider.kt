@@ -33,7 +33,7 @@ class ServiceProvider {
              okClient: OkHttpClient? = null,
              audioRecorder: AudioRecorder = AudioRecorderImpl(context)): Service {
         val converter = Converter(getHeaders(context), Gson())
-        AndroidThreeTen.init(context);
+        AndroidThreeTen.init(context)
         val client = createClient(config, generateOkHttpClient(okClient), converter)
         return ServiceImpl(client, audioRecorder, converter, config.userId, TokenManager(config.refreshToken))
     }
