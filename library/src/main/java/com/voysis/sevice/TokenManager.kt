@@ -22,5 +22,4 @@ internal class TokenManager(val refreshToken: String) {
             expiryDate.isAfter(currentTime)
         }
     }
-
 }
