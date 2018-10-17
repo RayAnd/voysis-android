@@ -80,6 +80,7 @@ class AudioRecorderImpl(context: Context,
     private fun stopRecorder() {
         if (record?.state != STATE_UNINITIALIZED) {
             record?.stop()
+            record?.release()
             record = null
         }
     }
