@@ -42,7 +42,7 @@ open class ClientTest {
             return getExpiry(60)
         }
 
-    fun getExpiry(time: Int): String {
+    private fun getExpiry(time: Int): String {
         val cal = Calendar.getInstance()
         cal.add(Calendar.SECOND, time)
         val format = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSX", Locale.ENGLISH)
