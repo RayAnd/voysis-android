@@ -1,6 +1,7 @@
 package com.voysis.sdk
 
 import android.content.Context
+import android.media.AudioFormat
 import android.media.AudioRecord
 import android.media.AudioRecord.RECORDSTATE_RECORDING
 import android.media.AudioRecord.RECORDSTATE_STOPPED
@@ -15,6 +16,7 @@ import com.voysis.recorder.AudioPlayer
 import com.voysis.recorder.AudioRecorder
 import com.voysis.recorder.AudioRecorderImpl
 import com.voysis.recorder.OnDataResponse
+import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -38,6 +40,8 @@ class AudioRecorderTest {
 
     var record = mock<AudioRecord> {
         on { recordingState } doReturn RECORDSTATE_RECORDING doReturn RECORDSTATE_STOPPED
+        on { audioFormat } doReturn AudioFormat.ENCODING_PCM_16BIT doReturn AudioFormat.ENCODING_PCM_8BIT doReturn AudioFormat.CHANNEL_INVALID
+        on { sampleRate } doReturn 16000
     }
 
     private lateinit var audioRecorder: AudioRecorder
@@ -83,6 +87,17 @@ class AudioRecorderTest {
         audioRecorder.start(onDataResposne)
         verify(onDataResposne, times(0)).onDataResponse(any())
         verify(onDataResposne).onComplete()
+    }
+
+    @Test
+    fun testGetAudioInfo() {
+        val audioInfoA = audioRecorder.getAudioInfo()
+        assertEquals(audioInfoA.bitsPerSample, 16)
+        assertEquals(audioInfoA.sampleRate, 16000)
+        val audioInfoB = audioRecorder.getAudioInfo()
+        assertEquals(audioInfoB.bitsPerSample, 8)
+        val audioInfoC = audioRecorder.getAudioInfo()
+        assertEquals(audioInfoC.bitsPerSample, -1)
     }
 
     private fun callCompletionListener() {

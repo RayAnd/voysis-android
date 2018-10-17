@@ -6,6 +6,7 @@ import com.nhaarman.mockito_kotlin.verify
 import com.nhaarman.mockito_kotlin.whenever
 import com.voysis.api.StreamingStoppedReason
 import com.voysis.model.request.FeedbackData
+import com.voysis.recorder.AudioInfo
 import com.voysis.sdk.ClientTest
 import com.voysis.sevice.Converter
 import com.voysis.websocket.WebSocketClient
@@ -45,6 +46,7 @@ class WebSocketClientTest : ClientTest() {
     private val context = hashMapOf("test" to "test")
     private val token = "token"
     private val userId = "userId"
+    private val audioInfo = AudioInfo(16000, 16)
 
     @Before
     @Throws(MalformedURLException::class)
@@ -58,7 +60,7 @@ class WebSocketClientTest : ClientTest() {
     @Throws(Exception::class)
     fun testSuccessfulCreateAudioQuery() {
         getResponseFromStringSend()
-        val future = webSocketClient.createAudioQuery(context, userId, token)
+        val future = webSocketClient.createAudioQuery(context, userId, token, audioInfo)
         val response = future.get()
         assertTrue(this.response.contains(response))
     }
@@ -104,7 +106,7 @@ class WebSocketClientTest : ClientTest() {
     @Throws(Exception::class)
     fun testCloseWhileSessionInProgress() {
         getCloseResponseFromStringSend()
-        val future = webSocketClient.createAudioQuery(context, userId, token)
+        val future = webSocketClient.createAudioQuery(context, userId, token, audioInfo)
         val response = future.get()
         assertEquals(response, "closing")
     }
@@ -113,7 +115,7 @@ class WebSocketClientTest : ClientTest() {
     @Throws(Exception::class)
     fun testFailWhileSessionInProgress() {
         getFailureResponseFromStringSend()
-        val future = webSocketClient.createAudioQuery(context, userId, token)
+        val future = webSocketClient.createAudioQuery(context, userId, token, audioInfo)
         future.get()
     }
 
@@ -133,7 +135,7 @@ class WebSocketClientTest : ClientTest() {
     }
 
     private fun getResponseFromByteStringSendWithVad() {
-        webSocketClient.createAudioQuery(context, userId, token)
+        webSocketClient.createAudioQuery(context, userId, token, audioInfo)
         doAnswer {
             argumentCaptor.value.onMessage(webSocket, vad)
             argumentCaptor.value.onMessage(webSocket, notification)

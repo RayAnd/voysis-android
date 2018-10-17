@@ -13,6 +13,11 @@ interface AudioRecorder {
      * @param callback called periodically as data is returned from the mic.
      */
     fun start(callback: OnDataResponse)
+
+    /**
+     * @return valid AudioInfo object.
+     */
+    fun getAudioInfo(): AudioInfo
 }
 
 interface OnDataResponse {

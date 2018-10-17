@@ -1,6 +1,8 @@
 package com.voysis.recorder
 
 import android.content.Context
+import android.media.AudioFormat.ENCODING_PCM_16BIT
+import android.media.AudioFormat.ENCODING_PCM_8BIT
 import android.media.AudioRecord
 import android.media.AudioRecord.STATE_UNINITIALIZED
 import android.util.Log
@@ -46,6 +48,17 @@ class AudioRecorderImpl(context: Context,
         if (inProgress.compareAndSet(true, false)) {
             player.playStopAudio()
         }
+    }
+
+    override fun getAudioInfo(): AudioInfo {
+        val bitsPerSecond = when (record?.audioFormat) {
+            ENCODING_PCM_16BIT -> 16
+            ENCODING_PCM_8BIT -> 8
+            else -> {
+                -1
+            }
+        }
+        return AudioInfo(record?.sampleRate ?: -1, bitsPerSecond)
     }
 
     private fun write(callback: OnDataResponse) {

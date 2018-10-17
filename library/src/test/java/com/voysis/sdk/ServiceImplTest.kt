@@ -75,7 +75,7 @@ class ServiceImplTest : ClientTest() {
         doReturn(notification).whenever(queryFuture).get()
         doReturn(VAD_RECEIVED).whenever(queryFuture).responseReason
         doReturn(tokenFuture).whenever(client).refreshSessionToken(anyOrNull())
-        doReturn(audioQueryFuture).whenever(client).createAudioQuery(any(), anyOrNull(), anyOrNull())
+        doReturn(audioQueryFuture).whenever(client).createAudioQuery(any(), anyOrNull(), anyOrNull(), anyOrNull())
         doReturn(queryFuture).whenever(client).streamAudio(anyOrNull(), anyOrNull())
     }
 
