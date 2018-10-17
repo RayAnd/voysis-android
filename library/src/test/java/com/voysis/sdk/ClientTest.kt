@@ -45,9 +45,7 @@ open class ClientTest {
     fun getExpiry(time: Int): String {
         val cal = Calendar.getInstance()
         cal.add(Calendar.SECOND, time)
-        cal.timeZone = TimeZone.getTimeZone("UTC")
-        val format = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.ENGLISH)
-        format.timeZone = cal.timeZone
+        val format = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSX", Locale.ENGLISH)
         return format.format(cal.time)
     }
 

@@ -2,6 +2,7 @@ package com.voysis.api
 
 import android.content.Context
 import com.google.gson.Gson
+import com.jakewharton.threetenabp.AndroidThreeTen
 import com.voysis.generateOkHttpClient
 import com.voysis.getHeaders
 import com.voysis.recorder.AudioRecorder
@@ -32,6 +33,7 @@ class ServiceProvider {
              okClient: OkHttpClient? = null,
              audioRecorder: AudioRecorder = AudioRecorderImpl(context)): Service {
         val converter = Converter(getHeaders(context), Gson())
+        AndroidThreeTen.init(context);
         val client = createClient(config, generateOkHttpClient(okClient), converter)
         return ServiceImpl(client, audioRecorder, converter, config.userId, TokenManager(config.refreshToken))
     }
