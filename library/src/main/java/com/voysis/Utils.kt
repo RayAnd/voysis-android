@@ -85,7 +85,7 @@ fun createAudioRecorder(): AudioRecord {
     val validSampleRates = intArrayOf(16000, 48000, 44100)
     for (rate in validSampleRates) {
         try {
-            val recorder = AudioRecord(MediaRecorder.AudioSource.VOICE_RECOGNITION, rate, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT, getButterSize(rate))
+            val recorder = AudioRecord(MediaRecorder.AudioSource.VOICE_RECOGNITION, rate, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT, getBufferSize(rate))
             if (recorder.state == AudioRecord.STATE_UNINITIALIZED) {
                 continue
             }
@@ -100,7 +100,7 @@ fun createAudioRecorder(): AudioRecord {
 /**
  * @return device specific preferred buffer size
  */
-private fun getButterSize(sampleRate: Int): Int {
+private fun getBufferSize(sampleRate: Int): Int {
     var minBufferSizeInBytes = AudioRecord.getMinBufferSize(sampleRate, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT)
     if (minBufferSizeInBytes == AudioRecord.ERROR_BAD_VALUE) {
         throw IllegalArgumentException("AudioRecord.getMinBufferSize: parameters not supported by hardware")
