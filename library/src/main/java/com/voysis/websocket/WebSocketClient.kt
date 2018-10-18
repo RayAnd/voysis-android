@@ -161,7 +161,7 @@ internal class WebSocketClient(private val converter: Converter,
                 notificationType == "vad_stop" -> setStreamStoppedReason(VAD_RECEIVED)
                 notificationType == "query_complete" -> callFuture(streamId, response)
                 notificationType == "internal_server_error" -> callFuturesOnClose(VoysisException("A Server Error Occurred"))
-                requestId != null -> callFuture(java.lang.Long.valueOf(requestId)!!, response)
+                requestId != null -> callFuture(java.lang.Long.valueOf(requestId), response)
                 else -> callFuturesOnClose(VoysisException("Unknown Response"))
             }
         }
