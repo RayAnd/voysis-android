@@ -4,6 +4,7 @@ import com.voysis.api.Client
 import com.voysis.events.VoysisException
 import com.voysis.model.request.FeedbackData
 import com.voysis.model.response.QueryResponse
+import com.voysis.recorder.AudioInfo
 import com.voysis.sevice.AudioResponseFuture
 import com.voysis.sevice.Converter
 import com.voysis.sevice.QueryFuture
@@ -36,15 +37,15 @@ class RestClient(private val converter: Converter, private val url: URL, private
         setAuthorizationHeader(token)
         setAcceptHeader("application/vnd.voysisquery.v1+json")
         val future = QueryFuture()
-        execute(future, createRequest(text, userId, context))
+        execute(future, createTextRequest(text, userId, context))
         return future
     }
 
-    override fun createAudioQuery(context: Map<String, Any>?, userId: String?, token: String): Future<String> {
+    override fun createAudioQuery(context: Map<String, Any>?, userId: String?, token: String, audioInfo: AudioInfo): Future<String> {
         setAuthorizationHeader(token)
         setAcceptHeader("application/vnd.voysisquery.v1+json")
         val future = QueryFuture()
-        execute(future, createRequest(userId = userId, context = context))
+        execute(future, createAudioRequest(userId, context, audioInfo))
         return future
     }
 
@@ -89,24 +90,41 @@ class RestClient(private val converter: Converter, private val url: URL, private
         return future
     }
 
-    private fun createRequest(text: String? = null, userId: String?, context: Map<String, Any>?): Request {
-        val body = createBody(text, userId, context)
+    private fun createTextRequest(text: String? = null, userId: String?, context: Map<String, Any>?): Request {
+        val body = createTextBody(text, userId, context)
         val queriesUrl = URL(url, "queries")
         return buildRequest(RequestBody.create(type, converter.toJson(body)), queriesUrl.toString())
     }
 
-    private fun createBody(text: String?, userId: String?, context: Map<String, Any>?): MutableMap<String, Any> {
-        val body = if (text == null) {
-            mutableMapOf(
-                    "locale" to "en-US",
-                    "queryType" to "audio",
-                    "audioQuery" to mapOf("mimeType" to "audio/pcm;bits=16;rate=16000"))
-        } else {
-            mutableMapOf(
-                    "locale" to "en-US",
-                    "queryType" to "text",
-                    "textQuery" to mapOf("text" to text))
+    private fun createAudioRequest(userId: String?, context: Map<String, Any>?, audioInfo: AudioInfo): Request {
+        val body = createAudioBody(userId, context, audioInfo)
+        val queriesUrl = URL(url, "queries")
+        return buildRequest(RequestBody.create(type, converter.toJson(body)), queriesUrl.toString())
+    }
+
+    private fun createAudioBody(userId: String?, context: Map<String, Any>?, audioInfo: AudioInfo): MutableMap<String, Any> {
+        val sampleRate = audioInfo.sampleRate
+        val bitsPerSample = audioInfo.bitsPerSample
+        val body = mutableMapOf(
+                "locale" to "en-US",
+                "queryType" to "audio",
+                "audioQuery" to mapOf("mimeType" to "audio/pcm;bits=$bitsPerSample;rate=$sampleRate"))
+
+        userId?.let {
+            body["userId"] = userId
         }
+        context?.let {
+            body["context"] = context
+        }
+        return body
+    }
+
+    private fun createTextBody(text: String?, userId: String?, context: Map<String, Any>?): MutableMap<String, Any> {
+        val body = mutableMapOf(
+                "locale" to "en-US",
+                "queryType" to "text",
+                "textQuery" to mapOf("text" to text))
+
         userId?.let {
             body["userId"] = userId
         }

@@ -8,6 +8,7 @@ import com.nhaarman.mockito_kotlin.verify
 import com.nhaarman.mockito_kotlin.whenever
 import com.voysis.model.request.Duration
 import com.voysis.model.request.FeedbackData
+import com.voysis.recorder.AudioInfo
 import com.voysis.rest.RestClient
 import com.voysis.sdk.ClientTest
 import com.voysis.sevice.Converter
@@ -57,7 +58,7 @@ class RestClientTest : ClientTest() {
     @Test
     fun testSendAudioQuery() {
         doReturn(call).whenever(okHttpClient).newCall(any())
-        restClient.createAudioQuery(null, null, "token")
+        restClient.createAudioQuery(null, null, "token", AudioInfo(16000, 16))
         argumentCaptor<Request>().apply {
             verify(okHttpClient).newCall(capture())
             val request = firstValue

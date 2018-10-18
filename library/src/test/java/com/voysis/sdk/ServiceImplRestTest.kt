@@ -2,6 +2,7 @@ package com.voysis.sdk
 
 import com.google.gson.Gson
 import com.nhaarman.mockito_kotlin.whenever
+import com.voysis.recorder.AudioInfo
 import com.voysis.rest.RestClient
 import com.voysis.sevice.Converter
 import org.junit.Assert.assertEquals
@@ -56,7 +57,7 @@ class ServiceImplRestTest : ClientTest() {
     @Throws(Exception::class)
     fun testSuccessCreateAudioQuery() {
         doReturn("result").whenever(body).string()
-        val future = restClient.createAudioQuery(userId = "userId", token = "token")
+        val future = restClient.createAudioQuery(userId = "userId", token = "token", audioInfo = AudioInfo(16000, 16))
         doReturn(true).whenever(networkResponse).isSuccessful
         voysisEventArgumentCaptor.value.onResponse(call, networkResponse)
         assertEquals(future.get(), "result")

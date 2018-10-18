@@ -2,6 +2,7 @@ package com.voysis.api
 
 import com.voysis.model.request.FeedbackData
 import com.voysis.model.response.QueryResponse
+import com.voysis.recorder.AudioInfo
 import com.voysis.sevice.QueryFuture
 import java.io.IOException
 import java.nio.channels.ReadableByteChannel
@@ -15,9 +16,10 @@ interface Client {
      * @param context (optional) context response from previous request.
      * @param userId (optional) user ID that uniquely identified a user.
      * @param token session token assigned to the query.
+     * @param audioInfo information about recorded audio.
      * @return future containing audioQueryResponse json string or error.
      */
-    fun createAudioQuery(context: Map<String, Any>? = null, userId: String?, token: String): Future<String>
+    fun createAudioQuery(context: Map<String, Any>? = null, userId: String?, token: String, audioInfo: AudioInfo): Future<String>
 
     /**
      * Call this method to execute a text query.
