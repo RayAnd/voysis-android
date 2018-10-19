@@ -1,13 +1,14 @@
 package com.voysis.model.response
 
 import com.google.gson.Gson
+import com.google.gson.annotations.SerializedName
 
-data class StreamResponse(private val entities: Any? = null,
-                          val context: Map<String, Any>? = null,
-                          val audioQuery: AudioQuery? = null,
-                          val textQuery: TextQuery? = null,
-                          val reply: Reply? = null,
-                          val intent: String? = null) : ApiResponse() {
+data class StreamResponse(@field:SerializedName("entities") private val entities: Any? = null,
+                          @field:SerializedName("context") val context: Map<String, Any>? = null,
+                          @field:SerializedName("audioQuery") val audioQuery: AudioQuery? = null,
+                          @field:SerializedName("textQuery") val textQuery: TextQuery? = null,
+                          @field:SerializedName("reply") val reply: Reply? = null,
+                          @field:SerializedName("intent") val intent: String? = null) : ApiResponse() {
     /**
      * @param clazz class object
      * @param <T> respone type

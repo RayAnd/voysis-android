@@ -129,6 +129,12 @@ Step 2. Add the dependency
 	}
 	
 
+Proguard
+-------------
+
+If using proguard you will need add the recommended proguard rules for [okhttp](https://github.com/square/okhttp/blob/master/okhttp/src/main/resources/META-INF/proguard/okhttp3.pro)
+
+
 Local Build
 -------------
 

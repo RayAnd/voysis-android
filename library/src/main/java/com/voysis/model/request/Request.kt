@@ -10,19 +10,19 @@ import com.voysis.model.response.TextQuery
  */
 interface ApiRequest
 
-data class SocketRequest(val restUri: String? = null,
-                         val headers: Headers? = null,
-                         val entity: ApiRequest? = null,
-                         val requestId: String? = null,
-                         val type: String? = "request",
-                         val method: String? = "POST")
+data class SocketRequest(@field:SerializedName("restUri") val restUri: String? = null,
+                         @field:SerializedName("headers") val headers: Headers? = null,
+                         @field:SerializedName("entity") val entity: ApiRequest? = null,
+                         @field:SerializedName("requestId") val requestId: String? = null,
+                         @field:SerializedName("type") val type: String? = "request",
+                         @field:SerializedName("method") val method: String? = "POST")
 
-data class RequestEntity(val context: Map<String, Any>? = null,
-                         val queryType: String? = "audio",
-                         val audioQuery: AudioQuery? = null,
-                         val textQuery: TextQuery? = null,
-                         val userId: String? = null,
-                         val locale: String = "en-US") : ApiRequest
+data class RequestEntity(@field:SerializedName("context") val context: Map<String, Any>? = null,
+                         @field:SerializedName("queryType") val queryType: String? = "audio",
+                         @field:SerializedName("audioQuery") val audioQuery: AudioQuery? = null,
+                         @field:SerializedName("textQuery") val textQuery: TextQuery? = null,
+                         @field:SerializedName("userId") val userId: String? = null,
+                         @field:SerializedName("locale") val locale: String = "en-US") : ApiRequest
 
 data class Headers(@field:SerializedName("X-Voysis-Audio-Profile-Id") val audioProfileId: String,
                    @field:SerializedName("User-Agent") val userAgent: String,
@@ -30,8 +30,13 @@ data class Headers(@field:SerializedName("X-Voysis-Audio-Profile-Id") val audioP
                    @field:SerializedName("X-Voysis-Ignore-Vad") val xVoysisIgnoreVad: Boolean? = false,
                    @field:SerializedName("Accept") val accept: String? = "application/vnd.voysisquery.v1+json")
 
-data class Token(var expiresAt: String, var token: String) : ApiResponse()
+data class Token(@field:SerializedName("expiresAt") var expiresAt: String,
+                 @field:SerializedName("token") var token: String) : ApiResponse()
 
-data class FeedbackData(val durations: Duration = Duration(), var rating: String? = null, var description: String? = null) : ApiRequest
+data class FeedbackData(@field:SerializedName("durations") val durations: Duration = Duration(),
+                        @field:SerializedName("rating") var rating: String? = null,
+                        @field:SerializedName("description") var description: String? = null) : ApiRequest
 
-data class Duration(var userStop: Long? = null, var vad: Long? = null, var complete: Long? = null)
+data class Duration(@field:SerializedName("userStop") var userStop: Long? = null,
+                    @field:SerializedName("vad") var vad: Long? = null,
+                    @field:SerializedName("complete") var complete: Long? = null)
