@@ -8,13 +8,10 @@ import com.voysis.recorder.AudioInfo
 import com.voysis.sevice.AudioResponseFuture
 import com.voysis.sevice.Converter
 import com.voysis.sevice.QueryFuture
-import okhttp3.Call
-import okhttp3.Callback
 import okhttp3.MediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody
-import okhttp3.Response
 import java.io.IOException
 import java.net.URL
 import java.nio.channels.ReadableByteChannel
@@ -85,7 +82,7 @@ class RestClient(private val converter: Converter, private val url: URL, private
 
     override fun streamAudio(channel: ReadableByteChannel, queryResponse: QueryResponse): AudioResponseFuture {
         val future = AudioResponseFuture()
-        val request = buildRequest(RestRequestBody(channel), queryResponse.href)
+        val request = buildRequest(RestRequestBody(channel), queryResponse.href.replace("http", "https"))
         execute(future, request)
         return future
     }
@@ -139,7 +136,16 @@ class RestClient(private val converter: Converter, private val url: URL, private
     }
 
     private fun execute(future: QueryFuture, request: Request) {
-        okhttp.newCall(request).enqueue(RestCallback(future))
+        val response = okhttp.newCall(request).execute()
+        if (response.isSuccessful) {
+            try {
+                future.setResponse(response.body()!!.string())
+            } catch (e: IOException) {
+                future.setException(e)
+            }
+        } else {
+            future.setException(VoysisException(response.message() ?: "error occured"))
+        }
     }
 
     private fun setAcceptHeader(accept: String) {
@@ -150,28 +156,5 @@ class RestClient(private val converter: Converter, private val url: URL, private
     private fun setAuthorizationHeader(token: String) {
         builder.removeHeader("Authorization")
         builder.addHeader("Authorization", "Bearer $token")
-    }
-
-    private class RestCallback internal constructor(private val future: QueryFuture) : Callback {
-
-        override fun onFailure(call: Call, e: IOException) {
-            setException(VoysisException(e))
-        }
-
-        override fun onResponse(call: Call, response: Response) {
-            if (response.isSuccessful) {
-                try {
-                    future.setResponse(response.body()!!.string())
-                } catch (e: IOException) {
-                    setException(VoysisException(e))
-                }
-            } else {
-                setException(VoysisException(response.message()))
-            }
-        }
-
-        private fun setException(exception: VoysisException) {
-            future.setException(exception)
-        }
     }
 }

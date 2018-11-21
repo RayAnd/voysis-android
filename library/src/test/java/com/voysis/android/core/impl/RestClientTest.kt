@@ -6,8 +6,6 @@ import com.nhaarman.mockito_kotlin.argumentCaptor
 import com.nhaarman.mockito_kotlin.doReturn
 import com.nhaarman.mockito_kotlin.verify
 import com.nhaarman.mockito_kotlin.whenever
-import com.voysis.model.request.Duration
-import com.voysis.model.request.FeedbackData
 import com.voysis.recorder.AudioInfo
 import com.voysis.rest.RestClient
 import com.voysis.sdk.ClientTest
@@ -16,6 +14,7 @@ import okhttp3.Call
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody
+import okhttp3.Response
 import okio.Buffer
 import org.junit.Assert
 import org.junit.Before
@@ -36,6 +35,8 @@ class RestClientTest : ClientTest() {
     private lateinit var okHttpClient: OkHttpClient
     @Mock
     private lateinit var call: Call
+    @Mock
+    private lateinit var callResponse: Response
     private lateinit var restClient: RestClient
 
     @Before
@@ -46,6 +47,7 @@ class RestClientTest : ClientTest() {
     @Test
     fun testSendTextQuery() {
         doReturn(call).whenever(okHttpClient).newCall(any())
+        doReturn(callResponse).whenever(call).execute()
         restClient.sendTextQuery(null, "test text", null, "token")
         argumentCaptor<Request>().apply {
             verify(okHttpClient).newCall(capture())
@@ -58,6 +60,7 @@ class RestClientTest : ClientTest() {
     @Test
     fun testSendAudioQuery() {
         doReturn(call).whenever(okHttpClient).newCall(any())
+        doReturn(callResponse).whenever(call).execute()
         restClient.createAudioQuery(null, null, "token", AudioInfo(16000, 16))
         argumentCaptor<Request>().apply {
             verify(okHttpClient).newCall(capture())
@@ -68,22 +71,9 @@ class RestClientTest : ClientTest() {
     }
 
     @Test
-    fun testSendFeedback() {
-        doReturn(call).whenever(okHttpClient).newCall(any())
-        val feedbackData = FeedbackData(Duration(userStop = 4L, vad = 5L, complete = 6L))
-        feedbackData.rating = "5"
-        restClient.sendFeedback("1", feedbackData, "token")
-        argumentCaptor<Request>().apply {
-            verify(okHttpClient).newCall(capture())
-            val request = firstValue
-            val body = bodyToString(request.body())
-            Assert.assertTrue(body.contains(feedbackRequest))
-        }
-    }
-
-    @Test
     fun testRefreshSessionToken() {
         doReturn(call).whenever(okHttpClient).newCall(any())
+        doReturn(callResponse).whenever(call).execute()
         restClient.refreshSessionToken("test token")
         argumentCaptor<Request>().apply {
             verify(okHttpClient).newCall(capture())
