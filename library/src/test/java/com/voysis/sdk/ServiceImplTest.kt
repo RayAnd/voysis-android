@@ -3,8 +3,10 @@ package com.voysis.sdk
 import com.google.gson.Gson
 import com.nhaarman.mockito_kotlin.anyOrNull
 import com.nhaarman.mockito_kotlin.argThat
+import com.nhaarman.mockito_kotlin.argumentCaptor
 import com.nhaarman.mockito_kotlin.doAnswer
 import com.nhaarman.mockito_kotlin.doReturn
+import com.nhaarman.mockito_kotlin.doThrow
 import com.nhaarman.mockito_kotlin.eq
 import com.nhaarman.mockito_kotlin.times
 import com.nhaarman.mockito_kotlin.verify
@@ -14,6 +16,8 @@ import com.voysis.api.State
 import com.voysis.api.StreamingStoppedReason.VAD_RECEIVED
 import com.voysis.events.Callback
 import com.voysis.events.FinishedReason
+import com.voysis.events.PermissionDeniedException
+import com.voysis.events.VoysisException
 import com.voysis.model.request.FeedbackData
 import com.voysis.recorder.AudioRecorder
 import com.voysis.recorder.OnDataResponse
@@ -28,6 +32,7 @@ import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
+import java.util.concurrent.ExecutionException
 import java.util.concurrent.Future
 
 @RunWith(MockitoJUnitRunner::class)
@@ -87,11 +92,13 @@ class ServiceImplTest : ClientTest() {
     }
 
     @Test
-    fun testFailureCallback() {
-        doReturn(null).whenever(tokenFuture).get()
+    fun testExceptionWithVoysisExceptionCause() {
+        doThrow(ExecutionException(PermissionDeniedException(""))).whenever(tokenFuture).get()
         doReturn(tokenFuture).whenever(client).refreshSessionToken(anyOrNull())
         serviceImpl.startAudioQuery(callback = callback)
-        verify(callback).failure(anyOrNull())
+        val captor = argumentCaptor<VoysisException>()
+        verify(callback).failure(captor.capture())
+        assertTrue(captor.firstValue is PermissionDeniedException)
         verify(manager).stop()
     }
 
