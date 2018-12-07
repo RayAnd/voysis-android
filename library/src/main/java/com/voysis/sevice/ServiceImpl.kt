@@ -163,7 +163,11 @@ internal class ServiceImpl(private val client: Client,
 
     private fun handleException(callback: Callback, e: Exception) {
         recorder.stop()
-        callback.failure(VoysisException(e))
+        when {
+            e is VoysisException -> callback.failure(e)
+            e.cause is VoysisException -> callback.failure(e.cause as VoysisException)
+            else -> callback.failure(VoysisException(e))
+        }
         state = State.IDLE
     }
 }
