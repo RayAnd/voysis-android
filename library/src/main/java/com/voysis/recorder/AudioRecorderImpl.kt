@@ -31,9 +31,8 @@ class AudioRecorderImpl(context: Context,
         stopRecorder()
         record = record ?: createAudioRecorder()
         inProgress.set(true)
-        player.playStartAudio {
-            execute(callback)
-        }
+        execute(callback)
+        player.playStartAudio()
     }
 
     private fun execute(callback: OnDataResponse) {
