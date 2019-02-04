@@ -1,14 +1,16 @@
 package com.voysis.recorder
 
 import android.content.Context
+import android.media.AudioFormat
 import android.media.AudioFormat.ENCODING_PCM_16BIT
 import android.media.AudioFormat.ENCODING_PCM_8BIT
 import android.media.AudioFormat.ENCODING_PCM_FLOAT
+import android.media.AudioManager
 import android.media.AudioRecord
 import android.media.AudioRecord.STATE_UNINITIALIZED
+import android.media.MediaRecorder
 import android.os.Build
 import android.util.Log
-import com.voysis.createAudioRecorder
 
 import java.nio.ByteBuffer
 import java.util.concurrent.Executor
@@ -19,6 +21,10 @@ class AudioRecorderImpl(context: Context,
                         private val player: AudioPlayer = AudioPlayer(context),
                         private var record: AudioRecord? = null,
                         private val executor: Executor = Executors.newSingleThreadExecutor()) : AudioRecorder {
+
+    private val audioManager: AudioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
+    private val rate = audioManager.getProperty(AudioManager.PROPERTY_OUTPUT_SAMPLE_RATE).toInt()
+    private val size = audioManager.getProperty(AudioManager.PROPERTY_OUTPUT_FRAMES_PER_BUFFER).toInt()
     private val inProgress = AtomicBoolean()
     private val maxBytes = 320000
 
@@ -112,5 +118,9 @@ class AudioRecorderImpl(context: Context,
             record?.release()
             record = null
         }
+    }
+
+    private fun createAudioRecorder(): AudioRecord {
+        return AudioRecord(MediaRecorder.AudioSource.VOICE_RECOGNITION, rate, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT, size * 4)
     }
 }

@@ -2,14 +2,10 @@ package com.voysis
 
 import android.content.Context
 import android.content.pm.PackageManager
-import android.media.AudioFormat
-import android.media.AudioRecord
-import android.media.MediaRecorder
 import android.util.Log
 import com.voysis.model.request.Headers
 import com.voysis.sdk.BuildConfig
 import okhttp3.OkHttpClient
-import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -84,34 +80,6 @@ fun getOrCreateAudioProfileId(context: Context): String {
 /**
  * @return default AudioRecord class
  */
-fun createAudioRecorder(): AudioRecord {
-    val validSampleRates = intArrayOf(16000, 48000, 44100)
-    for (rate in validSampleRates) {
-        try {
-            val recorder = AudioRecord(MediaRecorder.AudioSource.VOICE_RECOGNITION, rate, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT, getBufferSize(rate))
-            if (recorder.state == AudioRecord.STATE_UNINITIALIZED) {
-                continue
-            }
-            return recorder
-        } catch (e: IllegalArgumentException) {
-            Log.e("Utils", e.message)
-        }
-    }
-    throw IOException("failed to create audio recorder")
-}
-
-/**
- * @return device specific preferred buffer size
- */
-private fun getBufferSize(sampleRate: Int): Int {
-    var minBufferSizeInBytes = AudioRecord.getMinBufferSize(sampleRate, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT)
-    if (minBufferSizeInBytes == AudioRecord.ERROR_BAD_VALUE) {
-        throw IllegalArgumentException("AudioRecord.getMinBufferSize: parameters not supported by hardware")
-    } else if (minBufferSizeInBytes == AudioRecord.ERROR || minBufferSizeInBytes == 0) {
-        minBufferSizeInBytes = DEFAULT_BUFFER_SIZE
-    }
-    return 4 * minBufferSizeInBytes
-}
 
 fun generateISODate(expiresAt: String): Date {
     val format = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSX", Locale.ENGLISH)
