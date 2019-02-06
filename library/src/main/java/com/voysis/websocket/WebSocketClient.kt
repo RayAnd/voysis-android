@@ -1,11 +1,13 @@
 package com.voysis.websocket
 
 import com.voysis.api.Client
+import com.voysis.api.Config
 import com.voysis.api.StreamingStoppedReason
 import com.voysis.api.StreamingStoppedReason.END_OF_STREAM
 import com.voysis.api.StreamingStoppedReason.VAD_RECEIVED
 import com.voysis.events.PermissionDeniedException
 import com.voysis.events.VoysisException
+import com.voysis.generateReadBufferSize
 import com.voysis.model.request.ApiRequest
 import com.voysis.model.request.FeedbackData
 import com.voysis.model.request.RequestEntity
@@ -14,7 +16,6 @@ import com.voysis.model.response.QueryResponse
 import com.voysis.model.response.SocketResponse
 import com.voysis.model.response.TextQuery
 import com.voysis.recorder.AudioInfo
-import com.voysis.recorder.AudioRecorderImpl.Companion.BUFFER_SIZE
 import com.voysis.sevice.AudioResponseFuture
 import com.voysis.sevice.Converter
 import com.voysis.sevice.QueryFuture
@@ -25,15 +26,17 @@ import okhttp3.WebSocket
 import okhttp3.WebSocketListener
 import okio.ByteString
 import java.io.IOException
+import java.net.URL
 import java.nio.ByteBuffer
 import java.nio.channels.ReadableByteChannel
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.Future
 import java.util.concurrent.atomic.AtomicLong
 
-internal class WebSocketClient(private val converter: Converter,
-                               private val request: Request,
+internal class WebSocketClient(private val config: Config,
+                               private val converter: Converter,
                                private val client: OkHttpClient) : Client {
+    private val request: Request = Request.Builder().url(URL(config.url, "/websocketapi")).build()
     private val webSocketListener = InternalWebSocketListener()
     private var webSocket: WebSocket? = null
     private val streamId: Long = 1
@@ -71,7 +74,7 @@ internal class WebSocketClient(private val converter: Converter,
 
     @Throws(IOException::class)
     private fun sendLoop(channel: ReadableByteChannel, future: AudioResponseFuture) {
-        val buf = ByteBuffer.allocate(BUFFER_SIZE)
+        val buf = ByteBuffer.allocate(generateReadBufferSize(config))
         while ((channel.read(buf) > 0 || buf.position() > 0) && future.responseReason !== VAD_RECEIVED) {
             buf.flip()
             send(ByteString.of(buf))

@@ -1,5 +1,6 @@
 package com.voysis.api
 
+import com.voysis.recorder.AudioRecordParams
 import java.net.URL
 
 interface Config {
@@ -25,4 +26,13 @@ interface Config {
      * @return url used by client for making audio requests.
      */
     val url: URL
+
+    /**
+     * Configurable audio parameters object used by underlying AudioRecord object.
+     * If left blank the AudioRecord object will be created using default parameters.
+     * @note It is recommended to leave this object blank unless non default values are
+     * explicitly required by a specific use case.
+     * @return audioRecordParams
+     */
+    val audioRecordParams: AudioRecordParams?
 }

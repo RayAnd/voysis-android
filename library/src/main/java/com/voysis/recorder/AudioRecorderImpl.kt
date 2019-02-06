@@ -1,29 +1,35 @@
 package com.voysis.recorder
 
 import android.content.Context
+import android.media.AudioFormat
 import android.media.AudioFormat.ENCODING_PCM_16BIT
 import android.media.AudioFormat.ENCODING_PCM_8BIT
 import android.media.AudioFormat.ENCODING_PCM_FLOAT
 import android.media.AudioRecord
 import android.media.AudioRecord.STATE_UNINITIALIZED
+import android.media.MediaRecorder
 import android.os.Build
 import android.util.Log
-import com.voysis.createAudioRecorder
-
+import com.voysis.api.Config
+import com.voysis.generateAudioRecordParams
 import java.nio.ByteBuffer
 import java.util.concurrent.Executor
 import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicBoolean
 
-class AudioRecorderImpl(context: Context,
-                        private val player: AudioPlayer = AudioPlayer(context),
-                        private var record: AudioRecord? = null,
-                        private val executor: Executor = Executors.newSingleThreadExecutor()) : AudioRecorder {
+class AudioRecorderImpl(
+        context: Context,
+        config: Config,
+        private val player: AudioPlayer = AudioPlayer(context),
+        private var record: AudioRecord? = null,
+        private val executor: Executor = Executors.newSingleThreadExecutor()) : AudioRecorder {
+    private val recordParams = generateAudioRecordParams(context, config)
     private val inProgress = AtomicBoolean()
     private val maxBytes = 320000
 
     companion object {
-        const val BUFFER_SIZE = 2048
+        const val DEFAULT_READ_BUFFER_SIZE = 4000
+        const val DEFAULT_RECORD_BUFFER_SIZE = 16000
     }
 
     @Synchronized
@@ -79,9 +85,9 @@ class AudioRecorderImpl(context: Context,
     private fun write(callback: OnDataResponse) {
         record?.startRecording()
         callback.onRecordingStarted()
-        val buf = ByteBuffer.allocate(BUFFER_SIZE)
+        val buf = ByteBuffer.allocate(recordParams.readBufferSize!!)
         buf.clear()
-        val buffer = ByteArray(BUFFER_SIZE)
+        val buffer = ByteArray(recordParams.readBufferSize)
         var bytesRead: Int
         var limit = 0
         try {
@@ -111,5 +117,9 @@ class AudioRecorderImpl(context: Context,
             record?.release()
             record = null
         }
+    }
+
+    private fun createAudioRecorder(): AudioRecord {
+        return AudioRecord(MediaRecorder.AudioSource.VOICE_RECOGNITION, recordParams.sampleRate!!, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT, recordParams.recordBufferSize!!)
     }
 }

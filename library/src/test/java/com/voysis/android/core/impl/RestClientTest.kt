@@ -23,7 +23,6 @@ import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
 import java.io.IOException
-import java.net.URL
 
 @RunWith(MockitoJUnitRunner::class)
 class RestClientTest : ClientTest() {
@@ -41,7 +40,7 @@ class RestClientTest : ClientTest() {
 
     @Before
     fun setup() {
-        restClient = RestClient(Converter(headers, Gson()), URL("http://test.com"), okHttpClient)
+        restClient = RestClient(config, Converter(headers, Gson()), okHttpClient)
     }
 
     @Test

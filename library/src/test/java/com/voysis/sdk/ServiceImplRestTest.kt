@@ -20,7 +20,6 @@ import org.mockito.Mockito.doReturn
 import org.mockito.Mockito.spy
 import org.mockito.junit.MockitoJUnitRunner
 import java.net.MalformedURLException
-import java.net.URL
 import java.nio.channels.ReadableByteChannel
 
 @RunWith(MockitoJUnitRunner::class)
@@ -43,7 +42,7 @@ class ServiceImplRestTest : ClientTest() {
     @Throws(MalformedURLException::class)
     fun setup() {
         val converter = Converter(headers, Gson())
-        restClient = spy(RestClient(converter, URL("http://test.com"), client))
+        restClient = spy(RestClient(config, converter, client))
         val builder = Response.Builder()
         builder.body(body)
         doReturn(call).whenever(client).newCall(any(Request::class.java))

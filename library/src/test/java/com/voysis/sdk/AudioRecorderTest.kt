@@ -2,6 +2,7 @@ package com.voysis.sdk
 
 import android.content.Context
 import android.media.AudioFormat
+import android.media.AudioManager
 import android.media.AudioRecord
 import android.media.AudioRecord.RECORDSTATE_RECORDING
 import android.media.AudioRecord.RECORDSTATE_STOPPED
@@ -27,9 +28,8 @@ import org.mockito.junit.MockitoJUnitRunner
 import java.util.concurrent.ExecutorService
 
 @RunWith(MockitoJUnitRunner::class)
-class AudioRecorderTest {
-    @Mock
-    private lateinit var context: Context
+class AudioRecorderTest : ClientTest() {
+
     @Mock
     private lateinit var executorService: ExecutorService
     @Mock
@@ -37,7 +37,15 @@ class AudioRecorderTest {
     @Mock
     private lateinit var onDataResposne: OnDataResponse
 
-    var record = mock<AudioRecord> {
+    private var audioManager: AudioManager = mock {
+        on { getProperty(AudioManager.PROPERTY_OUTPUT_SAMPLE_RATE) } doReturn "16000"
+    }
+
+    private var context: Context = mock {
+        on { getSystemService(Context.AUDIO_SERVICE) } doReturn audioManager
+    }
+
+    private var record = mock<AudioRecord> {
         on { recordingState } doReturn RECORDSTATE_RECORDING doReturn RECORDSTATE_STOPPED
         on { audioFormat } doReturn AudioFormat.ENCODING_PCM_16BIT doReturn AudioFormat.ENCODING_PCM_8BIT doReturn AudioFormat.CHANNEL_INVALID
         on { sampleRate } doReturn 16000
@@ -47,7 +55,7 @@ class AudioRecorderTest {
 
     @Before
     fun setup() {
-        audioRecorder = spy(AudioRecorderImpl(context, player, record, executorService))
+        audioRecorder = spy(AudioRecorderImpl( context, config, player, record, executorService))
     }
 
     @Test
