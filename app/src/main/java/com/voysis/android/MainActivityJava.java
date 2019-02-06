@@ -51,7 +51,7 @@ public class MainActivityJava extends AppCompatActivity implements Callback {
         eventText = findViewById(R.id.eventText);
 
         try {
-            Config config = new DataConfig(true, new URL("INSERT_URL"), "INSERT_TOKEN", null, "INSERT_USERID");
+            Config config = new DataConfig(true, new URL("INSERT_URL"), "INSERT_TOKEN", "INSERT_USERID", null);
             ServiceProvider serviceprovider = new ServiceProvider();
             service = serviceprovider.make(this, config);
         } catch (MalformedURLException e) {

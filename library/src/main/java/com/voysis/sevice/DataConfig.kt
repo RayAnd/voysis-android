@@ -7,5 +7,5 @@ import java.net.URL
 data class DataConfig(override val isVadEnabled: Boolean = true,
                       override val url: URL,
                       override val refreshToken: String,
-                      override val audioRecordParams: AudioRecordParams? = null,
-                      override val userId: String?) : Config
+                      override val userId: String?,
+                      override val audioRecordParams: AudioRecordParams? = null) : Config
