@@ -1,6 +1,7 @@
 package com.voysis.rest
 
 import com.voysis.api.Client
+import com.voysis.api.Config
 import com.voysis.events.VoysisException
 import com.voysis.model.request.FeedbackData
 import com.voysis.model.response.QueryResponse
@@ -20,10 +21,12 @@ import java.util.concurrent.Future
 /**
  * Rest specific implementation of Service
  */
-class RestClient(private val converter: Converter, private val url: URL, private val okhttp: OkHttpClient) : Client {
-
+class RestClient(private val config: Config,
+                 private val converter: Converter,
+                 private val okhttp: OkHttpClient) : Client {
     private val acceptJson = "application/json; charset=utf-8"
     private val type = MediaType.parse(acceptJson)
+    private val url = config.url
     private val builder: Request.Builder = Request.Builder()
             .addHeader("X-Voysis-Audio-Profile-Id", converter.headers.audioProfileId)
             .addHeader("X-Voysis-Ignore-Vad", "true")
@@ -82,7 +85,7 @@ class RestClient(private val converter: Converter, private val url: URL, private
 
     override fun streamAudio(channel: ReadableByteChannel, queryResponse: QueryResponse): AudioResponseFuture {
         val future = AudioResponseFuture()
-        val request = buildRequest(RestRequestBody(channel), queryResponse.href.replace("http", "https"))
+        val request = buildRequest(RestRequestBody(channel, config), queryResponse.href.replace("http", "https"))
         execute(future, request)
         return future
     }

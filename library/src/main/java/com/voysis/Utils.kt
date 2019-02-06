@@ -2,8 +2,12 @@ package com.voysis
 
 import android.content.Context
 import android.content.pm.PackageManager
+import android.media.AudioManager
 import android.util.Log
+import com.voysis.api.Config
 import com.voysis.model.request.Headers
+import com.voysis.recorder.AudioRecordParams
+import com.voysis.recorder.AudioRecorderImpl
 import com.voysis.sdk.BuildConfig
 import okhttp3.OkHttpClient
 import java.text.SimpleDateFormat
@@ -77,9 +81,20 @@ fun getOrCreateAudioProfileId(context: Context): String {
     }
 }
 
-/**
- * @return default AudioRecord class
- */
+fun generateAudioRecordParams(context: Context, config: Config): AudioRecordParams {
+    val readBufferSize = generateReadBufferSize(config)
+    val recordBufferSize = config.audioRecordParams?.recordBufferSize
+            ?: AudioRecorderImpl.DEFAULT_RECORD_BUFFER_SIZE
+
+    val audioManager: AudioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
+    val rate = audioManager.getProperty(AudioManager.PROPERTY_OUTPUT_SAMPLE_RATE).toInt()
+    return AudioRecordParams(rate, readBufferSize, recordBufferSize)
+}
+
+fun generateReadBufferSize(config: Config): Int {
+    return config.audioRecordParams?.readBufferSize
+            ?: AudioRecorderImpl.DEFAULT_READ_BUFFER_SIZE
+}
 
 fun generateISODate(expiresAt: String): Date {
     val format = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSX", Locale.ENGLISH)

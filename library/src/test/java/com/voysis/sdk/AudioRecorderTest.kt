@@ -29,7 +29,7 @@ import org.mockito.junit.MockitoJUnitRunner
 import java.util.concurrent.ExecutorService
 
 @RunWith(MockitoJUnitRunner::class)
-class AudioRecorderTest {
+class AudioRecorderTest : ClientTest() {
 
     @Mock
     private lateinit var executorService: ExecutorService
@@ -40,7 +40,6 @@ class AudioRecorderTest {
 
     private var audioManager: AudioManager = mock {
         on { getProperty(AudioManager.PROPERTY_OUTPUT_SAMPLE_RATE) } doReturn "16000"
-        on { getProperty(AudioManager.PROPERTY_OUTPUT_FRAMES_PER_BUFFER) } doReturn "256"
     }
 
     private var context: Context = mock {
@@ -57,7 +56,7 @@ class AudioRecorderTest {
 
     @Before
     fun setup() {
-        audioRecorder = spy(AudioRecorderImpl(context, player, record, executorService))
+        audioRecorder = spy(AudioRecorderImpl( context, config, player, record, executorService))
     }
 
     @Test

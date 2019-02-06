@@ -11,7 +11,6 @@ import com.voysis.sdk.ClientTest
 import com.voysis.sevice.Converter
 import com.voysis.websocket.WebSocketClient
 import okhttp3.OkHttpClient
-import okhttp3.Request
 import okhttp3.WebSocket
 import okhttp3.WebSocketListener
 import okio.ByteString
@@ -27,7 +26,6 @@ import org.mockito.Mockito.doAnswer
 import org.mockito.Mockito.doReturn
 import org.mockito.junit.MockitoJUnitRunner
 import java.net.MalformedURLException
-import java.net.URL
 import java.nio.channels.ReadableByteChannel
 import java.util.concurrent.ExecutionException
 
@@ -51,8 +49,7 @@ class WebSocketClientTest : ClientTest() {
     @Before
     @Throws(MalformedURLException::class)
     fun setup() {
-        val request = Request.Builder().url(URL("http://test.com")).build()
-        webSocketClient = WebSocketClient(Converter(headers, Gson()), request, okHttpClient)
+        webSocketClient = WebSocketClient(config, Converter(headers, Gson()), okHttpClient)
         doReturn(webSocket).whenever(okHttpClient).newWebSocket(any(), argumentCaptor.capture())
     }
 
