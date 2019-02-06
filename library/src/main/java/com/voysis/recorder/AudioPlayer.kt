@@ -8,10 +8,9 @@ class AudioPlayer(private val context: Context,
                   private var audioStart: MediaPlayer? = MediaPlayer.create(context, R.raw.voysis_on),
                   private var audioStop: MediaPlayer? = MediaPlayer.create(context, R.raw.voysis_off)) {
 
-    fun playStartAudio(callback: () -> Unit) {
+    fun playStartAudio() {
         audioStart = audioStart ?: MediaPlayer.create(context, R.raw.voysis_on)
         audioStart?.setOnCompletionListener {
-            callback()
             audioStart?.reset()
             audioStart?.release()
             audioStart = null

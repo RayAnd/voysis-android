@@ -6,7 +6,6 @@ import android.media.AudioRecord
 import android.media.AudioRecord.RECORDSTATE_RECORDING
 import android.media.AudioRecord.RECORDSTATE_STOPPED
 import com.nhaarman.mockito_kotlin.any
-import com.nhaarman.mockito_kotlin.anyOrNull
 import com.nhaarman.mockito_kotlin.doAnswer
 import com.nhaarman.mockito_kotlin.doReturn
 import com.nhaarman.mockito_kotlin.mock
@@ -53,9 +52,8 @@ class AudioRecorderTest {
 
     @Test
     fun testRecordingStart() {
-        callCompletionListener()
         audioRecorder.start(onDataResposne)
-        verify(player).playStartAudio(any())
+        verify(player).playStartAudio()
         verify(executorService).execute(any())
     }
 
@@ -68,24 +66,12 @@ class AudioRecorderTest {
 
     @Test
     fun testReadLoop() {
-        callCompletionListener()
         doAnswer { invocation ->
             (invocation.getArgument<Any>(0) as Runnable).run()
             null
         }.whenever(executorService).execute(ArgumentMatchers.any(Runnable::class.java))
         audioRecorder.start(onDataResposne)
         verify(onDataResposne).onDataResponse(any())
-        verify(onDataResposne).onComplete()
-    }
-
-    @Test
-    fun testOnCompleteCalledWheStopRecordingBeforeSoundBiteCompletes() {
-        doAnswer { invocation ->
-            audioRecorder.stop()
-            (invocation.getArgument<Any>(0) as () -> Unit).invoke()
-        }.whenever(player).playStartAudio(anyOrNull())
-        audioRecorder.start(onDataResposne)
-        verify(onDataResposne, times(0)).onDataResponse(any())
         verify(onDataResposne).onComplete()
     }
 
@@ -98,11 +84,5 @@ class AudioRecorderTest {
         assertEquals(audioInfoB.bitsPerSample, 8)
         val audioInfoC = audioRecorder.getAudioInfo()
         assertEquals(audioInfoC.bitsPerSample, -1)
-    }
-
-    private fun callCompletionListener() {
-        doAnswer { invocation ->
-            (invocation.getArgument<Any>(0) as () -> Unit).invoke()
-        }.whenever(player).playStartAudio(anyOrNull())
     }
 }
