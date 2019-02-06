@@ -1,6 +1,7 @@
 package com.voysis.websocket
 
 import com.voysis.api.Client
+import com.voysis.api.Config
 import com.voysis.api.StreamingStoppedReason
 import com.voysis.api.StreamingStoppedReason.END_OF_STREAM
 import com.voysis.api.StreamingStoppedReason.VAD_RECEIVED
