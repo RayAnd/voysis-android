@@ -96,8 +96,8 @@ class AudioRecorderTest : ClientTest() {
 
     @Test
     fun testMaxRecordingLength() {
-        assertEquals(320000, calculateMaxRecordingLength(16000, AudioFormat.ENCODING_PCM_16BIT))
-        assertEquals(820000, calculateMaxRecordingLength(41000, AudioFormat.ENCODING_PCM_16BIT))
-        assertEquals(960000, calculateMaxRecordingLength(48000, AudioFormat.ENCODING_PCM_16BIT))
+        assertEquals(320000, calculateMaxRecordingLength(16000))
+        assertEquals(820000, calculateMaxRecordingLength(41000))
+        assertEquals(960000, calculateMaxRecordingLength(48000))
     }
 }

@@ -96,8 +96,11 @@ fun generateReadBufferSize(config: Config): Int {
             ?: AudioRecorderImpl.DEFAULT_READ_BUFFER_SIZE
 }
 
-fun calculateMaxRecordingLength(sampleRate: Int, bitDepth: Int): Int {
-    return sampleRate * bitDepth * 10
+fun calculateMaxRecordingLength(sampleRate: Int): Int {
+    //AudioFormat.ENCODING_PCM_16BIT = two bytes per sample
+    val bytesPerSample = 2
+    val seconds = 10
+    return sampleRate * bytesPerSample * seconds
 }
 
 fun generateISODate(expiresAt: String): Date {

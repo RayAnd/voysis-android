@@ -25,8 +25,7 @@ class AudioRecorderImpl(
         private var record: AudioRecord? = null,
         private val executor: Executor = Executors.newSingleThreadExecutor()) : AudioRecorder {
     private val recordParams = generateAudioRecordParams(context, config)
-    private val bitDepth = AudioFormat.ENCODING_PCM_16BIT
-    private val maxBytes = calculateMaxRecordingLength(recordParams.sampleRate!!, bitDepth)
+    private val maxBytes = calculateMaxRecordingLength(recordParams.sampleRate!!)
     private val inProgress = AtomicBoolean()
 
     companion object {
@@ -122,6 +121,6 @@ class AudioRecorderImpl(
     }
 
     private fun createAudioRecorder(): AudioRecord {
-        return AudioRecord(MediaRecorder.AudioSource.VOICE_RECOGNITION, recordParams.sampleRate!!, AudioFormat.CHANNEL_IN_MONO, bitDepth, recordParams.recordBufferSize!!)
+        return AudioRecord(MediaRecorder.AudioSource.VOICE_RECOGNITION, recordParams.sampleRate!!, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT, recordParams.recordBufferSize!!)
     }
 }
