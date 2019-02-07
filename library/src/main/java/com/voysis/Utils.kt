@@ -11,7 +11,9 @@ import com.voysis.recorder.AudioRecorderImpl
 import com.voysis.sdk.BuildConfig
 import okhttp3.OkHttpClient
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Date
+import java.util.Locale
+import java.util.UUID
 import java.util.concurrent.TimeUnit
 
 fun getHeaders(context: Context): Headers {
