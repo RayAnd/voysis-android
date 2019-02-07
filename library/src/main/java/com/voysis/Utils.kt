@@ -11,9 +11,7 @@ import com.voysis.recorder.AudioRecorderImpl
 import com.voysis.sdk.BuildConfig
 import okhttp3.OkHttpClient
 import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
-import java.util.UUID
+import java.util.*
 import java.util.concurrent.TimeUnit
 
 fun getHeaders(context: Context): Headers {
@@ -94,6 +92,10 @@ fun generateAudioRecordParams(context: Context, config: Config): AudioRecordPara
 fun generateReadBufferSize(config: Config): Int {
     return config.audioRecordParams?.readBufferSize
             ?: AudioRecorderImpl.DEFAULT_READ_BUFFER_SIZE
+}
+
+fun calculateMaxRecordingLength(sampleRate: Int, bitDepth: Int): Int {
+    return sampleRate * bitDepth * 10
 }
 
 fun generateISODate(expiresAt: String): Date {

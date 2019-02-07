@@ -11,6 +11,7 @@ import android.media.MediaRecorder
 import android.os.Build
 import android.util.Log
 import com.voysis.api.Config
+import com.voysis.calculateMaxRecordingLength
 import com.voysis.generateAudioRecordParams
 import java.nio.ByteBuffer
 import java.util.concurrent.Executor
@@ -24,8 +25,9 @@ class AudioRecorderImpl(
         private var record: AudioRecord? = null,
         private val executor: Executor = Executors.newSingleThreadExecutor()) : AudioRecorder {
     private val recordParams = generateAudioRecordParams(context, config)
+    private val bitDepth = AudioFormat.ENCODING_PCM_16BIT
+    private val maxBytes = calculateMaxRecordingLength(recordParams.sampleRate!!, bitDepth)
     private val inProgress = AtomicBoolean()
-    private val maxBytes = 320000
 
     companion object {
         const val DEFAULT_READ_BUFFER_SIZE = 4000
@@ -120,6 +122,6 @@ class AudioRecorderImpl(
     }
 
     private fun createAudioRecorder(): AudioRecord {
-        return AudioRecord(MediaRecorder.AudioSource.VOICE_RECOGNITION, recordParams.sampleRate!!, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT, recordParams.recordBufferSize!!)
+        return AudioRecord(MediaRecorder.AudioSource.VOICE_RECOGNITION, recordParams.sampleRate!!, AudioFormat.CHANNEL_IN_MONO, bitDepth, recordParams.recordBufferSize!!)
     }
 }

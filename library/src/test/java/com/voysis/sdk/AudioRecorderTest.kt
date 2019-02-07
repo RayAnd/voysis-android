@@ -10,8 +10,8 @@ import com.nhaarman.mockito_kotlin.any
 import com.nhaarman.mockito_kotlin.doAnswer
 import com.nhaarman.mockito_kotlin.doReturn
 import com.nhaarman.mockito_kotlin.mock
-import com.nhaarman.mockito_kotlin.times
 import com.nhaarman.mockito_kotlin.whenever
+import com.voysis.calculateMaxRecordingLength
 import com.voysis.recorder.AudioPlayer
 import com.voysis.recorder.AudioRecorder
 import com.voysis.recorder.AudioRecorderImpl
@@ -55,7 +55,7 @@ class AudioRecorderTest : ClientTest() {
 
     @Before
     fun setup() {
-        audioRecorder = spy(AudioRecorderImpl( context, config, player, record, executorService))
+        audioRecorder = spy(AudioRecorderImpl(context, config, player, record, executorService))
     }
 
     @Test
@@ -92,5 +92,12 @@ class AudioRecorderTest : ClientTest() {
         assertEquals(audioInfoB.bitsPerSample, 8)
         val audioInfoC = audioRecorder.getAudioInfo()
         assertEquals(audioInfoC.bitsPerSample, -1)
+    }
+
+    @Test
+    fun testMaxRecordingLength() {
+        assertEquals(320000, calculateMaxRecordingLength(16000, AudioFormat.ENCODING_PCM_16BIT))
+        assertEquals(820000, calculateMaxRecordingLength(41000, AudioFormat.ENCODING_PCM_16BIT))
+        assertEquals(960000, calculateMaxRecordingLength(48000, AudioFormat.ENCODING_PCM_16BIT))
     }
 }
