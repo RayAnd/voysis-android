@@ -1,5 +1,6 @@
 package com.voysis.sevice
 
+import android.content.Context
 import com.voysis.api.Client
 import com.voysis.api.Service
 import com.voysis.api.State
@@ -13,6 +14,7 @@ import com.voysis.model.response.QueryResponse
 import com.voysis.model.response.StreamResponse
 import com.voysis.recorder.AudioRecorder
 import com.voysis.recorder.OnDataResponse
+import com.voysis.setAudioProfileId
 import com.voysis.websocket.WebSocketClient.Companion.CLOSING
 import java.io.IOException
 import java.nio.ByteBuffer
@@ -72,6 +74,14 @@ internal class ServiceImpl(private val client: Client,
     override fun sendFeedback(queryId: String, feedback: FeedbackData) {
         checkToken()
         client.sendFeedback(queryId, feedback, tokenManager.token)
+    }
+
+    override fun getAudioProfileId(context: Context): String? {
+        return context.getSharedPreferences("VOYSIS_PREFERENCE", Context.MODE_PRIVATE).getString("ID", null)
+    }
+
+    override fun resetAudioProfileId(context: Context): String {
+        return setAudioProfileId(context.getSharedPreferences("VOYSIS_PREFERENCE", Context.MODE_PRIVATE))
     }
 
     private fun startRecording(callback: Callback) {
