@@ -1,5 +1,6 @@
 package com.voysis.api
 
+import android.content.Context
 import com.voysis.events.Callback
 import com.voysis.events.VoysisException
 import com.voysis.model.request.FeedbackData
@@ -65,6 +66,20 @@ interface Service {
      */
     @Throws(ExecutionException::class)
     fun refreshSessionToken(): Token
+
+    /**
+     * Audio profile id is a uuid set at library initialisation time.
+     * After initialization it is persisted in local storage.
+     * For information on the audio profile id see @link https://developers.voysis.com/docs/general-concepts#section-audio-profile-identifier
+     * @return AudioProfileId.
+     */
+    fun getAudioProfileId(context: Context): String?
+
+    /**
+     * Call this to reset the audioProfileId.
+     * @return new audioProfileId.
+     */
+    fun resetAudioProfileId(context: Context): String
 
     /**
      * Call this method send feedback following a successful query.

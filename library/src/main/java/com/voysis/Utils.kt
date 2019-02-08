@@ -1,6 +1,7 @@
 package com.voysis
 
 import android.content.Context
+import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.media.AudioManager
 import android.util.Log
@@ -72,13 +73,17 @@ fun getOrCreateAudioProfileId(context: Context): String {
     val preferences = context.getSharedPreferences("VOYSIS_PREFERENCE", Context.MODE_PRIVATE)
     val id = preferences.getString("ID", null)
     return if (id == null) {
-        val uuid = UUID.randomUUID().toString()
-        preferences.edit().putString("ID", uuid).apply()
-        uuid
+        setAudioProfileId(preferences)
     } else {
         Log.d("getAudioProfileId", id)
         id
     }
+}
+
+fun setAudioProfileId(preferences: SharedPreferences): String {
+    val uuid = UUID.randomUUID().toString()
+    preferences.edit().putString("ID", uuid).apply()
+    return uuid
 }
 
 fun generateAudioRecordParams(context: Context, config: Config): AudioRecordParams {

@@ -1,13 +1,17 @@
 package com.voysis.sdk
 
+import android.content.Context
+import android.content.SharedPreferences
 import com.google.gson.Gson
 import com.nhaarman.mockito_kotlin.anyOrNull
 import com.nhaarman.mockito_kotlin.argThat
 import com.nhaarman.mockito_kotlin.argumentCaptor
 import com.nhaarman.mockito_kotlin.doAnswer
+import com.nhaarman.mockito_kotlin.doNothing
 import com.nhaarman.mockito_kotlin.doReturn
 import com.nhaarman.mockito_kotlin.doThrow
 import com.nhaarman.mockito_kotlin.eq
+import com.nhaarman.mockito_kotlin.mock
 import com.nhaarman.mockito_kotlin.times
 import com.nhaarman.mockito_kotlin.verify
 import com.nhaarman.mockito_kotlin.whenever
@@ -25,6 +29,7 @@ import com.voysis.sevice.AudioResponseFuture
 import com.voysis.sevice.Converter
 import com.voysis.sevice.ServiceImpl
 import com.voysis.sevice.TokenManager
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -50,6 +55,18 @@ class ServiceImplTest : ClientTest() {
     private lateinit var tokenFuture: Future<String>
     @Mock
     private lateinit var queryFuture: AudioResponseFuture
+
+    private var editor: SharedPreferences.Editor = mock { }
+
+    private var preferences: SharedPreferences = mock {
+        on { getString("ID", null) } doReturn "audioProfileId"
+        on { edit() } doReturn editor
+    }
+
+    private var context: Context = mock {
+        on { getSharedPreferences("VOYSIS_PREFERENCE", Context.MODE_PRIVATE) } doReturn preferences
+    }
+
     private lateinit var serviceImpl: ServiceImpl
     private val tokenManager = TokenManager("refreshToken")
     private val userId = "userId"
@@ -140,6 +157,19 @@ class ServiceImplTest : ClientTest() {
         serviceImpl.sendTextQuery(context = null, text = exampleRequest, callback = callback)
         verify(client).sendTextQuery(anyOrNull(), eq(exampleRequest), anyOrNull(), anyOrNull())
         verify(callback).success(argThat { id == "5" })
+    }
+
+    @Test
+    fun testGetAudioProfileId() {
+        assertEquals("audioProfileId", serviceImpl.getAudioProfileId(context))
+    }
+
+    @Test
+    fun testResetAudioProfileId() {
+        doReturn(editor).whenever(editor).putString(any(), any())
+        doNothing().whenever(editor).apply()
+        serviceImpl.resetAudioProfileId(context)
+        verify(editor).putString(eq("ID"), anyOrNull())
     }
 
     private fun answerRecordingStarted() {
