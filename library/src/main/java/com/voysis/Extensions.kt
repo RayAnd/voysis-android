@@ -4,6 +4,7 @@ import android.media.AudioFormat
 import android.media.AudioRecord
 import android.os.Build
 import com.voysis.recorder.MimeType
+import java.lang.RuntimeException
 
 fun AudioRecord.generateMimeType(): MimeType {
     return MimeType(sampleRate = sampleRate,
@@ -13,14 +14,14 @@ fun AudioRecord.generateMimeType(): MimeType {
             encoding = getEncodingString())
 }
 
-fun AudioRecord.getBitsPerSample(): Int {
+fun AudioRecord.getBitsPerSample() : Int {
     if (Build.VERSION.SDK_INT >= 21) {
         return when (audioFormat) {
             AudioFormat.ENCODING_PCM_FLOAT -> 32
             AudioFormat.ENCODING_PCM_16BIT -> 16
             AudioFormat.ENCODING_PCM_8BIT -> 8
             else -> {
-                -1
+              throw RuntimeException("invalid encoding type")
             }
         }
     } else {
@@ -28,7 +29,7 @@ fun AudioRecord.getBitsPerSample(): Int {
             AudioFormat.ENCODING_PCM_16BIT -> 16
             AudioFormat.ENCODING_PCM_8BIT -> 8
             else -> {
-                -1
+                throw RuntimeException("invalid encoding type")
             }
         }
     }

@@ -25,6 +25,7 @@ import org.mockito.Mock
 import org.mockito.Mockito.spy
 import org.mockito.Mockito.verify
 import org.mockito.junit.MockitoJUnitRunner
+import java.lang.RuntimeException
 import java.util.concurrent.ExecutorService
 
 @RunWith(MockitoJUnitRunner::class)
@@ -82,6 +83,13 @@ class AudioRecorderTest : ClientTest() {
         assertEquals(mimeType.bitsPerSample, 16)
         assertEquals(mimeType.sampleRate, 16000)
         assertEquals(mimeType.bigEndian, false)
+    }
+
+    @Test(expected = RuntimeException::class)
+    fun testGetMimeTypeThrowException() {
+        doReturn(AudioFormat.ENCODING_INVALID).whenever(record).audioFormat
+        audioRecorder = spy(AudioRecorderImpl(context, config, player, AudioRecordParams(1600, 4096, 16000), record, executorService))
+        audioRecorder.getMimeType()
     }
 
     @Test
