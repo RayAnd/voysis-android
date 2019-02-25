@@ -2,7 +2,6 @@ package com.voysis.sdk
 
 import android.content.Context
 import android.media.AudioFormat
-import android.media.AudioManager
 import android.media.AudioRecord
 import android.media.AudioRecord.RECORDSTATE_RECORDING
 import android.media.AudioRecord.RECORDSTATE_STOPPED
@@ -13,6 +12,7 @@ import com.nhaarman.mockito_kotlin.mock
 import com.nhaarman.mockito_kotlin.whenever
 import com.voysis.calculateMaxRecordingLength
 import com.voysis.recorder.AudioPlayer
+import com.voysis.recorder.AudioRecordParams
 import com.voysis.recorder.AudioRecorder
 import com.voysis.recorder.AudioRecorderImpl
 import com.voysis.recorder.OnDataResponse
@@ -36,26 +36,18 @@ class AudioRecorderTest : ClientTest() {
     private lateinit var player: AudioPlayer
     @Mock
     private lateinit var onDataResposne: OnDataResponse
-
-    private var audioManager: AudioManager = mock {
-        on { getProperty(AudioManager.PROPERTY_OUTPUT_SAMPLE_RATE) } doReturn "16000"
-    }
-
-    private var context: Context = mock {
-        on { getSystemService(Context.AUDIO_SERVICE) } doReturn audioManager
-    }
-
+    @Mock
+    private lateinit var context: Context
+    private lateinit var audioRecorder: AudioRecorder
     private var record = mock<AudioRecord> {
         on { recordingState } doReturn RECORDSTATE_RECORDING doReturn RECORDSTATE_STOPPED
-        on { audioFormat } doReturn AudioFormat.ENCODING_PCM_16BIT doReturn AudioFormat.ENCODING_PCM_8BIT doReturn AudioFormat.CHANNEL_INVALID
+        on { audioFormat } doReturn AudioFormat.ENCODING_PCM_16BIT
         on { sampleRate } doReturn 16000
     }
 
-    private lateinit var audioRecorder: AudioRecorder
-
     @Before
     fun setup() {
-        audioRecorder = spy(AudioRecorderImpl(context, config, player, record, executorService))
+        audioRecorder = spy(AudioRecorderImpl(context, config, player, AudioRecordParams(1600, 4096, 16000), record, executorService))
     }
 
     @Test
@@ -84,14 +76,10 @@ class AudioRecorderTest : ClientTest() {
     }
 
     @Test
-    fun testGetAudioInfo() {
-        val audioInfoA = audioRecorder.getAudioInfo()
+    fun testGetMimeType() {
+        val audioInfoA = audioRecorder.getMimeType()
         assertEquals(audioInfoA.bitsPerSample, 16)
         assertEquals(audioInfoA.sampleRate, 16000)
-        val audioInfoB = audioRecorder.getAudioInfo()
-        assertEquals(audioInfoB.bitsPerSample, 8)
-        val audioInfoC = audioRecorder.getAudioInfo()
-        assertEquals(audioInfoC.bitsPerSample, -1)
     }
 
     @Test

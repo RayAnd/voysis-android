@@ -15,9 +15,9 @@ interface AudioRecorder {
     fun start(callback: OnDataResponse)
 
     /**
-     * @return valid AudioInfo object.
+     * @return valid MimeType object.
      */
-    fun getAudioInfo(): AudioInfo
+    fun getMimeType(): MimeType
 }
 
 interface OnDataResponse {

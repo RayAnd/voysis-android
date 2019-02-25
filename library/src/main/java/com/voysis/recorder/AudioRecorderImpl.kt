@@ -1,18 +1,14 @@
 package com.voysis.recorder
 
 import android.content.Context
-import android.media.AudioFormat
-import android.media.AudioFormat.ENCODING_PCM_16BIT
-import android.media.AudioFormat.ENCODING_PCM_8BIT
-import android.media.AudioFormat.ENCODING_PCM_FLOAT
 import android.media.AudioRecord
 import android.media.AudioRecord.STATE_UNINITIALIZED
-import android.media.MediaRecorder
-import android.os.Build
 import android.util.Log
 import com.voysis.api.Config
 import com.voysis.calculateMaxRecordingLength
+import com.voysis.createAudioRecorder
 import com.voysis.generateAudioRecordParams
+import com.voysis.generateMimeType
 import java.nio.ByteBuffer
 import java.util.concurrent.Executor
 import java.util.concurrent.Executors
@@ -22,10 +18,11 @@ class AudioRecorderImpl(
         context: Context,
         config: Config,
         private val player: AudioPlayer = AudioPlayer(context),
-        private var record: AudioRecord? = null,
+        private val recordParams: AudioRecordParams = generateAudioRecordParams(context, config),
+        private var record: AudioRecord? = createAudioRecorder(recordParams),
         private val executor: Executor = Executors.newSingleThreadExecutor()) : AudioRecorder {
-    private val recordParams = generateAudioRecordParams(context, config)
     private val maxBytes = calculateMaxRecordingLength(recordParams.sampleRate!!)
+    private var mimeType = record!!.generateMimeType()
     private val inProgress = AtomicBoolean()
 
     companion object {
@@ -36,7 +33,7 @@ class AudioRecorderImpl(
     @Synchronized
     override fun start(callback: OnDataResponse) {
         stopRecorder()
-        record = record ?: createAudioRecorder()
+        record = record ?: createAudioRecorder(recordParams)
         inProgress.set(true)
         execute(callback)
         player.playStartAudio()
@@ -58,29 +55,8 @@ class AudioRecorderImpl(
         }
     }
 
-    override fun getAudioInfo(): AudioInfo {
-        return AudioInfo(record?.sampleRate ?: -1, getBitsPerSecond())
-    }
-
-    private fun getBitsPerSecond(): Int {
-        if (Build.VERSION.SDK_INT >= 21) {
-            return when (record?.audioFormat) {
-                ENCODING_PCM_FLOAT -> 32
-                ENCODING_PCM_16BIT -> 16
-                ENCODING_PCM_8BIT -> 8
-                else -> {
-                    -1
-                }
-            }
-        } else {
-            return when (record?.audioFormat) {
-                ENCODING_PCM_16BIT -> 16
-                ENCODING_PCM_8BIT -> 8
-                else -> {
-                    -1
-                }
-            }
-        }
+    override fun getMimeType(): MimeType {
+        return mimeType
     }
 
     private fun write(callback: OnDataResponse) {
@@ -118,9 +94,5 @@ class AudioRecorderImpl(
             record?.release()
             record = null
         }
-    }
-
-    private fun createAudioRecorder(): AudioRecord {
-        return AudioRecord(MediaRecorder.AudioSource.VOICE_RECOGNITION, recordParams.sampleRate!!, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT, recordParams.recordBufferSize!!)
     }
 }

@@ -123,7 +123,7 @@ internal class ServiceImpl(private val client: Client,
     }
 
     private fun executeAudioQueryRequest(callback: Callback, context: Map<String, Any>?): QueryResponse {
-        response = client.createAudioQuery(context, userId, tokenManager.token, recorder.getAudioInfo())
+        response = client.createAudioQuery(context, userId, tokenManager.token, recorder.getMimeType())
         val stringResponse = validateResponse(response!!.get())
         val audioQuery = converter.convertResponse(stringResponse, QueryResponse::class.java)
         callback.queryResponse(audioQuery)

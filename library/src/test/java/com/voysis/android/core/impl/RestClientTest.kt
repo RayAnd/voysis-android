@@ -6,7 +6,7 @@ import com.nhaarman.mockito_kotlin.argumentCaptor
 import com.nhaarman.mockito_kotlin.doReturn
 import com.nhaarman.mockito_kotlin.verify
 import com.nhaarman.mockito_kotlin.whenever
-import com.voysis.recorder.AudioInfo
+import com.voysis.recorder.MimeType
 import com.voysis.rest.RestClient
 import com.voysis.sdk.ClientTest
 import com.voysis.sevice.Converter
@@ -60,7 +60,7 @@ class RestClientTest : ClientTest() {
     fun testSendAudioQuery() {
         doReturn(call).whenever(okHttpClient).newCall(any())
         doReturn(callResponse).whenever(call).execute()
-        restClient.createAudioQuery(null, null, "token", AudioInfo(16000, 16))
+        restClient.createAudioQuery(null, null, "token", MimeType(16000, 16, "signed-int", false, 1))
         argumentCaptor<Request>().apply {
             verify(okHttpClient).newCall(capture())
             val request = firstValue

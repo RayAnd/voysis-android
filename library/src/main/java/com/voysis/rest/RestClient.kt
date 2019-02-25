@@ -5,7 +5,7 @@ import com.voysis.api.Config
 import com.voysis.events.VoysisException
 import com.voysis.model.request.FeedbackData
 import com.voysis.model.response.QueryResponse
-import com.voysis.recorder.AudioInfo
+import com.voysis.recorder.MimeType
 import com.voysis.sevice.AudioResponseFuture
 import com.voysis.sevice.Converter
 import com.voysis.sevice.QueryFuture
@@ -41,11 +41,11 @@ class RestClient(private val config: Config,
         return future
     }
 
-    override fun createAudioQuery(context: Map<String, Any>?, userId: String?, token: String, audioInfo: AudioInfo): Future<String> {
+    override fun createAudioQuery(context: Map<String, Any>?, userId: String?, token: String, mimeType: MimeType): Future<String> {
         setAuthorizationHeader(token)
         setAcceptHeader("application/vnd.voysisquery.v1+json")
         val future = QueryFuture()
-        execute(future, createAudioRequest(userId, context, audioInfo))
+        execute(future, createAudioRequest(userId, context, mimeType))
         return future
     }
 
@@ -96,15 +96,15 @@ class RestClient(private val config: Config,
         return buildRequest(RequestBody.create(type, converter.toJson(body)), queriesUrl.toString())
     }
 
-    private fun createAudioRequest(userId: String?, context: Map<String, Any>?, audioInfo: AudioInfo): Request {
-        val body = createAudioBody(userId, context, audioInfo)
+    private fun createAudioRequest(userId: String?, context: Map<String, Any>?, mimeType: MimeType): Request {
+        val body = createAudioBody(userId, context, mimeType)
         val queriesUrl = URL(url, "queries")
         return buildRequest(RequestBody.create(type, converter.toJson(body)), queriesUrl.toString())
     }
 
-    private fun createAudioBody(userId: String?, context: Map<String, Any>?, audioInfo: AudioInfo): MutableMap<String, Any> {
-        val sampleRate = audioInfo.sampleRate
-        val bitsPerSample = audioInfo.bitsPerSample
+    private fun createAudioBody(userId: String?, context: Map<String, Any>?, mimeType: MimeType): MutableMap<String, Any> {
+        val sampleRate = mimeType.sampleRate
+        val bitsPerSample = mimeType.bitsPerSample
         val body = mutableMapOf(
                 "locale" to "en-US",
                 "queryType" to "audio",
