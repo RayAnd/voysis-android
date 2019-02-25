@@ -77,9 +77,11 @@ class AudioRecorderTest : ClientTest() {
 
     @Test
     fun testGetMimeType() {
-        val audioInfoA = audioRecorder.getMimeType()
-        assertEquals(audioInfoA.bitsPerSample, 16)
-        assertEquals(audioInfoA.sampleRate, 16000)
+        val mimeType = audioRecorder.getMimeType()
+        assertEquals(mimeType.encoding, "signed-int")
+        assertEquals(mimeType.bitsPerSample, 16)
+        assertEquals(mimeType.sampleRate, 16000)
+        assertEquals(mimeType.bigEndian, false)
     }
 
     @Test
