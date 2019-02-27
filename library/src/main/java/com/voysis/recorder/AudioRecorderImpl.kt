@@ -16,7 +16,6 @@ import com.voysis.generateAudioRecordParams
 import java.nio.ByteBuffer
 import java.util.concurrent.Executor
 import java.util.concurrent.Executors
-import java.util.concurrent.atomic.AtomicBoolean
 
 class AudioRecorderImpl(
         context: Context,
