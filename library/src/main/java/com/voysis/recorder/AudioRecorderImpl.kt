@@ -21,7 +21,6 @@ import java.util.concurrent.atomic.AtomicBoolean
 class AudioRecorderImpl(
         context: Context,
         config: Config,
-        private val player: AudioPlayer = AudioPlayer(context),
         private var record: AudioRecord? = null,
         private val executor: Executor = Executors.newSingleThreadExecutor()) : AudioRecorder {
     private val recordParams = generateAudioRecordParams(context, config)
@@ -39,7 +38,6 @@ class AudioRecorderImpl(
         record = record ?: createAudioRecorder()
         inProgress.set(true)
         execute(callback)
-        player.playStartAudio()
     }
 
     private fun execute(callback: OnDataResponse) {
@@ -53,9 +51,6 @@ class AudioRecorderImpl(
     @Synchronized
     override fun stop() {
         stopRecorder()
-        if (inProgress.compareAndSet(true, false)) {
-            player.playStopAudio()
-        }
     }
 
     override fun getAudioInfo(): AudioInfo {
