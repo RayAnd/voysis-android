@@ -25,7 +25,6 @@ class AudioRecorderImpl(
         private val executor: Executor = Executors.newSingleThreadExecutor()) : AudioRecorder {
     private val recordParams = generateAudioRecordParams(context, config)
     private val maxBytes = calculateMaxRecordingLength(recordParams.sampleRate!!)
-    private val inProgress = AtomicBoolean()
 
     companion object {
         const val DEFAULT_READ_BUFFER_SIZE = 4096
@@ -36,16 +35,7 @@ class AudioRecorderImpl(
     override fun start(callback: OnDataResponse) {
         stopRecorder()
         record = record ?: createAudioRecorder()
-        inProgress.set(true)
-        execute(callback)
-    }
-
-    private fun execute(callback: OnDataResponse) {
-        if (inProgress.get()) {
-            executor.execute { write(callback) }
-        } else {
-            callback.onComplete()
-        }
+        executor.execute { write(callback) }
     }
 
     @Synchronized
