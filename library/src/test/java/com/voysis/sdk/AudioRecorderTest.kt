@@ -12,7 +12,6 @@ import com.nhaarman.mockito_kotlin.doReturn
 import com.nhaarman.mockito_kotlin.mock
 import com.nhaarman.mockito_kotlin.whenever
 import com.voysis.calculateMaxRecordingLength
-import com.voysis.recorder.AudioPlayer
 import com.voysis.recorder.AudioRecorder
 import com.voysis.recorder.AudioRecorderImpl
 import com.voysis.recorder.OnDataResponse
@@ -32,8 +31,6 @@ class AudioRecorderTest : ClientTest() {
 
     @Mock
     private lateinit var executorService: ExecutorService
-    @Mock
-    private lateinit var player: AudioPlayer
     @Mock
     private lateinit var onDataResposne: OnDataResponse
 
@@ -55,21 +52,7 @@ class AudioRecorderTest : ClientTest() {
 
     @Before
     fun setup() {
-        audioRecorder = spy(AudioRecorderImpl(context, config, player, record, executorService))
-    }
-
-    @Test
-    fun testRecordingStart() {
-        audioRecorder.start(onDataResposne)
-        verify(player).playStartAudio()
-        verify(executorService).execute(any())
-    }
-
-    @Test
-    fun testRecordingStop() {
-        audioRecorder.start(onDataResposne)
-        audioRecorder.stop()
-        verify(player).playStopAudio()
+        audioRecorder = spy(AudioRecorderImpl(context, config, record, executorService))
     }
 
     @Test
