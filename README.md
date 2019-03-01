@@ -1,5 +1,3 @@
-WARNING: This is a beta release of the Voysis Android SDK.
-
 Voysis Android Kotlin SDK
 =====================
 
@@ -66,7 +64,7 @@ Usage
 ```
 
 
-- Next: to make a request, call `service.startAudioQuery` with the mandatory `Callback` parameter and optional voysis `Context` (See context section below for details).
+- Next: to make a request, call `service.startAudioQuery` with the mandatory `Callback` parameter and optional voysis `Context` (See context section below for details). 
  
  **Note:** This call issues a network request and should not be done on the main thread. Note also that callbacks may not occur on the main thread.
 ```kotlin
@@ -85,7 +83,13 @@ class ExampleActivity : AppCompatActivity(), Callback {
     }
 
     override fun recordingStarted() {
-        //Optional: called when microphone begins recording.
+	/**
+	 * Optional: called when microphone begins recording.
+	 * NOTE: It is recommended that when this callback occurs, the user be notified through the ui that they can now       
+	 * start speaking. 
+	 * Failure to implement proper ui may result in the user speaking before the microphone has opened resulting in       
+	 * incomplete audio.
+	 */
     }
 
     override fun queryResponse(query: QueryResponse) {
@@ -109,6 +113,7 @@ Voysis Context
 One of the features of the Voysis service is that it can use the `StreamResponse.context` 
 (Not to be confused with Android [context](https://developer.android.com/reference/android/content/Context)) to refine and improve subsequent requests. In order to avail of this 
 the developer must store the `context` response from the `AudioStreamResponse` and send it in the following `startAudioQuery(context , callback)` request.  
+
 
 Integration Gradle
 -------------
