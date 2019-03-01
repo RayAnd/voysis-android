@@ -12,18 +12,15 @@ import com.voysis.generateMimeType
 import java.nio.ByteBuffer
 import java.util.concurrent.Executor
 import java.util.concurrent.Executors
-import java.util.concurrent.atomic.AtomicBoolean
 
 class AudioRecorderImpl(
         context: Context,
         config: Config,
-        private val player: AudioPlayer = AudioPlayer(context),
         private val recordParams: AudioRecordParams = generateAudioRecordParams(context, config),
-        private var record: AudioRecord? = createAudioRecorder(recordParams),
+        private var record: AudioRecord? = null,
         private val executor: Executor = Executors.newSingleThreadExecutor()) : AudioRecorder {
     private val maxBytes = calculateMaxRecordingLength(recordParams.sampleRate!!)
     private var mimeType = record!!.generateMimeType()
-    private val inProgress = AtomicBoolean()
 
     companion object {
         const val DEFAULT_READ_BUFFER_SIZE = 4096
@@ -34,25 +31,12 @@ class AudioRecorderImpl(
     override fun start(callback: OnDataResponse) {
         stopRecorder()
         record = record ?: createAudioRecorder(recordParams)
-        inProgress.set(true)
-        execute(callback)
-        player.playStartAudio()
-    }
-
-    private fun execute(callback: OnDataResponse) {
-        if (inProgress.get()) {
-            executor.execute { write(callback) }
-        } else {
-            callback.onComplete()
-        }
+        executor.execute { write(callback) }
     }
 
     @Synchronized
     override fun stop() {
         stopRecorder()
-        if (inProgress.compareAndSet(true, false)) {
-            player.playStopAudio()
-        }
     }
 
     override fun getMimeType(): MimeType {
