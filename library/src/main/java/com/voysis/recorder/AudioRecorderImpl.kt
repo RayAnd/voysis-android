@@ -17,7 +17,7 @@ class AudioRecorderImpl(
         context: Context,
         config: Config,
         private val recordParams: AudioRecordParams = generateAudioRecordParams(context, config),
-        private var record: AudioRecord? = null,
+        private var record: AudioRecord? = createAudioRecorder(recordParams),
         private val executor: Executor = Executors.newSingleThreadExecutor()) : AudioRecorder {
     private val maxBytes = calculateMaxRecordingLength(recordParams.sampleRate!!)
     private var mimeType = record!!.generateMimeType()
