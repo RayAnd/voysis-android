@@ -2,6 +2,7 @@ package com.voysis.api
 
 import android.content.Context
 import com.google.gson.Gson
+import com.voysis.generateAudioRecordParams
 import com.voysis.generateOkHttpClient
 import com.voysis.getHeaders
 import com.voysis.recorder.AudioRecorder
@@ -28,7 +29,7 @@ class ServiceProvider {
     fun make(context: Context,
              config: Config,
              okClient: OkHttpClient? = null,
-             audioRecorder: AudioRecorder = AudioRecorderImpl(context = context, config = config)): Service {
+             audioRecorder: AudioRecorder = AudioRecorderImpl(generateAudioRecordParams(context, config))): Service {
         val converter = Converter(getHeaders(context), Gson())
         val client = createClient(config, generateOkHttpClient(okClient), converter)
         return ServiceImpl(client, audioRecorder, converter, config.userId, TokenManager(config.refreshToken))
@@ -41,7 +42,7 @@ class ServiceProvider {
      */
     fun make(context: Context,
              config: Config,
-             audioRecorder: AudioRecorder = AudioRecorderImpl(context = context, config = config)): Service {
+             audioRecorder: AudioRecorder = AudioRecorderImpl(generateAudioRecordParams(context, config))): Service {
         return make(context, config, null, audioRecorder)
     }
 

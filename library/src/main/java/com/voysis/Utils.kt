@@ -3,10 +3,7 @@ package com.voysis
 import android.content.Context
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
-import android.media.AudioFormat
 import android.media.AudioManager
-import android.media.AudioRecord
-import android.media.MediaRecorder
 import android.util.Log
 import com.voysis.api.Config
 import com.voysis.model.request.Headers
@@ -123,8 +120,4 @@ fun generateRFCDate(expiresAt: String): Date {
     }
     val format = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ", Locale.ENGLISH)
     return format.parse(local)
-}
-
-fun createAudioRecorder(recordParams: AudioRecordParams): AudioRecord {
-    return AudioRecord(MediaRecorder.AudioSource.VOICE_RECOGNITION, recordParams.sampleRate!!, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT, recordParams.recordBufferSize!!)
 }

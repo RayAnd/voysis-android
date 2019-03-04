@@ -1,26 +1,20 @@
 package com.voysis.recorder
 
-import android.content.Context
 import android.media.AudioRecord
 import android.media.AudioRecord.STATE_UNINITIALIZED
 import android.util.Log
-import com.voysis.api.Config
 import com.voysis.calculateMaxRecordingLength
-import com.voysis.createAudioRecorder
-import com.voysis.generateAudioRecordParams
 import com.voysis.generateMimeType
 import java.nio.ByteBuffer
 import java.util.concurrent.Executor
 import java.util.concurrent.Executors
 
 class AudioRecorderImpl(
-        context: Context,
-        config: Config,
-        private val recordParams: AudioRecordParams = generateAudioRecordParams(context, config),
-        private var record: AudioRecord? = createAudioRecorder(recordParams),
+        private val recordParams: AudioRecordParams,
+        private val recordFactory: Factory<AudioRecord> = AudioRecordFactory(recordParams),
         private val executor: Executor = Executors.newSingleThreadExecutor()) : AudioRecorder {
     private val maxBytes = calculateMaxRecordingLength(recordParams.sampleRate!!)
-    private var mimeType = record!!.generateMimeType()
+    private var record: AudioRecord? = null
 
     companion object {
         const val DEFAULT_READ_BUFFER_SIZE = 4096
@@ -30,7 +24,6 @@ class AudioRecorderImpl(
     @Synchronized
     override fun start(callback: OnDataResponse) {
         stopRecorder()
-        record = record ?: createAudioRecorder(recordParams)
         executor.execute { write(callback) }
     }
 
@@ -39,13 +32,11 @@ class AudioRecorderImpl(
         stopRecorder()
     }
 
-    override fun getMimeType(): MimeType {
-        return mimeType
-    }
-
     private fun write(callback: OnDataResponse) {
-        record?.startRecording()
-        callback.onRecordingStarted()
+        record = recordFactory.provide().apply {
+            startRecording()
+            callback.onRecordingStarted(generateMimeType())
+        }
         val buf = ByteBuffer.allocate(recordParams.readBufferSize!!)
         buf.clear()
         val buffer = ByteArray(recordParams.readBufferSize)
