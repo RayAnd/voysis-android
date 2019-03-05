@@ -16,7 +16,6 @@ import com.voysis.generateMimeType
 import com.voysis.recorder.AudioRecordParams
 import com.voysis.recorder.AudioRecorder
 import com.voysis.recorder.AudioRecorderImpl
-import com.voysis.recorder.Factory
 import com.voysis.recorder.OnDataResponse
 import org.junit.Assert.assertEquals
 import org.junit.Before
@@ -36,7 +35,7 @@ class AudioRecorderTest : ClientTest() {
     @Mock
     private lateinit var onDataResposne: OnDataResponse
     @Mock
-    private lateinit var factory: Factory<AudioRecord>
+    private lateinit var factory: () -> AudioRecord
 
     private lateinit var audioRecorder: AudioRecorder
 
@@ -49,7 +48,7 @@ class AudioRecorderTest : ClientTest() {
     @Before
     fun setup() {
         doNothing().whenever(record).startRecording()
-        doReturn(record).whenever(factory).provide()
+        doReturn(record).whenever(factory).invoke()
         doAnswer { invocation ->
             (invocation.getArgument<Any>(0) as Runnable).run()
             null
@@ -67,7 +66,7 @@ class AudioRecorderTest : ClientTest() {
 
     @Test
     fun testGetMimeType() {
-        val record = factory.provide()
+        val record = factory()
         val mimeType = record.generateMimeType()
         assertEquals(mimeType.encoding, "signed-int")
         assertEquals(mimeType.bitsPerSample, 16)

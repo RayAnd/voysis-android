@@ -11,7 +11,7 @@ import java.util.concurrent.Executors
 
 class AudioRecorderImpl(
         private val recordParams: AudioRecordParams,
-        private val recordFactory: Factory<AudioRecord> = AudioRecordFactory(recordParams),
+        private val recordFactory: () -> AudioRecord = AudioRecordFactory(recordParams)::invoke,
         private val executor: Executor = Executors.newSingleThreadExecutor()) : AudioRecorder {
     private val maxBytes = calculateMaxRecordingLength(recordParams.sampleRate!!)
     private var record: AudioRecord? = null
@@ -33,7 +33,7 @@ class AudioRecorderImpl(
     }
 
     private fun write(callback: OnDataResponse) {
-        record = recordFactory.provide().apply {
+        record = recordFactory().apply {
             startRecording()
             callback.onRecordingStarted(generateMimeType())
         }
