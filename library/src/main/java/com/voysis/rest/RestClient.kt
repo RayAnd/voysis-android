@@ -103,12 +103,10 @@ class RestClient(private val config: Config,
     }
 
     private fun createAudioBody(userId: String?, context: Map<String, Any>?, mimeType: MimeType): MutableMap<String, Any> {
-        val sampleRate = mimeType.sampleRate
-        val bitsPerSample = mimeType.bitsPerSample
         val body = mutableMapOf(
                 "locale" to "en-US",
                 "queryType" to "audio",
-                "audioQuery" to mapOf("mimeType" to "audio/pcm;bits=$bitsPerSample;rate=$sampleRate"))
+                "audioQuery" to mapOf("mimeType" to mimeType.getDescription()))
 
         userId?.let {
             body["userId"] = userId
