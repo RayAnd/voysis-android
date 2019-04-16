@@ -6,7 +6,7 @@ import com.nhaarman.mockito_kotlin.verify
 import com.nhaarman.mockito_kotlin.whenever
 import com.voysis.api.StreamingStoppedReason
 import com.voysis.model.request.FeedbackData
-import com.voysis.recorder.AudioInfo
+import com.voysis.recorder.MimeType
 import com.voysis.sdk.ClientTest
 import com.voysis.sevice.Converter
 import com.voysis.websocket.WebSocketClient
@@ -44,7 +44,7 @@ class WebSocketClientTest : ClientTest() {
     private val context = hashMapOf("test" to "test")
     private val token = "token"
     private val userId = "userId"
-    private val audioInfo = AudioInfo(16000, 16)
+    private val audioInfo = MimeType(16000, 16, "signed-int", false, 1)
 
     @Before
     @Throws(MalformedURLException::class)

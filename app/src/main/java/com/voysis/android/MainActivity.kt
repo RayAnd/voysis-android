@@ -32,8 +32,8 @@ import java.util.concurrent.Executors
 
 class MainActivity : AppCompatActivity(), Callback {
 
-    private val url = "INSERT_URL"
-    private val config = DataConfig(isVadEnabled = true, url = URL(url), refreshToken = "INSERT_TOKEN", userId = "")
+    private val url = "https://dockers.staging.voysis.io"
+    private val config = DataConfig(isVadEnabled = true, url = URL(url), refreshToken = "b6kGgbTeiSYwCwbb9aKZPRMoNG4imRX/d30vUJA42fO7784GJ3Go8SyzmtwpmxHi", userId = "")
     private lateinit var service: Service
     private val executor = Executors.newSingleThreadExecutor()
     private var context: Map<String, Any>? = null

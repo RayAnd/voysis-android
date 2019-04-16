@@ -13,6 +13,8 @@ import com.voysis.model.request.Token
 import com.voysis.model.response.QueryResponse
 import com.voysis.model.response.StreamResponse
 import com.voysis.recorder.AudioRecorder
+import com.voysis.recorder.MimeType
+import com.voysis.recorder.MimeType
 import com.voysis.recorder.OnDataResponse
 import com.voysis.setAudioProfileId
 import com.voysis.websocket.WebSocketClient.Companion.CLOSING
@@ -28,7 +30,7 @@ internal class ServiceImpl(private val client: Client,
                            private val userId: String?,
                            private val tokenManager: TokenManager) : Service {
     override var state = State.IDLE
-
+    private lateinit var mimeType: MimeType
     @Throws(IOException::class)
     override fun startAudioQuery(context: Map<String, Any>?, callback: Callback) {
         if (state == State.IDLE) {
@@ -91,8 +93,9 @@ internal class ServiceImpl(private val client: Client,
                 callback.audioData(buffer)
             }
 
-            override fun onRecordingStarted() {
+            override fun onRecordingStarted(mimeType: MimeType) {
                 callback.recordingStarted()
+                this@ServiceImpl.mimeType = mimeType
             }
 
             override fun onComplete() {
@@ -125,7 +128,7 @@ internal class ServiceImpl(private val client: Client,
     }
 
     private fun executeAudioQueryRequest(callback: Callback, context: Map<String, Any>?): QueryResponse {
-        val response = client.createAudioQuery(context, userId, tokenManager.token, recorder.getAudioInfo())
+        val response = client.createAudioQuery(context, userId, tokenManager.token, mimeType)
         val stringResponse = validateResponse(response.get())
         val audioQuery = converter.convertResponse(stringResponse, QueryResponse::class.java)
         callback.queryResponse(audioQuery)

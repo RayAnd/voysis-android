@@ -15,7 +15,7 @@ import com.voysis.model.response.AudioQuery
 import com.voysis.model.response.QueryResponse
 import com.voysis.model.response.SocketResponse
 import com.voysis.model.response.TextQuery
-import com.voysis.recorder.AudioInfo
+import com.voysis.recorder.MimeType
 import com.voysis.sevice.AudioResponseFuture
 import com.voysis.sevice.Converter
 import com.voysis.sevice.QueryFuture
@@ -46,10 +46,8 @@ internal class WebSocketClient(private val config: Config,
         const val CLOSING = "closing"
     }
 
-    override fun createAudioQuery(context: Map<String, Any>?, userId: String?, token: String, audioInfo: AudioInfo): Future<String> {
-        val sampleRate = audioInfo.sampleRate
-        val bitsPerSample = audioInfo.bitsPerSample
-        return sendString("/queries", RequestEntity(context = context, userId = userId, audioQuery = AudioQuery(mimeType = "audio/pcm;bits=$bitsPerSample;rate=$sampleRate")), token)
+    override fun createAudioQuery(context: Map<String, Any>?, userId: String?, token: String, mimeType: MimeType): Future<String> {
+        return sendString("/queries", RequestEntity(context = context, userId = userId, audioQuery = AudioQuery(mimeType = mimeType.getDescription())), token)
     }
 
     override fun sendTextQuery(context: Map<String, Any>?, text: String, userId: String?, token: String): Future<String> {
