@@ -6,7 +6,8 @@ import com.nhaarman.mockito_kotlin.argumentCaptor
 import com.nhaarman.mockito_kotlin.doReturn
 import com.nhaarman.mockito_kotlin.verify
 import com.nhaarman.mockito_kotlin.whenever
-import com.voysis.recorder.AudioInfo
+import com.voysis.model.request.RequestEntity
+import com.voysis.recorder.MimeType
 import com.voysis.rest.RestClient
 import com.voysis.sdk.ClientTest
 import com.voysis.sevice.Converter
@@ -28,7 +29,7 @@ import java.io.IOException
 class RestClientTest : ClientTest() {
 
     private val textRequest = """"queryType":"text","textQuery":{"text":"test text"}"""
-    private val audioRequest = """"queryType":"audio","audioQuery":{"mimeType":"audio/pcm;bits\u003d16;rate\u003d16000"}}"""
+
     private val feedbackRequest = """{"duration":{"vad":5,"userStop":4,"complete":6},"description":"description","rating":"rating"}"""
     @Mock
     private lateinit var okHttpClient: OkHttpClient
@@ -37,10 +38,12 @@ class RestClientTest : ClientTest() {
     @Mock
     private lateinit var callResponse: Response
     private lateinit var restClient: RestClient
+    private lateinit var gson: Gson
 
     @Before
     fun setup() {
-        restClient = RestClient(config, Converter(headers, Gson()), okHttpClient)
+        gson = Gson()
+        restClient = RestClient(config, Converter(headers, gson), okHttpClient)
     }
 
     @Test
@@ -60,12 +63,15 @@ class RestClientTest : ClientTest() {
     fun testSendAudioQuery() {
         doReturn(call).whenever(okHttpClient).newCall(any())
         doReturn(callResponse).whenever(call).execute()
-        restClient.createAudioQuery(null, null, "token", AudioInfo(16000, 16))
+        val mimeType = MimeType(16000, 16, "signed-int", false, 1)
+        restClient.createAudioQuery(null, null, "token", mimeType)
         argumentCaptor<Request>().apply {
             verify(okHttpClient).newCall(capture())
             val request = firstValue
             val body = bodyToString(request.body())
-            Assert.assertTrue(body.contains(audioRequest))
+            val requestBody = gson.fromJson<RequestEntity>(body, RequestEntity::class.java)
+            Assert.assertEquals(requestBody.queryType, "audio")
+            Assert.assertEquals(requestBody.audioQuery!!.mimeType, mimeType.getDescription())
         }
     }
 

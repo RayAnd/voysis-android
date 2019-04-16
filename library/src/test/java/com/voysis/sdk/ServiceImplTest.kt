@@ -24,6 +24,7 @@ import com.voysis.events.PermissionDeniedException
 import com.voysis.events.VoysisException
 import com.voysis.model.request.FeedbackData
 import com.voysis.recorder.AudioRecorder
+import com.voysis.recorder.MimeType
 import com.voysis.recorder.OnDataResponse
 import com.voysis.sevice.AudioResponseFuture
 import com.voysis.sevice.Converter
@@ -174,7 +175,7 @@ class ServiceImplTest : ClientTest() {
 
     private fun answerRecordingStarted() {
         doAnswer { invocation ->
-            (invocation.getArgument<Any>(0) as OnDataResponse).onRecordingStarted()
+            (invocation.getArgument<Any>(0) as OnDataResponse).onRecordingStarted(MimeType(16000, 16, "signed-int", false, 1))
             null
         }.whenever(manager).start(anyOrNull())
     }
