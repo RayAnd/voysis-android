@@ -49,6 +49,10 @@ class RestClient(private val config: Config,
         return future
     }
 
+    override fun cancelStreaming() {
+        okhttp.dispatcher().cancelAll()
+    }
+
     override fun refreshSessionToken(refreshToken: String): Future<String> {
         setAuthorizationHeader(refreshToken)
         setAcceptHeader(acceptJson)

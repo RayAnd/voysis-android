@@ -100,6 +100,20 @@ class WebSocketClientTest : ClientTest() {
     }
 
     @Test
+    fun testCancelStream() {
+        val future = webSocketClient.streamAudio(channel, createAudioQueryResponse())
+        webSocketClient.cancelStreaming()
+        assertTrue(future.isCancelled)
+    }
+
+    @Test
+    fun testCancelCreateAudioQuery() {
+        val future = webSocketClient.createAudioQuery(context, userId, token, audioInfo)
+        webSocketClient.cancelStreaming()
+        assertTrue(future.isCancelled)
+    }
+
+    @Test
     @Throws(Exception::class)
     fun testCloseWhileSessionInProgress() {
         getCloseResponseFromStringSend()

@@ -65,9 +65,13 @@ internal class WebSocketClient(private val config: Config,
     @Throws(IOException::class)
     override fun streamAudio(channel: ReadableByteChannel, queryResponse: QueryResponse): AudioResponseFuture {
         val future = AudioResponseFuture()
-        webSocketListener.addFuture(1, future)
+        webSocketListener.addFuture(streamId, future)
         sendLoop(channel, future)
         return future
+    }
+
+    override fun cancelStreaming() {
+        webSocketListener.cancelStream()
     }
 
     @Throws(IOException::class)
@@ -149,6 +153,13 @@ internal class WebSocketClient(private val config: Config,
         fun setStreamStoppedReason(reason: StreamingStoppedReason) {
             val future = callbackMap[streamId] as? AudioResponseFuture
             future?.responseReason = reason
+        }
+
+        fun cancelStream() {
+            for (id in HashSet(callbackMap.keys)) {
+                val future = callbackMap[id]
+                future?.cancel(true)
+            }
         }
 
         fun createQueryFuture(id: Long): QueryFuture = addFuture(id, QueryFuture())
