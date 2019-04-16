@@ -28,8 +28,8 @@ internal class ServiceImpl(private val client: Client,
                            private val converter: Converter,
                            private val userId: String?,
                            private val tokenManager: TokenManager) : Service {
-    override var state = State.IDLE
     private lateinit var mimeType: MimeType
+    override var state = State.IDLE
     @Throws(IOException::class)
     override fun startAudioQuery(context: Map<String, Any>?, callback: Callback) {
         if (state == State.IDLE) {
