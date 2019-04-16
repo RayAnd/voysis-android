@@ -3,6 +3,7 @@ package com.voysis.android.core.impl
 import com.google.gson.Gson
 import com.nhaarman.mockito_kotlin.any
 import com.nhaarman.mockito_kotlin.argumentCaptor
+import com.nhaarman.mockito_kotlin.doNothing
 import com.nhaarman.mockito_kotlin.doReturn
 import com.nhaarman.mockito_kotlin.verify
 import com.nhaarman.mockito_kotlin.whenever
@@ -11,6 +12,7 @@ import com.voysis.rest.RestClient
 import com.voysis.sdk.ClientTest
 import com.voysis.sevice.Converter
 import okhttp3.Call
+import okhttp3.Dispatcher
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody
@@ -34,6 +36,8 @@ class RestClientTest : ClientTest() {
     private lateinit var okHttpClient: OkHttpClient
     @Mock
     private lateinit var call: Call
+    @Mock
+    private lateinit var dispatcher: Dispatcher
     @Mock
     private lateinit var callResponse: Response
     private lateinit var restClient: RestClient
@@ -67,6 +71,14 @@ class RestClientTest : ClientTest() {
             val body = bodyToString(request.body())
             Assert.assertTrue(body.contains(audioRequest))
         }
+    }
+
+    @Test
+    fun testCancelSendAudioQuery() {
+        doReturn(dispatcher).whenever(okHttpClient).dispatcher()
+        doNothing().whenever(dispatcher).cancelAll()
+        restClient.cancelStreaming()
+        verify(dispatcher).cancelAll()
     }
 
     @Test

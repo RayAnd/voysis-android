@@ -44,6 +44,11 @@ interface Client {
     fun streamAudio(channel: ReadableByteChannel, queryResponse: QueryResponse): QueryFuture
 
     /**
+     * Call this to manually cancel open network requests
+     */
+    fun cancelStreaming()
+
+    /**
      * Call this method to manually refresh the session token.
      * @param refreshToken refreshToken.
      * @return future containing Token json string or error.
