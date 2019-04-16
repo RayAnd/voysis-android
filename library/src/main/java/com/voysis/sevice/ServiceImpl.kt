@@ -14,7 +14,6 @@ import com.voysis.model.response.QueryResponse
 import com.voysis.model.response.StreamResponse
 import com.voysis.recorder.AudioRecorder
 import com.voysis.recorder.MimeType
-import com.voysis.recorder.MimeType
 import com.voysis.recorder.OnDataResponse
 import com.voysis.setAudioProfileId
 import com.voysis.websocket.WebSocketClient.Companion.CLOSING
