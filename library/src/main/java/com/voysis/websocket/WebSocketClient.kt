@@ -3,7 +3,9 @@ package com.voysis.websocket
 import com.voysis.api.Client
 import com.voysis.api.Config
 import com.voysis.api.StreamingStoppedReason
+import com.voysis.api.StreamingStoppedReason.CANCELLATION
 import com.voysis.api.StreamingStoppedReason.END_OF_STREAM
+import com.voysis.api.StreamingStoppedReason.NONE
 import com.voysis.api.StreamingStoppedReason.VAD_RECEIVED
 import com.voysis.events.PermissionDeniedException
 import com.voysis.events.VoysisException
@@ -77,7 +79,7 @@ internal class WebSocketClient(private val config: Config,
     @Throws(IOException::class)
     private fun sendLoop(channel: ReadableByteChannel, future: AudioResponseFuture) {
         val buf = ByteBuffer.allocate(generateReadBufferSize(config))
-        while ((channel.read(buf) > 0 || buf.position() > 0) && future.responseReason !== VAD_RECEIVED) {
+        while ((channel.read(buf) > 0 || buf.position() > 0) && future.responseReason == NONE) {
             buf.flip()
             send(ByteString.of(buf))
             buf.compact()
@@ -93,11 +95,11 @@ internal class WebSocketClient(private val config: Config,
     }
 
     /*
-     *If the future `responseReason != VAD_RECEIVED` we can take it that the user stopped recording
+     *If the `responseReason != VAD_RECEIVED` or 'CANCELLATION' we can take it that the user stopped recording
      *manually in which case we need to notify the server by sending `ByteString.of((4))`
      */
     private fun checkStreamStopReason(future: AudioResponseFuture) {
-        if (future.responseReason != VAD_RECEIVED) {
+        if (future.responseReason != VAD_RECEIVED && future.responseReason != CANCELLATION) {
             send(ByteString.of((4)))
             webSocketListener.setStreamStoppedReason(END_OF_STREAM)
         }
@@ -156,6 +158,7 @@ internal class WebSocketClient(private val config: Config,
         }
 
         fun cancelStream() {
+            setStreamStoppedReason(CANCELLATION)
             for (id in HashSet(callbackMap.keys)) {
                 val future = callbackMap[id]
                 future?.cancel(true)

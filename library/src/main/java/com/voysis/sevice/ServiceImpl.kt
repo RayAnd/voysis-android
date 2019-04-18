@@ -20,6 +20,7 @@ import com.voysis.websocket.WebSocketClient.Companion.CLOSING
 import java.io.IOException
 import java.nio.ByteBuffer
 import java.nio.channels.Pipe
+import java.util.concurrent.CancellationException
 import java.util.concurrent.ExecutionException
 import java.util.concurrent.Future
 
@@ -146,10 +147,11 @@ internal class ServiceImpl(private val client: Client,
     }
 
     private fun checkStreamStoppedReason(response: QueryFuture, callback: Callback) {
-        if ((response as AudioResponseFuture).responseReason === StreamingStoppedReason.VAD_RECEIVED) {
+        val reason = (response as AudioResponseFuture).responseReason
+        if (reason === StreamingStoppedReason.VAD_RECEIVED) {
             callback.recordingFinished(FinishedReason.VAD_RECEIVED)
             recorder.stop()
-        } else {
+        } else if (reason != StreamingStoppedReason.CANCELLATION) {
             callback.recordingFinished(FinishedReason.MANUAL_STOP)
         }
     }
@@ -177,11 +179,19 @@ internal class ServiceImpl(private val client: Client,
 
     private fun handleException(callback: Callback, e: Exception) {
         recorder.stop()
+        recordingFinishedCheck(callback, e)
         when {
             e is VoysisException -> callback.failure(e)
             e.cause is VoysisException -> callback.failure(e.cause as VoysisException)
             else -> callback.failure(VoysisException(e))
         }
         state = State.IDLE
+    }
+
+    //If cancellation exception is thrown at any stage before recording finishes we track the callback here
+    private fun recordingFinishedCheck(callback: Callback, e: Exception) {
+        if (e is CancellationException || e.cause is CancellationException) {
+            callback.recordingFinished(FinishedReason.CANCELLED)
+        }
     }
 }
