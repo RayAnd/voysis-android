@@ -4,7 +4,9 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.media.AudioManager
+import android.os.Build
 import android.util.Log
+import com.google.gson.GsonBuilder
 import com.voysis.api.Config
 import com.voysis.model.request.Headers
 import com.voysis.recorder.AudioRecordParams
@@ -18,34 +20,42 @@ import java.util.UUID
 import java.util.concurrent.TimeUnit
 
 fun getHeaders(context: Context): Headers {
-    return Headers(getOrCreateAudioProfileId(context), getUserAgent(context))
+    return Headers(getOrCreateAudioProfileId(context), getClientVersionInfo(context))
 }
 
 /**
+ * Get the stringified form of the client version info to supply when
+ * creating a new query.
  * @param context current context
- * @return user agent string including app package/version and sdk package/version.
+ * @return client version info string including app package/version and sdk package/version.
  */
-fun getUserAgent(context: Context): String {
+fun getClientVersionInfo(context: Context): String {
     var versionName = ""
     try {
         val appPackageInfo = context.packageManager.getPackageInfo(context.packageName, 0)
         versionName = appPackageInfo.versionName
     } catch (e: PackageManager.NameNotFoundException) {
-        Log.w("ServiceImpl", "getUserAgent: ", e)
+        Log.w("ServiceImpl", "getClientVersionInfo: ", e)
     }
-
-    val stringBuilder = StringBuilder()
-    return stringBuilder
-            .append(System.getProperty("http.agent"))
-            .append(" ")
-            .append(context.packageName)
-            .append("/")
-            .append(versionName)
-            .append(" ")
-            .append(BuildConfig.APPLICATION_ID)
-            .append("/")
-            .append(BuildConfig.VERSION_NAME)
-            .toString()
+    val clientInfo = mapOf(
+            "os" to mapOf(
+                "id" to "Android",
+                "version" to Build.VERSION.RELEASE
+            ),
+            "sdk" to mapOf(
+                    "id" to "voysis-android",
+                    "version" to BuildConfig.VERSION_NAME
+            ),
+            "app" to mapOf(
+                    "id" to context.packageName,
+                    "version" to versionName
+            ),
+            "device" to mapOf(
+                    "manufacturer" to Build.MANUFACTURER,
+                    "model" to Build.MODEL
+            )
+    )
+    return GsonBuilder().serializeNulls().create().toJson(clientInfo)
 }
 
 /**
