@@ -25,7 +25,7 @@ data class RequestEntity(@field:SerializedName("context") val context: Map<Strin
                          @field:SerializedName("locale") val locale: String = "en-US") : ApiRequest
 
 data class Headers(@field:SerializedName("X-Voysis-Audio-Profile-Id") val audioProfileId: String,
-                   @field:SerializedName("User-Agent") val userAgent: String,
+                   @field:SerializedName("X-Voysis-Client-Info") val clientInfo: String,
                    @field:SerializedName("Authorization") var authorization: String = "",
                    @field:SerializedName("X-Voysis-Ignore-Vad") val xVoysisIgnoreVad: Boolean? = false,
                    @field:SerializedName("Accept") val accept: String? = "application/vnd.voysisquery.v1+json")

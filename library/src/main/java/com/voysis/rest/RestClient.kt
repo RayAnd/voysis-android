@@ -31,7 +31,7 @@ class RestClient(private val config: Config,
             .addHeader("X-Voysis-Audio-Profile-Id", converter.headers.audioProfileId)
             .addHeader("X-Voysis-Ignore-Vad", "true")
             .addHeader("Accept", acceptJson)
-            .addHeader("User-Agent", converter.headers.userAgent)
+            .addHeader("X-Voysis-Client-Info", converter.headers.clientInfo)
 
     override fun sendTextQuery(context: Map<String, Any>?, text: String, userId: String?, token: String): Future<String> {
         setAuthorizationHeader(token)
