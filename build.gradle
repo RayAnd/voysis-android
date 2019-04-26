@@ -1,11 +1,16 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 
-version = '0.0.1'
-def env = System.getenv()
-if (env['JITPACK'] == 'true') {
-    version = env['GIT_BRANCH']
-} else if (env['TRAVIS_TAG'] != null) {
-    version = env['TRAVIS_TAG']
+//
+// Jitpack will invoke gradle with -Pversion=<version>
+// With no -Pversion=, version defaults to the string "unspecified".
+//
+if ("unspecified" == version) {
+    def env = System.getenv()
+    if (null != env['TRAVIS_TAG']) {
+        version = env['TRAVIS_TAG']
+    } else {
+        version = '0.0.1'
+    }
 }
 
 buildscript {
