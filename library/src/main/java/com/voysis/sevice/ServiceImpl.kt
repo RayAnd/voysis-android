@@ -147,10 +147,10 @@ internal class ServiceImpl(private val client: Client,
     }
 
     private fun checkStreamStoppedReason(response: QueryFuture, callback: Callback) {
+        recorder.stop()
         val reason = (response as AudioResponseFuture).responseReason
         if (reason === StreamingStoppedReason.VAD_RECEIVED) {
             callback.recordingFinished(FinishedReason.VAD_RECEIVED)
-            recorder.stop()
         } else if (reason != StreamingStoppedReason.CANCELLATION) {
             callback.recordingFinished(FinishedReason.MANUAL_STOP)
         }
