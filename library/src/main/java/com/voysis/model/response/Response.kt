@@ -30,6 +30,9 @@ data class AudioQuery(@field:SerializedName("mimeType") val mimeType: String? = 
 data class Reply(@field:SerializedName("text") val text: String? = null,
                  @field:SerializedName("audioUri") val audioUri: String? = null)
 
+data class DmReply(@field:SerializedName("text") val text: String? = null,
+                   @field:SerializedName("audioUri") val audioUri: String? = null)
+
 data class Queries(@field:SerializedName("href") val href: String? = null)
 
 data class Audio(@field:SerializedName("href") val href: String? = null)

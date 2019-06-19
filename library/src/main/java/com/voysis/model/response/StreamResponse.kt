@@ -8,6 +8,7 @@ data class StreamResponse(@field:SerializedName("entities") private val entities
                           @field:SerializedName("audioQuery") val audioQuery: AudioQuery? = null,
                           @field:SerializedName("textQuery") val textQuery: TextQuery? = null,
                           @field:SerializedName("reply") val reply: Reply? = null,
+                          @field:SerializedName("dmReply") val dmReply: DmReply? = null,
                           @field:SerializedName("intent") val intent: String? = null) : ApiResponse() {
     /**
      * @param clazz class object

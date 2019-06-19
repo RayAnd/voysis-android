@@ -158,6 +158,7 @@ class ServiceImplTest : ClientTest() {
         serviceImpl.sendTextQuery(context = null, text = exampleRequest, callback = callback)
         verify(client).sendTextQuery(anyOrNull(), eq(exampleRequest), anyOrNull(), anyOrNull())
         verify(callback).success(argThat { id == "5" })
+        verify(callback).success(argThat { dmReply!!.text == "test" })
     }
 
     @Test
