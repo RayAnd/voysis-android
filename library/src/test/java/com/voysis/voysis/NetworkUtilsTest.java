@@ -3,7 +3,6 @@ package com.voysis.voysis;
 import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.os.Build;
 
 import com.google.gson.Gson;
 import com.voysis.sdk.BuildConfig;

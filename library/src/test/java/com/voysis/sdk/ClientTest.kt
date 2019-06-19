@@ -24,7 +24,7 @@ open class ClientTest {
 
     var queryFutureResponse = """{"id":"1","locale":"en-US","conversationId":"1","queryType":"audio","audioQuery":{"mimeType":"audio/pcm"},"_links":{"self":{"href":"/queries/1"},"audio":{"href":"/queries/1/audio"}},"_embedded":{}}"""
     var vad = """{"type":"notification","notificationType":"vad_stop"}"""
-    var streamResponse = """{"id":"5","locale":"en-US","conversationId":"1","queryType":"audio","audioQuery":{"mimeType":"audio/pcm;bits\u003d16;rate\u003d16000"}, "textQuery":{"text":"go to my cart"},"intent":"goToCart","reply":{"text":"Here's what's in your cart"},"entities":{"products":[]},"userId":"","_links":{"self":{"href":"/queries/"},"audio":{"href":"/queries/58c64416-b5e7-44ee-98e0-8a876ff368f5/audio"}},"_embedded":{}}"""
+    var streamResponse = """{"id":"5","locale":"en-US","conversationId":"1","queryType":"audio","audioQuery":{"mimeType":"audio/pcm;bits\u003d16;rate\u003d16000"}, "textQuery":{"text":"go to my cart"},"intent":"goToCart","reply":{"text":"Here's what's in your cart"},"dmReply":{"text":"test"},"entities":{"products":[]},"userId":"","_links":{"self":{"href":"/queries/"},"audio":{"href":"/queries/58c64416-b5e7-44ee-98e0-8a876ff368f5/audio"}},"_embedded":{}}"""
     val config = DataConfig(isVadEnabled = true, url = URL("https://test.com"), refreshToken = "1", userId = "")
     private val links: Links
         get() {
