@@ -1,6 +1,7 @@
 package com.voysis.api
 
 import com.voysis.model.request.FeedbackData
+import com.voysis.model.request.InteractionType
 import com.voysis.model.response.QueryResponse
 import com.voysis.recorder.MimeType
 import com.voysis.sevice.QueryFuture
@@ -19,7 +20,7 @@ interface Client {
      * @param mimeType information about recorded audio.
      * @return future containing audioQueryResponse json string or error.
      */
-    fun createAudioQuery(context: Map<String, Any>? = null, userId: String?, token: String, mimeType: MimeType): Future<String>
+    fun createAudioQuery(context: Map<String, Any>? = null, interactionType: InteractionType?, userId: String?, token: String, mimeType: MimeType): Future<String>
 
     /**
      * Call this method to execute a text query.
@@ -30,7 +31,7 @@ interface Client {
      * @param token session token assigned to the query.
      * @return future containing response json string or error.
      */
-    fun sendTextQuery(context: Map<String, Any>?, text: String, userId: String?, token: String): Future<String>
+    fun sendTextQuery(context: Map<String, Any>?, interactionType: InteractionType?, text: String, userId: String?, token: String): Future<String>
 
     /**
      * Call this method to stream audio to server and return an audioStreamResponse

@@ -51,7 +51,7 @@ public class MainActivityJava extends AppCompatActivity implements Callback {
         eventText = findViewById(R.id.eventText);
 
         try {
-            Config config = new DataConfig(true, new URL("INSERT_URL"), "INSERT_TOKEN", "INSERT_USERID", null);
+            Config config = new DataConfig(true, new URL("INSERT_URL"), "INSERT_TOKEN", "INSERT_USERID", null, null);
             ServiceProvider serviceprovider = new ServiceProvider();
             service = serviceprovider.make(this, config);
         } catch (MalformedURLException e) {
@@ -147,7 +147,7 @@ public class MainActivityJava extends AppCompatActivity implements Callback {
             @Override
             public void run() {
                 try {
-                    service.startAudioQuery(null, MainActivityJava.this);
+                    service.startAudioQuery(null, MainActivityJava.this, null);
                 } catch (IOException e) {
                     Log.e(TAG, "checkPermissionAndStartQuery: ", e);
                 }

@@ -98,7 +98,7 @@ class ServiceImplTest : ClientTest() {
         doReturn(notification).whenever(queryFuture).get()
         doReturn(VAD_RECEIVED).whenever(queryFuture).responseReason
         doReturn(tokenFuture).whenever(client).refreshSessionToken(anyOrNull())
-        doReturn(audioQueryFuture).whenever(client).createAudioQuery(any(), anyOrNull(), anyOrNull(), anyOrNull())
+        doReturn(audioQueryFuture).whenever(client).createAudioQuery(any(), anyOrNull(), anyOrNull(), anyOrNull(), anyOrNull())
         doReturn(queryFuture).whenever(client).streamAudio(anyOrNull(), anyOrNull())
     }
 
@@ -153,10 +153,10 @@ class ServiceImplTest : ClientTest() {
         val exampleRequest = "I'm looking for things."
         doReturn(tokenResponseValid).whenever(tokenFuture).get()
         doReturn(tokenFuture).whenever(client).refreshSessionToken(anyOrNull())
-        doReturn(queryFuture).whenever(client).sendTextQuery(anyOrNull(), eq(exampleRequest), anyOrNull(), anyOrNull())
+        doReturn(queryFuture).whenever(client).sendTextQuery(anyOrNull(), anyOrNull(), eq(exampleRequest), anyOrNull(), anyOrNull())
         doReturn(streamResponse).whenever(queryFuture).get()
         serviceImpl.sendTextQuery(context = null, text = exampleRequest, callback = callback)
-        verify(client).sendTextQuery(anyOrNull(), eq(exampleRequest), anyOrNull(), anyOrNull())
+        verify(client).sendTextQuery(anyOrNull(), anyOrNull(), eq(exampleRequest), anyOrNull(), anyOrNull())
         verify(callback).success(argThat { id == "5" })
         verify(callback).success(argThat { dmReply!!.text == "test" })
     }

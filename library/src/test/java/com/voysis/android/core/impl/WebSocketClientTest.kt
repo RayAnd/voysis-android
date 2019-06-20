@@ -6,6 +6,7 @@ import com.nhaarman.mockito_kotlin.verify
 import com.nhaarman.mockito_kotlin.whenever
 import com.voysis.api.StreamingStoppedReason
 import com.voysis.model.request.FeedbackData
+import com.voysis.model.request.InteractionType
 import com.voysis.recorder.MimeType
 import com.voysis.sdk.ClientTest
 import com.voysis.sevice.Converter
@@ -44,6 +45,7 @@ class WebSocketClientTest : ClientTest() {
     private val context = hashMapOf("test" to "test")
     private val token = "token"
     private val userId = "userId"
+    private val interactionType = InteractionType.QUERY
     private val audioInfo = MimeType(16000, 16, "signed-int", false, 1)
 
     @Before
@@ -57,15 +59,15 @@ class WebSocketClientTest : ClientTest() {
     @Throws(Exception::class)
     fun testSuccessfulCreateAudioQuery() {
         getResponseFromStringSend()
-        val future = webSocketClient.createAudioQuery(context, userId, token, audioInfo)
+        val future = webSocketClient.createAudioQuery(context, interactionType, userId, token, audioInfo)
         val response = future.get()
         assertTrue(this.response.contains(response))
     }
 
     @Test
     fun testExecuteTextQuery() {
-        webSocketClient.sendTextQuery(null, "text", "1", "123")
-        val textEntity = """"entity":{"queryType":"text","textQuery":{"text":"text"},"userId":"1","locale":"en-US"}"""
+        webSocketClient.sendTextQuery(null, interactionType, "text", "1", "123")
+        val textEntity = """"entity":{"interactionType":"QUERY","userId":"1","queryType":"test","textQuery":{"text":"text"},"locale":"en-US"},"requestId":"2","type":"request","method":"POST"}"""
         argumentCaptor<String>().apply {
             verify(webSocket).send(capture())
             assertTrue(firstValue.contains(textEntity))
@@ -108,7 +110,7 @@ class WebSocketClientTest : ClientTest() {
 
     @Test
     fun testCancelCreateAudioQuery() {
-        val future = webSocketClient.createAudioQuery(context, userId, token, audioInfo)
+        val future = webSocketClient.createAudioQuery(context, interactionType, userId, token, audioInfo)
         webSocketClient.cancelStreaming()
         assertTrue(future.isCancelled)
     }
@@ -117,7 +119,7 @@ class WebSocketClientTest : ClientTest() {
     @Throws(Exception::class)
     fun testCloseWhileSessionInProgress() {
         getCloseResponseFromStringSend()
-        val future = webSocketClient.createAudioQuery(context, userId, token, audioInfo)
+        val future = webSocketClient.createAudioQuery(context, interactionType, userId, token, audioInfo)
         val response = future.get()
         assertEquals(response, "closing")
     }
@@ -126,7 +128,7 @@ class WebSocketClientTest : ClientTest() {
     @Throws(Exception::class)
     fun testFailWhileSessionInProgress() {
         getFailureResponseFromStringSend()
-        val future = webSocketClient.createAudioQuery(context, userId, token, audioInfo)
+        val future = webSocketClient.createAudioQuery(context, interactionType, userId, token, audioInfo)
         future.get()
     }
 
@@ -146,7 +148,7 @@ class WebSocketClientTest : ClientTest() {
     }
 
     private fun getResponseFromByteStringSendWithVad() {
-        webSocketClient.createAudioQuery(context, userId, token, audioInfo)
+        webSocketClient.createAudioQuery(context, interactionType, userId, token, audioInfo)
         doAnswer {
             argumentCaptor.value.onMessage(webSocket, vad)
             argumentCaptor.value.onMessage(webSocket, notification)

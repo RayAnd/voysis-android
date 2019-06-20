@@ -4,6 +4,7 @@ import com.voysis.api.Client
 import com.voysis.api.Config
 import com.voysis.events.VoysisException
 import com.voysis.model.request.FeedbackData
+import com.voysis.model.request.InteractionType
 import com.voysis.model.response.QueryResponse
 import com.voysis.recorder.MimeType
 import com.voysis.sevice.AudioResponseFuture
@@ -33,19 +34,19 @@ class RestClient(private val config: Config,
             .addHeader("Accept", acceptJson)
             .addHeader("X-Voysis-Client-Info", converter.headers.clientInfo)
 
-    override fun sendTextQuery(context: Map<String, Any>?, text: String, userId: String?, token: String): Future<String> {
+    override fun sendTextQuery(context: Map<String, Any>?, interactionType: InteractionType?, text: String, userId: String?, token: String): Future<String> {
         setAuthorizationHeader(token)
         setAcceptHeader("application/vnd.voysisquery.v1+json")
         val future = QueryFuture()
-        execute(future, createTextRequest(text, userId, context))
+        execute(future, createTextRequest(text, userId, context, interactionType))
         return future
     }
 
-    override fun createAudioQuery(context: Map<String, Any>?, userId: String?, token: String, mimeType: MimeType): Future<String> {
+    override fun createAudioQuery(context: Map<String, Any>?, interactionType: InteractionType?, userId: String?, token: String, mimeType: MimeType): Future<String> {
         setAuthorizationHeader(token)
         setAcceptHeader("application/vnd.voysisquery.v1+json")
         val future = QueryFuture()
-        execute(future, createAudioRequest(userId, context, mimeType))
+        execute(future, createAudioRequest(userId, context, mimeType, interactionType))
         return future
     }
 
@@ -94,22 +95,24 @@ class RestClient(private val config: Config,
         return future
     }
 
-    private fun createTextRequest(text: String? = null, userId: String?, context: Map<String, Any>?): Request {
-        val body = createTextBody(text, userId, context)
+    private fun createTextRequest(text: String? = null, userId: String?, context: Map<String, Any>?, interactionType: InteractionType?): Request {
+        val body = createTextBody(text, userId, context, interactionType)
         val queriesUrl = URL(url, "queries")
         return buildRequest(RequestBody.create(type, converter.toJson(body)), queriesUrl.toString())
     }
 
-    private fun createAudioRequest(userId: String?, context: Map<String, Any>?, mimeType: MimeType): Request {
-        val body = createAudioBody(userId, context, mimeType)
+    private fun createAudioRequest(userId: String?, context: Map<String, Any>?, mimeType: MimeType, interactionType: InteractionType?): Request {
+        val body = createAudioBody(userId, context, mimeType, interactionType)
         val queriesUrl = URL(url, "queries")
         return buildRequest(RequestBody.create(type, converter.toJson(body)), queriesUrl.toString())
     }
 
-    private fun createAudioBody(userId: String?, context: Map<String, Any>?, mimeType: MimeType): MutableMap<String, Any> {
+    private fun createAudioBody(userId: String?, context: Map<String, Any>?, mimeType: MimeType, interactionType: InteractionType?): MutableMap<String, Any> {
+        val interaction = interactionType ?: config.interactionType
         val body = mutableMapOf(
                 "locale" to "en-US",
                 "queryType" to "audio",
+                "interactionType" to interaction.name,
                 "audioQuery" to mapOf("mimeType" to mimeType.getDescription()))
 
         userId?.let {
@@ -121,10 +124,12 @@ class RestClient(private val config: Config,
         return body
     }
 
-    private fun createTextBody(text: String?, userId: String?, context: Map<String, Any>?): MutableMap<String, Any> {
+    private fun createTextBody(text: String?, userId: String?, context: Map<String, Any>?, interactionType: InteractionType?): MutableMap<String, Any> {
+        val interaction = interactionType ?: config.interactionType
         val body = mutableMapOf(
                 "locale" to "en-US",
                 "queryType" to "text",
+                "interactionType" to interaction.name,
                 "textQuery" to mapOf("text" to text))
 
         userId?.let {

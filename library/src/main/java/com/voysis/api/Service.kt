@@ -4,6 +4,7 @@ import android.content.Context
 import com.voysis.events.Callback
 import com.voysis.events.VoysisException
 import com.voysis.model.request.FeedbackData
+import com.voysis.model.request.InteractionType
 import com.voysis.model.request.Token
 
 import java.io.IOException
@@ -33,7 +34,7 @@ interface Service {
      * @throws IOException if reading/writing error occurs
      */
     @Throws(IOException::class)
-    fun startAudioQuery(context: Map<String, Any>? = null, callback: Callback)
+    fun startAudioQuery(context: Map<String, Any>? = null, callback: Callback, interactionType: InteractionType? = null)
 
     /**
      * This method executes a text query.
@@ -43,7 +44,7 @@ interface Service {
      * @param text query to be executed
      * @param callback used by client application
      */
-    fun sendTextQuery(context: Map<String, Any>?, text: String, callback: Callback)
+    fun sendTextQuery(context: Map<String, Any>?, text: String, callback: Callback, interactionType: InteractionType? = null)
 
     /**
      * Call to manually stop recording audio and process request
