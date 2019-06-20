@@ -7,6 +7,7 @@ import com.nhaarman.mockito_kotlin.doNothing
 import com.nhaarman.mockito_kotlin.doReturn
 import com.nhaarman.mockito_kotlin.verify
 import com.nhaarman.mockito_kotlin.whenever
+import com.voysis.model.request.InteractionType
 import com.voysis.model.request.RequestEntity
 import com.voysis.recorder.MimeType
 import com.voysis.rest.RestClient
@@ -30,7 +31,7 @@ import java.io.IOException
 @RunWith(MockitoJUnitRunner::class)
 class RestClientTest : ClientTest() {
 
-    private val textRequest = """"queryType":"text","textQuery":{"text":"test text"}"""
+    private val textRequest = """"queryType":"text","interactionType":"QUERY","textQuery":{"text":"test text"}"""
 
     private val feedbackRequest = """{"duration":{"vad":5,"userStop":4,"complete":6},"description":"description","rating":"rating"}"""
     @Mock
@@ -42,6 +43,7 @@ class RestClientTest : ClientTest() {
     @Mock
     private lateinit var callResponse: Response
     private lateinit var restClient: RestClient
+    private val interactionType = InteractionType.QUERY
     private lateinit var gson: Gson
 
     @Before
@@ -54,7 +56,7 @@ class RestClientTest : ClientTest() {
     fun testSendTextQuery() {
         doReturn(call).whenever(okHttpClient).newCall(any())
         doReturn(callResponse).whenever(call).execute()
-        restClient.sendTextQuery(null, "test text", null, "token")
+        restClient.sendTextQuery(null, interactionType, "test text", null, "token")
         argumentCaptor<Request>().apply {
             verify(okHttpClient).newCall(capture())
             val request = firstValue
@@ -68,7 +70,7 @@ class RestClientTest : ClientTest() {
         doReturn(call).whenever(okHttpClient).newCall(any())
         doReturn(callResponse).whenever(call).execute()
         val mimeType = MimeType(16000, 16, "signed-int", false, 1)
-        restClient.createAudioQuery(null, null, "token", mimeType)
+        restClient.createAudioQuery(null, interactionType, null, "token", mimeType)
         argumentCaptor<Request>().apply {
             verify(okHttpClient).newCall(capture())
             val request = firstValue

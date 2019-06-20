@@ -18,10 +18,11 @@ data class SocketRequest(@field:SerializedName("restUri") val restUri: String? =
                          @field:SerializedName("method") val method: String? = "POST")
 
 data class RequestEntity(@field:SerializedName("context") val context: Map<String, Any>? = null,
-                         @field:SerializedName("queryType") val queryType: String? = "audio",
-                         @field:SerializedName("audioQuery") val audioQuery: AudioQuery? = null,
-                         @field:SerializedName("textQuery") val textQuery: TextQuery? = null,
+                         @field:SerializedName("interactionType") val flag: InteractionType? = null,
                          @field:SerializedName("userId") val userId: String? = null,
+                         @field:SerializedName("audioQuery") val audioQuery: AudioQuery? = null,
+                         @field:SerializedName("queryType") val queryType: String? = "audio",
+                         @field:SerializedName("textQuery") val textQuery: TextQuery? = null,
                          @field:SerializedName("locale") val locale: String = "en-US") : ApiRequest
 
 data class Headers(@field:SerializedName("X-Voysis-Audio-Profile-Id") val audioProfileId: String,
@@ -40,3 +41,7 @@ data class FeedbackData(@field:SerializedName("durations") val durations: Durati
 data class Duration(@field:SerializedName("userStop") var userStop: Long? = null,
                     @field:SerializedName("vad") var vad: Long? = null,
                     @field:SerializedName("complete") var complete: Long? = null)
+
+enum class InteractionType {
+    QUERY, CHATBOT
+}

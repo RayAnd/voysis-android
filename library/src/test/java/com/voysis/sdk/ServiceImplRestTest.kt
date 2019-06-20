@@ -2,6 +2,7 @@ package com.voysis.sdk
 
 import com.google.gson.Gson
 import com.nhaarman.mockito_kotlin.whenever
+import com.voysis.model.request.InteractionType
 import com.voysis.recorder.MimeType
 import com.voysis.rest.RestClient
 import com.voysis.sevice.Converter
@@ -55,7 +56,7 @@ class ServiceImplRestTest : ClientTest() {
         doReturn(true).whenever(networkResponse).isSuccessful
         doReturn(body).whenever(networkResponse).body()
         doReturn("result").whenever(body).string()
-        val future = restClient.createAudioQuery(userId = "userId", token = "token", mimeType = MimeType(16000, 16, "signed-int", false, 1))
+        val future = restClient.createAudioQuery(userId = "userId", interactionType = InteractionType.QUERY, token = "token", mimeType = MimeType(16000, 16, "signed-int", false, 1))
         assertEquals(future.get(), "result")
     }
 

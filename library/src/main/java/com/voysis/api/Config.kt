@@ -1,5 +1,6 @@
 package com.voysis.api
 
+import com.voysis.model.request.InteractionType
 import com.voysis.recorder.AudioRecordParams
 import java.net.URL
 
@@ -26,6 +27,11 @@ interface Config {
      * @return url used by client for making audio requests.
      */
     val url: URL
+
+    /**
+     * @return default interaction type.
+     */
+    val interactionType: InteractionType
 
     /**
      * Configurable audio parameters object used by underlying AudioRecord object.
