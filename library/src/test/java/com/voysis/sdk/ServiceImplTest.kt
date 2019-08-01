@@ -162,6 +162,20 @@ class ServiceImplTest : ClientTest() {
     }
 
     @Test
+    fun testResponseFields() {
+        val exampleRequest = "I'm looking for things."
+        doReturn(tokenResponseValid).whenever(tokenFuture).get()
+        doReturn(tokenFuture).whenever(client).refreshSessionToken(anyOrNull())
+        doReturn(queryFuture).whenever(client).sendTextQuery(anyOrNull(), anyOrNull(), eq(exampleRequest), anyOrNull(), anyOrNull())
+        doReturn(streamResponse).whenever(queryFuture).get()
+        serviceImpl.sendTextQuery(context = null, text = exampleRequest, callback = callback)
+        verify(client).sendTextQuery(anyOrNull(), anyOrNull(), eq(exampleRequest), anyOrNull(), anyOrNull())
+        verify(callback).success(argThat { id == "5" })
+        verify(callback).success(argThat { dmReply!!.text == "test" })
+        verify(callback).success(argThat { confidence.text == 0.1 })
+    }
+
+    @Test
     fun testGetAudioProfileId() {
         assertEquals("audioProfileId", serviceImpl.getAudioProfileId(context))
     }

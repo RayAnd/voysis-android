@@ -10,6 +10,8 @@ open class ApiResponse {
     lateinit var links: Links
     @SerializedName("id")
     lateinit var id: String
+    @SerializedName("confidence")
+    lateinit var confidence: Confidence
 }
 
 data class SocketResponse<out T>(@field:SerializedName("notificationType") val notificationType: String? = null,
@@ -38,3 +40,5 @@ data class Queries(@field:SerializedName("href") val href: String? = null)
 data class Audio(@field:SerializedName("href") val href: String? = null)
 
 data class Self(@field:SerializedName("href") val href: String? = null)
+
+data class Confidence(@field:SerializedName("textQuery.text") val text: Double? = null)
