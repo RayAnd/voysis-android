@@ -5,12 +5,12 @@ import com.nhaarman.mockito_kotlin.argumentCaptor
 import com.nhaarman.mockito_kotlin.verify
 import com.nhaarman.mockito_kotlin.whenever
 import com.voysis.api.StreamingStoppedReason
+import com.voysis.client.websocket.WebSocketClient
 import com.voysis.model.request.FeedbackData
 import com.voysis.model.request.InteractionType
 import com.voysis.recorder.MimeType
 import com.voysis.sdk.ClientTest
 import com.voysis.sevice.Converter
-import com.voysis.websocket.WebSocketClient
 import okhttp3.OkHttpClient
 import okhttp3.WebSocket
 import okhttp3.WebSocketListener

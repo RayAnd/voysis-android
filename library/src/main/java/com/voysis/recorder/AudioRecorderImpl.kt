@@ -24,6 +24,10 @@ class AudioRecorderImpl(
     @Synchronized
     override fun start(callback: OnDataResponse) {
         stopRecorder()
+        record = recordFactory().apply {
+            startRecording()
+            callback.onRecordingStarted(generateMimeType())
+        }
         executor.execute { write(callback) }
     }
 
@@ -33,10 +37,6 @@ class AudioRecorderImpl(
     }
 
     private fun write(callback: OnDataResponse) {
-        record = recordFactory().apply {
-            startRecording()
-            callback.onRecordingStarted(generateMimeType())
-        }
         val buf = ByteBuffer.allocate(recordParams.readBufferSize!!)
         buf.clear()
         val buffer = ByteArray(recordParams.readBufferSize)

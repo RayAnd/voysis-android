@@ -10,7 +10,7 @@ import com.nhaarman.mockito_kotlin.whenever
 import com.voysis.model.request.InteractionType
 import com.voysis.model.request.RequestEntity
 import com.voysis.recorder.MimeType
-import com.voysis.rest.RestClient
+import com.voysis.client.rest.RestClient
 import com.voysis.sdk.ClientTest
 import com.voysis.sevice.Converter
 import okhttp3.Call

@@ -1,4 +1,4 @@
-package com.voysis.rest
+package com.voysis.client.rest
 
 import android.util.Log
 import com.voysis.api.Config

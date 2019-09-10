@@ -1,15 +1,17 @@
 package com.voysis.api
 
+import com.voysis.events.VoysisException
 import com.voysis.model.request.FeedbackData
 import com.voysis.model.request.InteractionType
 import com.voysis.model.response.QueryResponse
 import com.voysis.recorder.MimeType
 import com.voysis.sevice.QueryFuture
+import java.io.Closeable
 import java.io.IOException
 import java.nio.channels.ReadableByteChannel
 import java.util.concurrent.Future
 
-interface Client {
+interface Client : Closeable {
 
     /**
      * Call this method to create a new audioQueryRequest.
@@ -57,4 +59,15 @@ interface Client {
     fun refreshSessionToken(refreshToken: String): Future<String>
 
     fun sendFeedback(queryId: String, feedback: FeedbackData, token: String): Future<String>
+
+    /**
+     * Client implementations may allocate and hold operating system resources that need to be explicitly released.
+     * Closing the client will release these resources but once closed a Client cannot be reused.
+     *
+     * Note that allocating these resources may be a time intensive operation, such as model loading for local execution mode, and a calling application will need to be acutely aware of when it instantiates and discards Service implementations.
+     *
+     * @throws VoysisException if any memory could not be released
+     */
+    @Throws(VoysisException::class)
+    override fun close()
 }

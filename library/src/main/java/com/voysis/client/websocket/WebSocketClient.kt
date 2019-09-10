@@ -1,4 +1,4 @@
-package com.voysis.websocket
+package com.voysis.client.websocket
 
 import com.voysis.api.Client
 import com.voysis.api.Config
@@ -123,7 +123,7 @@ internal class WebSocketClient(private val config: Config,
         webSocket?.send(read)
     }
 
-    private fun close() {
+    private fun closeWebSocket() {
         if (webSocket != null) {
             webSocket!!.close(1000, "disconnect")
             webSocket = null
@@ -149,7 +149,7 @@ internal class WebSocketClient(private val config: Config,
             //ignore
         }
 
-        override fun onClosing(webSocket: WebSocket, code: Int, reason: String?) = close()
+        override fun onClosing(webSocket: WebSocket, code: Int, reason: String?) = closeWebSocket()
 
         override fun onClosed(webSocket: WebSocket, code: Int, reason: String?) = callFuturesOnClose(null)
 
@@ -189,7 +189,7 @@ internal class WebSocketClient(private val config: Config,
 
         private fun onFailure(exception: VoysisException) {
             callFuturesOnClose(exception)
-            close()
+            closeWebSocket()
         }
 
         private fun callFuture(id: Long, response: SocketResponse<*>) {
@@ -209,4 +209,6 @@ internal class WebSocketClient(private val config: Config,
             }
         }
     }
+
+    override fun close() {}
 }

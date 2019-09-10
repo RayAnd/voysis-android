@@ -102,7 +102,20 @@ fun generateAudioRecordParams(context: Context, config: Config): AudioRecordPara
             ?: AudioRecorderImpl.DEFAULT_RECORD_BUFFER_SIZE
 
     val audioManager: AudioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
-    val rate = audioManager.getProperty(AudioManager.PROPERTY_OUTPUT_SAMPLE_RATE).toInt()
+    val rate = config.audioRecordParams?.sampleRate
+            ?: audioManager.getProperty(AudioManager.PROPERTY_OUTPUT_SAMPLE_RATE).toInt()
+    return AudioRecordParams(rate, readBufferSize, recordBufferSize)
+}
+
+/**
+ * @param config app config
+ * @return wav specifics AudioRecordParams
+ */
+fun generateAudioWavRecordParams(config: Config): AudioRecordParams {
+    val readBufferSize = generateReadBufferSize(config)
+    val recordBufferSize = config.audioRecordParams?.recordBufferSize
+            ?: AudioRecorderImpl.DEFAULT_RECORD_BUFFER_SIZE
+    val rate = 16000
     return AudioRecordParams(rate, readBufferSize, recordBufferSize)
 }
 

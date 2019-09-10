@@ -10,8 +10,6 @@ open class ApiResponse {
     lateinit var links: Links
     @SerializedName("id")
     lateinit var id: String
-    @SerializedName("confidence")
-    lateinit var confidence: Confidence
 }
 
 data class SocketResponse<out T>(@field:SerializedName("notificationType") val notificationType: String? = null,

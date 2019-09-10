@@ -6,10 +6,11 @@ import com.google.gson.annotations.SerializedName
 data class StreamResponse(@field:SerializedName("entities") private val entities: Any? = null,
                           @field:SerializedName("context") val context: Map<String, Any>? = null,
                           @field:SerializedName("audioQuery") val audioQuery: AudioQuery? = null,
-                          @field:SerializedName("textQuery") val textQuery: TextQuery? = null,
+                          @field:SerializedName("textQuery") var textQuery: TextQuery? = null,
                           @field:SerializedName("reply") val reply: Reply? = null,
                           @field:SerializedName("dmReply") val dmReply: DmReply? = null,
-                          @field:SerializedName("intent") val intent: String? = null) : ApiResponse() {
+                          @field:SerializedName("intent") val intent: String? = null,
+                          @field:SerializedName("confidence") val confidence: Confidence? = null) : ApiResponse() {
     /**
      * @param clazz class object
      * @param <T> respone type

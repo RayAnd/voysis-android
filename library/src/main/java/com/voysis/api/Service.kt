@@ -6,11 +6,12 @@ import com.voysis.events.VoysisException
 import com.voysis.model.request.FeedbackData
 import com.voysis.model.request.InteractionType
 import com.voysis.model.request.Token
+import java.io.Closeable
 
 import java.io.IOException
 import java.util.concurrent.ExecutionException
 
-interface Service {
+interface Service : Closeable {
 
     /**
      * when `startAudioQuery` has been called, state will turn to `State.BUSY`.
@@ -89,6 +90,17 @@ interface Service {
      */
     @Throws(ExecutionException::class, VoysisException::class)
     fun sendFeedback(queryId: String, feedback: FeedbackData)
+
+    /**
+     * Service implementations may allocate and hold operating system resources that need to be explicitly released.
+     * Closing the service will release these resources but once closed a Service cannot be reused.
+     *
+     * Note that allocating these resources may be a time intensive operation, such as model loading for local execution mode, and a calling application will need to be acutely aware of when it instantiates and discards Service implementations.
+     *
+     * @throws VoysisException if any memory could not be released
+     */
+    @Throws(VoysisException::class)
+    override fun close()
 }
 
 enum class State {
