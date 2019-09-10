@@ -1,4 +1,4 @@
-package com.voysis.rest
+package com.voysis.client.rest
 
 import com.voysis.api.Client
 import com.voysis.api.Config
@@ -167,4 +167,6 @@ class RestClient(private val config: Config,
         builder.removeHeader("Authorization")
         builder.addHeader("Authorization", "Bearer $token")
     }
+
+    override fun close() {}
 }

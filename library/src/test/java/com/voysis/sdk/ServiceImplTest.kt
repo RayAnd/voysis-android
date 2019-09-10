@@ -29,7 +29,7 @@ import com.voysis.recorder.OnDataResponse
 import com.voysis.sevice.AudioResponseFuture
 import com.voysis.sevice.Converter
 import com.voysis.sevice.ServiceImpl
-import com.voysis.sevice.TokenManager
+import com.voysis.sevice.CloudTokenManager
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -69,7 +69,7 @@ class ServiceImplTest : ClientTest() {
     }
 
     private lateinit var serviceImpl: ServiceImpl
-    private val tokenManager = TokenManager("refreshToken")
+    private val tokenManager = CloudTokenManager("refreshToken")
     private val userId = "userId"
 
     @Before
@@ -172,7 +172,7 @@ class ServiceImplTest : ClientTest() {
         verify(client).sendTextQuery(anyOrNull(), anyOrNull(), eq(exampleRequest), anyOrNull(), anyOrNull())
         verify(callback).success(argThat { id == "5" })
         verify(callback).success(argThat { dmReply!!.text == "test" })
-        verify(callback).success(argThat { confidence.text == 0.1 })
+        verify(callback).success(argThat { confidence?.text == 0.1 })
     }
 
     @Test

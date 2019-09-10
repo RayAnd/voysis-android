@@ -1,20 +1,21 @@
 package com.voysis.sevice
 
+import com.voysis.api.TokenManager
 import com.voysis.generateISODate
 import com.voysis.generateRFCDate
 import com.voysis.model.request.Token
 import java.util.Calendar
 import java.util.Date
 
-internal class TokenManager(val refreshToken: String) {
-    internal var sessionToken: Token? = null
+internal class CloudTokenManager(override val refreshToken: String) : TokenManager {
+    override var sessionToken: Token? = null
 
-    val token: String
+    override val token: String
         get() {
             return sessionToken!!.token
         }
 
-    fun tokenIsValid(): Boolean {
+    override fun tokenIsValid(): Boolean {
         return if (sessionToken == null) {
             false
         } else {

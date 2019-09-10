@@ -5,6 +5,8 @@ import com.voysis.api.Client
 import com.voysis.api.Service
 import com.voysis.api.State
 import com.voysis.api.StreamingStoppedReason
+import com.voysis.api.TokenManager
+import com.voysis.client.websocket.WebSocketClient.Companion.CLOSING
 import com.voysis.events.Callback
 import com.voysis.events.FinishedReason
 import com.voysis.events.VoysisException
@@ -17,7 +19,6 @@ import com.voysis.recorder.AudioRecorder
 import com.voysis.recorder.MimeType
 import com.voysis.recorder.OnDataResponse
 import com.voysis.setAudioProfileId
-import com.voysis.websocket.WebSocketClient.Companion.CLOSING
 import java.io.IOException
 import java.nio.ByteBuffer
 import java.nio.channels.Pipe
@@ -61,6 +62,10 @@ internal class ServiceImpl(private val client: Client,
         client.cancelStreaming()
         recorder.stop()
         state = State.IDLE
+    }
+
+    override fun close() {
+        client.close()
     }
 
     @Throws(ExecutionException::class)

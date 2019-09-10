@@ -15,6 +15,11 @@ interface AudioRecorder {
     fun start(callback: OnDataResponse)
 }
 
+interface AudioStopper {
+
+    fun onStop()
+}
+
 interface OnDataResponse {
 
     /**
