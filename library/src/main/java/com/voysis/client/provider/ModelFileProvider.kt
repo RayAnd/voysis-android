@@ -29,7 +29,7 @@ internal interface ModelFileProvider {
  * @param assetManager optional app assets manager
  */
 internal class LocalModelAssetProvider(context: Context,
-                                       private val filesDir: String = context.filesDir.toString(),
+                                       private val filesDir: String = context.filesDir.absolutePath.toString(),
                                        private val assetManager: AssetManager = context.assets) : ModelFileProvider {
 
     override fun extractModel(path: String): String {
@@ -40,13 +40,13 @@ internal class LocalModelAssetProvider(context: Context,
                 fullPath = path
                 copyFile(path)
             } else {
-                fullPath = filesDir.plus(path)
+                fullPath = filesDir.plus("/").plus(path)
                 val dir = File(fullPath)
                 fullPath = fullPath.plus("/")
                 if (!dir.exists())
                     dir.mkdir()
                 for (i in assets!!.indices) {
-                    extractModel(path + "/" + assets[i])
+                    extractModel(path.plus("/").plus(assets[i]))
                 }
             }
             return fullPath
@@ -58,8 +58,8 @@ internal class LocalModelAssetProvider(context: Context,
 
     private fun copyFile(filename: String) {
         try {
-            val newFileName = filesDir.plus(filename)
-            var copiedFileOutput = FileOutputStream(newFileName)
+            val newFileName = filesDir.plus("/").plus(filename)
+            val copiedFileOutput = FileOutputStream(newFileName)
             assetManager.open(filename).copyTo(copiedFileOutput, 4096)
             copiedFileOutput.flush()
             copiedFileOutput.close()
