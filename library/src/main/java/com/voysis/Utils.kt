@@ -7,7 +7,7 @@ import android.media.AudioManager
 import android.os.Build
 import android.util.Log
 import com.google.gson.GsonBuilder
-import com.voysis.api.Config
+import com.voysis.api.BaseConfig
 import com.voysis.model.request.Headers
 import com.voysis.recorder.AudioRecordParams
 import com.voysis.recorder.AudioRecorderImpl
@@ -96,7 +96,7 @@ fun setAudioProfileId(preferences: SharedPreferences): String {
     return uuid
 }
 
-fun generateAudioRecordParams(context: Context, config: Config): AudioRecordParams {
+fun generateAudioRecordParams(context: Context, config: BaseConfig): AudioRecordParams {
     val readBufferSize = generateReadBufferSize(config)
     val recordBufferSize = config.audioRecordParams?.recordBufferSize
             ?: AudioRecorderImpl.DEFAULT_RECORD_BUFFER_SIZE
@@ -111,7 +111,7 @@ fun generateAudioRecordParams(context: Context, config: Config): AudioRecordPara
  * @param config app config
  * @return wav specifics AudioRecordParams
  */
-fun generateAudioWavRecordParams(config: Config): AudioRecordParams {
+fun generateAudioWavRecordParams(config: BaseConfig): AudioRecordParams {
     val readBufferSize = generateReadBufferSize(config)
     val recordBufferSize = config.audioRecordParams?.recordBufferSize
             ?: AudioRecorderImpl.DEFAULT_RECORD_BUFFER_SIZE
@@ -119,7 +119,7 @@ fun generateAudioWavRecordParams(config: Config): AudioRecordParams {
     return AudioRecordParams(rate, readBufferSize, recordBufferSize)
 }
 
-fun generateReadBufferSize(config: Config): Int {
+fun generateReadBufferSize(config: BaseConfig): Int {
     return config.audioRecordParams?.readBufferSize
             ?: AudioRecorderImpl.DEFAULT_READ_BUFFER_SIZE
 }
