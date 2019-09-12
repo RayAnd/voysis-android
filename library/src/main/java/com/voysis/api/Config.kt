@@ -1,17 +1,14 @@
 package com.voysis.api
 
 import com.voysis.model.request.InteractionType
-import com.voysis.recorder.AudioRecordParams
 import java.net.URL
 
-interface Config {
+interface Config : BaseConfig {
 
     /**
      * @return refreshToken
      */
     val refreshToken: String
-
-    val userId: String?
 
     /**
      * Voice Activity Detection will automatically detect when the user stops speaking and
@@ -32,13 +29,4 @@ interface Config {
      * @return default interaction type.
      */
     val interactionType: InteractionType
-
-    /**
-     * Configurable audio parameters object used by underlying AudioRecord object.
-     * If left blank the AudioRecord object will be created using default parameters.
-     * @note It is recommended to leave this object blank unless non default values are
-     * explicitly required by a specific use case.
-     * @return audioRecordParams
-     */
-    val audioRecordParams: AudioRecordParams?
 }

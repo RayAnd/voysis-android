@@ -65,7 +65,7 @@ class ServiceProvider {
      */
     @Throws(ClassNotFoundException::class)
     fun makeLocal(context: Context,
-                  config: Config,
+                  config: LocalConfig,
                   audioRecorder: AudioRecorder = AudioRecorderImpl(generateAudioWavRecordParams(config))
     ): Service {
         val localTokenManager = object : TokenManager {
@@ -77,7 +77,7 @@ class ServiceProvider {
             }
         }
         val clientProviderClass = Class.forName("com.voysis.client.provider.LocalClientProvider")
-        val resourcesPath = LocalModelAssetProvider(context).extractModel("localResources")
+        val resourcesPath = LocalModelAssetProvider(context).extractModel(config.resourcePath)
         val clientProviderConstructor = clientProviderClass.getConstructor(resourcesPath::class.java, Config::class.java, AudioRecorder::class.java)
         val clientProviderConstructorInstance = clientProviderConstructor.newInstance(resourcesPath, config, audioRecorder) as ClientProvider
         return make(context, clientProviderConstructorInstance, config, localTokenManager, audioRecorder)
@@ -85,7 +85,7 @@ class ServiceProvider {
 
     private fun make(context: Context,
                      clientProvider: ClientProvider,
-                     config: Config,
+                     config: BaseConfig,
                      tokenManager: TokenManager,
                      audioRecorder: AudioRecorder = AudioRecorderImpl(generateAudioWavRecordParams(config)),
                      converter: Converter = Converter(getHeaders(context), Gson())
