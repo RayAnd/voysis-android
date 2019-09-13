@@ -78,7 +78,7 @@ class ServiceProvider {
         }
         val clientProviderClass = Class.forName("com.voysis.client.provider.LocalClientProvider")
         val resourcesPath = LocalModelAssetProvider(context).extractModel(config.resourcePath)
-        val clientProviderConstructor = clientProviderClass.getConstructor(resourcesPath::class.java, Config::class.java, AudioRecorder::class.java)
+        val clientProviderConstructor = clientProviderClass.getConstructor(String::class.java, LocalConfig::class.java, AudioRecorder::class.java)
         val clientProviderConstructorInstance = clientProviderConstructor.newInstance(resourcesPath, config, audioRecorder) as ClientProvider
         return make(context, clientProviderConstructorInstance, config, localTokenManager, audioRecorder)
     }
