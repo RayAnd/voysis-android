@@ -36,8 +36,8 @@ import java.util.concurrent.Executors
 
 class MainActivity : AppCompatActivity(), Callback {
 
-    private val url = "https://gary.staging.voysis.io"
-    private val config = DataConfig(isVadEnabled = true, serviceType = ServiceType.WAKEWORD, url = URL(url), refreshToken = "99f6hR6YTIBq6aU9O6i1ds7RnIXhNmSokhrPSeHFFAw5JhLZJZSU/Je6bSJjKeV7", userId = "", resourcePath = "resources")
+    private val url = "INSERT_URL"
+    private val config = DataConfig(isVadEnabled = true, serviceType = ServiceType.WAKEWORD, url = URL(url), refreshToken = "INSERT_TOKEN", userId = "", resourcePath = "resources")
     private lateinit var service: WakeWordService
     private val executor = Executors.newSingleThreadExecutor()
     private var context: Map<String, Any>? = null
