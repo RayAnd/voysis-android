@@ -2,7 +2,6 @@ package com.voysis.events
 
 import com.voysis.model.response.QueryResponse
 import com.voysis.model.response.StreamResponse
-import java.nio.ByteBuffer
 
 interface Callback {
 
@@ -16,6 +15,14 @@ interface Callback {
      * @param error provides throwable.
      */
     fun failure(error: VoysisException)
+
+    /**
+     * Note: Only called for wakeword enabled service
+     * @param state called for various states of wakeword
+     */
+    fun wakeword(state: WakeWordState) {
+        //no implementation
+    }
 
     /**
      * Called when microphone is turned on and recording begins.
@@ -37,14 +44,6 @@ interface Callback {
      * @param reason enum explaining why recording finished.
      */
     fun recordingFinished(reason: FinishedReason) {
-        //no implementation
-    }
-
-    /**
-     * Audio data recorded from microphone.
-     * @param buffer containing audio data.
-     */
-    fun audioData(buffer: ByteBuffer) {
         //no implementation
     }
 }

@@ -2,6 +2,8 @@ package com.voysis.api
 
 import android.content.Context
 import com.google.gson.Gson
+import com.voysis.client.provider.ClientProvider
+import com.voysis.client.provider.CloudClientProvider
 import com.voysis.client.provider.LocalModelAssetProvider
 import com.voysis.generateAudioRecordParams
 import com.voysis.generateAudioWavRecordParams
@@ -10,12 +12,14 @@ import com.voysis.getHeaders
 import com.voysis.model.request.Token
 import com.voysis.recorder.AudioRecorder
 import com.voysis.recorder.AudioRecorderImpl
+import com.voysis.sevice.CloudTokenManager
 import com.voysis.sevice.Converter
 import com.voysis.sevice.ServiceImpl
-import com.voysis.sevice.CloudTokenManager
-import com.voysis.client.provider.ClientProvider
-import com.voysis.client.provider.CloudClientProvider
+import com.voysis.wakeword.WakeWordDetectorImpl
+import com.voysis.wakeword.WakeWordServiceImpl
 import okhttp3.OkHttpClient
+import org.tensorflow.lite.Interpreter
+import java.io.File
 
 /**
  * The Voysis.ServiceProvider is the sdk's primary object for making Voysis.Service instances.
@@ -34,10 +38,10 @@ class ServiceProvider {
      * @return new `Service` instance
      */
     @JvmOverloads
-    fun make(context: Context,
-             config: Config,
-             okClient: OkHttpClient? = null,
-             audioRecorder: AudioRecorder = AudioRecorderImpl(generateAudioRecordParams(context, config))): Service {
+    fun makeCloud(context: Context,
+                  config: Config,
+                  okClient: OkHttpClient? = null,
+                  audioRecorder: AudioRecorder = AudioRecorderImpl(generateAudioRecordParams(context, config))): Service {
         val converter = Converter(getHeaders(context), Gson())
         val tokenManager = CloudTokenManager(config.refreshToken)
         return make(context, CloudClientProvider(config, generateOkHttpClient(okClient), converter), config, tokenManager, audioRecorder, converter)
@@ -48,10 +52,10 @@ class ServiceProvider {
      * @param audioRecorder optional to override default recorder
      * @return new `Service` instance
      */
-    fun make(context: Context,
-             config: Config,
-             audioRecorder: AudioRecorder = AudioRecorderImpl(generateAudioRecordParams(context, config))): Service {
-        return make(context, config, null, audioRecorder)
+    fun makeCloud(context: Context,
+                  config: Config,
+                  audioRecorder: AudioRecorder = AudioRecorderImpl(generateAudioRecordParams(context, config))): Service {
+        return makeCloud(context, config, null, audioRecorder)
     }
 
     /**
@@ -65,7 +69,7 @@ class ServiceProvider {
      */
     @Throws(ClassNotFoundException::class)
     fun makeLocal(context: Context,
-                  config: LocalConfig,
+                  config: BaseConfig,
                   audioRecorder: AudioRecorder = AudioRecorderImpl(generateAudioWavRecordParams(config))
     ): Service {
         val localTokenManager = object : TokenManager {
@@ -77,8 +81,8 @@ class ServiceProvider {
             }
         }
         val clientProviderClass = Class.forName("com.voysis.client.provider.LocalClientProvider")
-        val resourcesPath = LocalModelAssetProvider(context).extractModel(config.resourcePath)
-        val clientProviderConstructor = clientProviderClass.getConstructor(String::class.java, LocalConfig::class.java, AudioRecorder::class.java)
+        val resourcesPath = LocalModelAssetProvider(context).extractModel(config.resourcePath!!)
+        val clientProviderConstructor = clientProviderClass.getConstructor(String::class.java, BaseConfig::class.java, AudioRecorder::class.java)
         val clientProviderConstructorInstance = clientProviderConstructor.newInstance(resourcesPath, config, audioRecorder) as ClientProvider
         return make(context, clientProviderConstructorInstance, config, localTokenManager, audioRecorder)
     }
@@ -87,10 +91,23 @@ class ServiceProvider {
                      clientProvider: ClientProvider,
                      config: BaseConfig,
                      tokenManager: TokenManager,
-                     audioRecorder: AudioRecorder = AudioRecorderImpl(generateAudioWavRecordParams(config)),
+                     audioRecorder: AudioRecorder,
                      converter: Converter = Converter(getHeaders(context), Gson())
     ): Service {
         val client = clientProvider.createClient()
-        return ServiceImpl(client, audioRecorder, converter, config.userId, tokenManager)
+        val service = ServiceImpl(client, audioRecorder, converter, config.userId, tokenManager)
+        return when {
+            config.serviceType == ServiceType.WAKEWORD -> {
+                wakeWordServiceImpl(context, config, service)
+            }
+            else -> service
+        }
+    }
+
+    private fun wakeWordServiceImpl(context: Context, config: BaseConfig, service: ServiceImpl): WakeWordServiceImpl {
+        val resourcesPath = LocalModelAssetProvider(context).extractModel(config.resourcePath!!)
+        val interpreter = Interpreter(File("$resourcesPath/wakeword.tflite"))
+        val wakeWordDetector = WakeWordDetectorImpl(interpreter)
+        return WakeWordServiceImpl(AudioRecorderImpl(generateAudioWavRecordParams(config)), wakeWordDetector, service)
     }
 }

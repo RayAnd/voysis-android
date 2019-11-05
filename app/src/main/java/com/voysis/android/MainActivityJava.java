@@ -17,9 +17,11 @@ import com.google.gson.GsonBuilder;
 import com.voysis.api.Config;
 import com.voysis.api.Service;
 import com.voysis.api.ServiceProvider;
+import com.voysis.api.ServiceType;
 import com.voysis.events.Callback;
 import com.voysis.events.FinishedReason;
 import com.voysis.events.VoysisException;
+import com.voysis.events.WakeWordState;
 import com.voysis.model.response.QueryResponse;
 import com.voysis.model.response.StreamResponse;
 import com.voysis.sevice.DataConfig;
@@ -29,13 +31,12 @@ import org.jetbrains.annotations.NotNull;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.nio.ByteBuffer;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class MainActivityJava extends AppCompatActivity implements Callback {
 
-    private static final String TAG = MainActivityJava.class.getClass().getSimpleName();
+    private static final String TAG = MainActivityJava.class.getSimpleName();
     private ExecutorService executor = Executors.newSingleThreadExecutor();
     private Gson gson = new GsonBuilder().setPrettyPrinting().create();
     private TextView responseText;
@@ -51,9 +52,9 @@ public class MainActivityJava extends AppCompatActivity implements Callback {
         eventText = findViewById(R.id.eventText);
 
         try {
-            Config config = new DataConfig(true, new URL("INSERT_URL"), "INSERT_TOKEN", "INSERT_USERID", null, null);
+            Config config = new DataConfig(true, new URL("INSERT_URL"), "INSERT_TOKEN", "INSERT_USERID", null, null, ServiceType.DEFAULT, "");
             ServiceProvider serviceprovider = new ServiceProvider();
-            service = serviceprovider.make(this, config);
+            service = serviceprovider.makeCloud(this, config);
         } catch (MalformedURLException e) {
             Log.e(TAG, "MalformedURLException", e);
         }
@@ -76,11 +77,6 @@ public class MainActivityJava extends AppCompatActivity implements Callback {
     public void failure(@NotNull VoysisException error) {
         Log.d(TAG, "failure: ");
         setText(error.getMessage());
-    }
-
-    @Override
-    public void audioData(@NotNull ByteBuffer buffer) {
-        Log.d(TAG, "audioData:");
     }
 
     @Override
@@ -147,7 +143,7 @@ public class MainActivityJava extends AppCompatActivity implements Callback {
             @Override
             public void run() {
                 try {
-                    service.startAudioQuery(null, MainActivityJava.this, null);
+                    service.startAudioQuery(null, MainActivityJava.this, null, null);
                 } catch (IOException e) {
                     Log.e(TAG, "checkPermissionAndStartQuery: ", e);
                 }
@@ -170,5 +166,10 @@ public class MainActivityJava extends AppCompatActivity implements Callback {
                 requestPermissions(new String[] { android.Manifest.permission.RECORD_AUDIO }, 123);
             }
         }
+    }
+
+    @Override
+    public void wakeword(@NotNull WakeWordState state) {
+        setText(state.name());
     }
 }

@@ -16,29 +16,29 @@ import com.voysis.model.request.Token
 import com.voysis.model.response.QueryResponse
 import com.voysis.model.response.StreamResponse
 import com.voysis.recorder.AudioRecorder
-import com.voysis.recorder.MimeType
-import com.voysis.recorder.OnDataResponse
 import com.voysis.setAudioProfileId
 import java.io.IOException
-import java.nio.ByteBuffer
-import java.nio.channels.Pipe
+import java.nio.channels.ReadableByteChannel
 import java.util.concurrent.CancellationException
 import java.util.concurrent.ExecutionException
 import java.util.concurrent.Future
 
 internal class ServiceImpl(private val client: Client,
-                           private val recorder: AudioRecorder,
+                           private var recorder: AudioRecorder,
                            private val converter: Converter,
                            private val userId: String?,
                            private val tokenManager: TokenManager) : Service {
-    private lateinit var mimeType: MimeType
     override var state = State.IDLE
 
     @Throws(IOException::class)
-    override fun startAudioQuery(context: Map<String, Any>?, callback: Callback, interactionType: InteractionType?) {
+    override fun startAudioQuery(context: Map<String, Any>?, callback: Callback, interactionType: InteractionType?, source: AudioRecorder?) {
         if (state == State.IDLE) {
             state = State.BUSY
-            val pipe = startRecording(callback)
+            if (source != null) {
+                recorder = source
+            }
+            val pipe = recorder.start()
+            callback.recordingStarted()
             executeAudio(callback, pipe, context, interactionType)
         } else {
             callback.failure(VoysisException("duplicate request"))
@@ -91,34 +91,13 @@ internal class ServiceImpl(private val client: Client,
         return setAudioProfileId(context.getSharedPreferences("VOYSIS_PREFERENCE", Context.MODE_PRIVATE))
     }
 
-    private fun startRecording(callback: Callback): Pipe {
-        val pipe = Pipe.open()
-        val sink = pipe.sink()
-        recorder.start(object : OnDataResponse {
-            override fun onDataResponse(buffer: ByteBuffer) {
-                sink.write(buffer)
-                callback.audioData(buffer)
-            }
-
-            override fun onRecordingStarted(mimeType: MimeType) {
-                callback.recordingStarted()
-                this@ServiceImpl.mimeType = mimeType
-            }
-
-            override fun onComplete() {
-                sink.close()
-            }
-        })
-        return pipe
-    }
-
-    private fun executeAudio(callback: Callback, pipe: Pipe, context: Map<String, Any>?, interactionType: InteractionType?) {
+    private fun executeAudio(callback: Callback, source: ReadableByteChannel, context: Map<String, Any>?, interactionType: InteractionType?) {
         try {
             checkToken()
             val audioQueryResponse = executeAudioQueryRequest(callback, context, interactionType)
             // Don't do anything if cancel was called prior to streaming starting
             if (state != State.IDLE) {
-                executeStreamRequest(audioQueryResponse, pipe, callback)
+                executeStreamRequest(audioQueryResponse, source, callback)
             }
         } catch (e: Exception) {
             handleException(callback, e)
@@ -135,15 +114,15 @@ internal class ServiceImpl(private val client: Client,
     }
 
     private fun executeAudioQueryRequest(callback: Callback, context: Map<String, Any>?, interactionType: InteractionType?): QueryResponse {
-        val response = client.createAudioQuery(context, interactionType, userId, tokenManager.token, mimeType)
+        val response = client.createAudioQuery(context, interactionType, userId, tokenManager.token, recorder.mimeType()!!)
         val stringResponse = validateResponse(response.get())
         val audioQuery = converter.convertResponse(stringResponse, QueryResponse::class.java)
         callback.queryResponse(audioQuery)
         return audioQuery
     }
 
-    private fun executeStreamRequest(query: QueryResponse, pipe: Pipe, callback: Callback) {
-        val response = client.streamAudio(pipe.source(), query)
+    private fun executeStreamRequest(query: QueryResponse, source: ReadableByteChannel, callback: Callback) {
+        val response = client.streamAudio(source, query)
         checkStreamStoppedReason(response, callback)
         handleSuccess(response, callback)
     }

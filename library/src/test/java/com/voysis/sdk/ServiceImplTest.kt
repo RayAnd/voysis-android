@@ -6,7 +6,6 @@ import com.google.gson.Gson
 import com.nhaarman.mockito_kotlin.anyOrNull
 import com.nhaarman.mockito_kotlin.argThat
 import com.nhaarman.mockito_kotlin.argumentCaptor
-import com.nhaarman.mockito_kotlin.doAnswer
 import com.nhaarman.mockito_kotlin.doNothing
 import com.nhaarman.mockito_kotlin.doReturn
 import com.nhaarman.mockito_kotlin.doThrow
@@ -25,11 +24,10 @@ import com.voysis.events.VoysisException
 import com.voysis.model.request.FeedbackData
 import com.voysis.recorder.AudioRecorder
 import com.voysis.recorder.MimeType
-import com.voysis.recorder.OnDataResponse
 import com.voysis.sevice.AudioResponseFuture
+import com.voysis.sevice.CloudTokenManager
 import com.voysis.sevice.Converter
 import com.voysis.sevice.ServiceImpl
-import com.voysis.sevice.CloudTokenManager
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -38,6 +36,7 @@ import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
+import java.nio.channels.Pipe
 import java.util.concurrent.ExecutionException
 import java.util.concurrent.Future
 
@@ -46,10 +45,16 @@ class ServiceImplTest : ClientTest() {
 
     @Mock
     private lateinit var callback: Callback
+
+    private var source: Pipe.SourceChannel = mock { }
+
     @Mock
     private lateinit var client: Client
-    @Mock
-    private lateinit var manager: AudioRecorder
+
+    private var manager: AudioRecorder = mock {
+        on { start() } doReturn source
+        on { mimeType() } doReturn MimeType(1, 1, "", true, 1)
+    }
     @Mock
     private lateinit var audioQueryFuture: Future<String>
     @Mock
@@ -82,13 +87,12 @@ class ServiceImplTest : ClientTest() {
     @Throws(Exception::class)
     fun testSuccessResponse() {
         successfulExecutionResponses()
-        answerRecordingStarted()
         serviceImpl.startAudioQuery(callback = callback)
         verify(callback).recordingStarted()
         verify(callback).recordingFinished(eq(FinishedReason.VAD_RECEIVED))
         verify(callback).queryResponse(anyOrNull())
         verify(callback).success(anyOrNull())
-        verify(manager).start(anyOrNull())
+        verify(manager).start()
         verify(manager).stop()
     }
 
@@ -141,7 +145,6 @@ class ServiceImplTest : ClientTest() {
     @Test
     fun testValidFeedback() {
         successfulExecutionResponses()
-        answerRecordingStarted()
         val feedback = FeedbackData()
         serviceImpl.startAudioQuery(callback = callback)
         serviceImpl.sendFeedback("1", feedback)
@@ -186,12 +189,5 @@ class ServiceImplTest : ClientTest() {
         doNothing().whenever(editor).apply()
         serviceImpl.resetAudioProfileId(context)
         verify(editor).putString(eq("ID"), anyOrNull())
-    }
-
-    private fun answerRecordingStarted() {
-        doAnswer { invocation ->
-            (invocation.getArgument<Any>(0) as OnDataResponse).onRecordingStarted(MimeType(16000, 16, "signed-int", false, 1))
-            null
-        }.whenever(manager).start(anyOrNull())
     }
 }

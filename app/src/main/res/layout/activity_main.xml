@@ -3,9 +3,9 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:layout_margin="16dp"
     android:descendantFocusability="beforeDescendants"
     android:focusableInTouchMode="true"
-    android:layout_margin="16dp"
     android:orientation="vertical"
     tools:context="com.voysis.android.MainActivity">
 
@@ -16,16 +16,16 @@
 
     <ScrollView
         android:id="@+id/scroll"
-        android:layout_below="@+id/eventText"
-        android:layout_above="@+id/tvText"
         android:layout_width="match_parent"
-        android:layout_height="250dp">
+        android:layout_height="250dp"
+        android:layout_above="@+id/tvText"
+        android:layout_below="@+id/eventText">
 
         <TextView
             android:id="@+id/responseText"
-            android:textIsSelectable="true"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:textIsSelectable="true" />
     </ScrollView>
 
     <TextView
@@ -54,18 +54,34 @@
         android:layout_alignParentStart="true"
         android:text="Send" />
 
+    <Button
+        android:id="@+id/wakeWordStart"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/tvAudio"
+        android:layout_toLeftOf="@id/wakeWordStop"
+        android:text="Start WW" />
+
+    <Button
+        android:id="@+id/wakeWordStop"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/tvAudio"
+        android:layout_alignParentEnd="true"
+        android:text="Stop WW" />
+
     <TextView
         android:id="@+id/tvAudio"
-        android:layout_above="@+id/linearLayout"
         android:layout_width="wrap_content"
         android:layout_height="19dp"
+        android:layout_above="@+id/linearLayout"
         android:text="Audio" />
 
     <LinearLayout
         android:id="@+id/linearLayout"
         android:layout_width="match_parent"
-        android:layout_alignParentBottom="true"
         android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
         android:weightSum="3">
 
         <Button

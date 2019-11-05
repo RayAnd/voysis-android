@@ -14,4 +14,21 @@ interface BaseConfig {
      * @return audioRecordParams
      */
     val audioRecordParams: AudioRecordParams?
+
+    /**
+     * Sets type of service. Currently supported: default and wakeword.
+     * Defaut supports single utterances. Wakeword supports single utterances wrapped with wakeword
+     * functionality
+     */
+    val serviceType: ServiceType?
+
+    /**
+     * @return optional resourcePath is a reference to the necessary binary sets for local execution
+     */
+    val resourcePath: String? get() = ""
+}
+
+enum class ServiceType {
+    DEFAULT,
+    WAKEWORD
 }

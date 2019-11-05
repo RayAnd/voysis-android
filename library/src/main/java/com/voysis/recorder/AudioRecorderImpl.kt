@@ -3,9 +3,10 @@ package com.voysis.recorder
 import android.media.AudioRecord
 import android.media.AudioRecord.STATE_UNINITIALIZED
 import android.util.Log
-import com.voysis.calculateMaxRecordingLength
 import com.voysis.generateMimeType
 import java.nio.ByteBuffer
+import java.nio.channels.Pipe
+import java.nio.channels.ReadableByteChannel
 import java.util.concurrent.Executor
 import java.util.concurrent.Executors
 
@@ -13,8 +14,8 @@ class AudioRecorderImpl(
         private val recordParams: AudioRecordParams,
         private val recordFactory: () -> AudioRecord = AudioRecordFactory(recordParams)::invoke,
         private val executor: Executor = Executors.newSingleThreadExecutor()) : AudioRecorder {
-    private val maxBytes = calculateMaxRecordingLength(recordParams.sampleRate!!)
     private var record: AudioRecord? = null
+    private var pipe: Pipe? = null
 
     companion object {
         const val DEFAULT_READ_BUFFER_SIZE = 4096
@@ -22,48 +23,38 @@ class AudioRecorderImpl(
     }
 
     @Synchronized
-    override fun start(callback: OnDataResponse) {
-        stopRecorder()
-        record = recordFactory().apply {
-            startRecording()
-            callback.onRecordingStarted(generateMimeType())
+    override fun start(): ReadableByteChannel {
+        if (record == null) {
+            pipe = Pipe.open()
+            record = recordFactory()
+            record!!.startRecording()
+            executor.execute { write() }
         }
-        executor.execute { write(callback) }
+        return pipe!!.source()
     }
 
     @Synchronized
-    override fun stop() {
-        stopRecorder()
-    }
+    override fun stop() = destroyRecorder()
 
-    private fun write(callback: OnDataResponse) {
-        val buf = ByteBuffer.allocate(recordParams.readBufferSize!!)
-        buf.clear()
-        val buffer = ByteArray(recordParams.readBufferSize)
-        var bytesRead: Int
-        var limit = 0
+    override fun mimeType(): MimeType? = record?.generateMimeType()
+
+    private fun write() {
+        val sink = pipe?.sink()
         try {
-            while (isRecording() && limit < maxBytes) {
-                bytesRead = record?.read(buffer, 0, buffer.size)!!
-                if ((bytesRead >= 0 || buf.position() > 0)) {
-                    limit += bytesRead
-                    buf.put(buffer, 0, bytesRead)
-                    buf.flip()
-                    callback.onDataResponse(buf)
-                    buf.compact()
-                } else {
-                    break
-                }
+            val buffer = ByteArray(recordParams.readBufferSize!!)
+            while (isRecording()) {
+                record?.read(buffer, 0, buffer.size)
+                sink?.write(ByteBuffer.wrap(buffer))
             }
         } catch (e: Exception) {
-            Log.e("complete", e.toString())
+            Log.e("AudioRecorderImpl", e.toString(), e)
         }
-        callback.onComplete()
+        sink?.close()
     }
 
     private fun isRecording(): Boolean = record?.recordingState == AudioRecord.RECORDSTATE_RECORDING
 
-    private fun stopRecorder() {
+    private fun destroyRecorder() {
         if (record?.state != STATE_UNINITIALIZED) {
             record?.stop()
             record?.release()

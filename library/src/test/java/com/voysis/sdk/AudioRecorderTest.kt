@@ -4,7 +4,6 @@ import android.media.AudioFormat
 import android.media.AudioRecord
 import android.media.AudioRecord.RECORDSTATE_RECORDING
 import android.media.AudioRecord.RECORDSTATE_STOPPED
-import com.nhaarman.mockito_kotlin.any
 import com.nhaarman.mockito_kotlin.doAnswer
 import com.nhaarman.mockito_kotlin.doNothing
 import com.nhaarman.mockito_kotlin.doReturn
@@ -16,15 +15,15 @@ import com.voysis.generateMimeType
 import com.voysis.recorder.AudioRecordParams
 import com.voysis.recorder.AudioRecorder
 import com.voysis.recorder.AudioRecorderImpl
-import com.voysis.recorder.OnDataResponse
+import com.voysis.wakeword.WakeWordDetectorImpl
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers
 import org.mockito.Mock
-import org.mockito.Mockito.verify
 import org.mockito.junit.MockitoJUnitRunner
+import java.nio.ByteBuffer
 import java.util.concurrent.ExecutorService
 
 @RunWith(MockitoJUnitRunner::class)
@@ -32,8 +31,6 @@ class AudioRecorderTest : ClientTest() {
 
     @Mock
     private lateinit var executorService: ExecutorService
-    @Mock
-    private lateinit var onDataResposne: OnDataResponse
     @Mock
     private lateinit var factory: () -> AudioRecord
 
@@ -59,9 +56,10 @@ class AudioRecorderTest : ClientTest() {
 
     @Test
     fun testWriteLoop() {
-        audioRecorder.start(onDataResposne)
-        verify(onDataResposne).onDataResponse(any())
-        verify(onDataResposne).onComplete()
+        val buffer = ByteBuffer.allocate(WakeWordDetectorImpl.byteSampleSize)
+        val source = audioRecorder.start()
+        assertEquals(source.read(buffer) , 4096)
+        assertEquals(source.read(buffer) , -1)
     }
 
     @Test
@@ -78,7 +76,8 @@ class AudioRecorderTest : ClientTest() {
     fun testGetMimeTypeThrowException() {
         doReturn(AudioFormat.ENCODING_INVALID).whenever(record).audioFormat
         audioRecorder = spy(AudioRecorderImpl(AudioRecordParams(-1, 4096, 16000), factory, executorService))
-        audioRecorder.start(onDataResposne)
+        audioRecorder.start()
+        audioRecorder.mimeType()
     }
 
     @Test

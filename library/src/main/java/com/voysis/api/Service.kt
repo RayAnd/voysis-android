@@ -6,8 +6,8 @@ import com.voysis.events.VoysisException
 import com.voysis.model.request.FeedbackData
 import com.voysis.model.request.InteractionType
 import com.voysis.model.request.Token
+import com.voysis.recorder.AudioRecorder
 import java.io.Closeable
-
 import java.io.IOException
 import java.util.concurrent.ExecutionException
 
@@ -32,10 +32,11 @@ interface Service : Closeable {
      *
      * @param context (optional) context of previous query
      * @param callback used by client application
+     * @param source optional audio source
      * @throws IOException if reading/writing error occurs
      */
     @Throws(IOException::class)
-    fun startAudioQuery(context: Map<String, Any>? = null, callback: Callback, interactionType: InteractionType? = null)
+    fun startAudioQuery(context: Map<String, Any>? = null, callback: Callback, interactionType: InteractionType? = null, source: AudioRecorder? = null)
 
     /**
      * This method executes a text query.
@@ -45,7 +46,7 @@ interface Service : Closeable {
      * @param text query to be executed
      * @param callback used by client application
      */
-    fun sendTextQuery(context: Map<String, Any>?, text: String, callback: Callback, interactionType: InteractionType? = null)
+    fun sendTextQuery(context: Map<String, Any>? = null, text: String, callback: Callback, interactionType: InteractionType? = null)
 
     /**
      * Call to manually stop recording audio and process request
