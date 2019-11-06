@@ -1,4 +1,6 @@
---- 
+---
+before_install:
+  - yes | sdkmanager "platforms;android-29"
 android: 
   components: 
     - tools
