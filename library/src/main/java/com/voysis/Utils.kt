@@ -133,7 +133,7 @@ fun calculateMaxRecordingLength(sampleRate: Int): Int {
 
 fun generateISODate(expiresAt: String): Date {
     val format = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSX", Locale.ENGLISH)
-    return format.parse(expiresAt)
+    return format.parse(expiresAt)!!
 }
 
 fun generateRFCDate(expiresAt: String): Date {
@@ -142,5 +142,5 @@ fun generateRFCDate(expiresAt: String): Date {
         local = expiresAt.replace("Z", "+0000")
     }
     val format = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ", Locale.ENGLISH)
-    return format.parse(local)
+    return format.parse(local)!!
 }

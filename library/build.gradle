@@ -3,8 +3,8 @@ apply plugin: 'kotlin-android'
 apply from: 'ktlint.gradle'
 
 android {
-    compileSdkVersion 28
-    buildToolsVersion '28.0.3'
+    compileSdkVersion 29
+    buildToolsVersion '29.0.0'
 
 
     defaultConfig {
@@ -12,7 +12,7 @@ android {
         targetSdkVersion 29
         versionCode 5
         versionName rootProject.version
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
         debug {
