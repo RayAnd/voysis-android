@@ -14,6 +14,8 @@ class AudioRecorderImpl(
         private val recordParams: AudioRecordParams,
         private val recordFactory: () -> AudioRecord = AudioRecordFactory(recordParams)::invoke,
         private val executor: Executor = Executors.newSingleThreadExecutor()) : AudioRecorder {
+
+    private var listener: ((ByteBuffer) -> Unit)? = null
     private var record: AudioRecord? = null
     private var pipe: Pipe? = null
 
@@ -38,6 +40,10 @@ class AudioRecorderImpl(
 
     override fun mimeType(): MimeType? = record?.generateMimeType()
 
+    override fun registerWriteListener(listener: (ByteBuffer) -> Unit) {
+        this.listener = listener
+    }
+
     private fun write() {
         val sink = pipe?.sink()
         try {
@@ -45,7 +51,9 @@ class AudioRecorderImpl(
             while (isRecording()) {
                 val bytesRead = record?.read(buffer, 0, buffer.size)
                 if (bytesRead != null && bytesRead > 0) {
-                    sink?.write(ByteBuffer.wrap(buffer, 0, bytesRead))
+                    val byteBuffer = ByteBuffer.wrap(buffer, 0, bytesRead)
+                    listener?.invoke(byteBuffer)
+                    sink?.write(byteBuffer)
                 }
             }
         } catch (e: Exception) {

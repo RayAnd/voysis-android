@@ -12,6 +12,8 @@ import java.util.concurrent.Executors
 class WavAudioRecorder(var wavFile: File? = null,
                        private val executor: Executor = Executors.newSingleThreadExecutor()) : AudioRecorder {
 
+    private var listener: ((ByteBuffer) -> Unit)? = null
+
     companion object {
         const val DEFAULT_READ_BUFFER_SIZE = 4096
     }
@@ -30,6 +32,10 @@ class WavAudioRecorder(var wavFile: File? = null,
     override fun stop() {
     }
 
+    override fun registerWriteListener(listener: (ByteBuffer) -> Unit) {
+        this.listener = listener
+    }
+
     private fun write() {
         if (exists()) {
             val inputStream = wavFile!!.inputStream()
@@ -39,7 +45,9 @@ class WavAudioRecorder(var wavFile: File? = null,
                 do {
                     val bytesRead = inputStream.read(buffer, 0, buffer.size)
                     if (bytesRead > 0) {
-                        sink?.write(ByteBuffer.wrap(buffer, 0, bytesRead))
+                        val byteBuffer = ByteBuffer.wrap(buffer, 0, bytesRead)
+                        listener?.invoke(byteBuffer)
+                        sink?.write(byteBuffer)
                     }
                 } while (bytesRead >= 0)
             } catch (e: Exception) {

@@ -95,19 +95,15 @@ class ServiceProvider {
                      converter: Converter = Converter(getHeaders(context), Gson())
     ): Service {
         val client = clientProvider.createClient()
-        val service = ServiceImpl(client, audioRecorder, converter, config.userId, tokenManager)
         return when {
             config.serviceType == ServiceType.WAKEWORD -> {
-                wakeWordServiceImpl(context, config, service)
+                val resourcesPath = LocalModelAssetProvider(context).extractModel(config.resourcePath!!)
+                val interpreter = Interpreter(File("$resourcesPath/wakeword.tflite"))
+                val wakeWordDetector = WakeWordDetectorImpl(interpreter)
+                val service = ServiceImpl(client, AudioRecorderImpl(generateAudioWavRecordParams(config)), converter, config.userId, tokenManager)
+                return WakeWordServiceImpl(audioRecorder, wakeWordDetector, service)
             }
-            else -> service
+            else -> ServiceImpl(client, audioRecorder, converter, config.userId, tokenManager)
         }
-    }
-
-    private fun wakeWordServiceImpl(context: Context, config: BaseConfig, service: ServiceImpl): WakeWordServiceImpl {
-        val resourcesPath = LocalModelAssetProvider(context).extractModel(config.resourcePath!!)
-        val interpreter = Interpreter(File("$resourcesPath/wakeword.tflite"))
-        val wakeWordDetector = WakeWordDetectorImpl(interpreter)
-        return WakeWordServiceImpl(AudioRecorderImpl(generateAudioWavRecordParams(config)), wakeWordDetector, service)
     }
 }
