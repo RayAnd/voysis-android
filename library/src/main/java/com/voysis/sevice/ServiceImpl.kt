@@ -31,7 +31,7 @@ internal class ServiceImpl(private val client: Client,
     override var state = State.IDLE
 
     @Throws(IOException::class)
-    override fun startAudioQuery( callback: Callback, context: Map<String, Any>?,interactionType: InteractionType?, source: AudioRecorder?) {
+    override fun startAudioQuery(callback: Callback, context: Map<String, Any>?, interactionType: InteractionType?, source: AudioRecorder?) {
         if (state == State.IDLE) {
             state = State.BUSY
             if (source != null) {
@@ -45,7 +45,7 @@ internal class ServiceImpl(private val client: Client,
         }
     }
 
-    override fun sendTextQuery( text: String, callback: Callback, context: Map<String, Any>?, interactionType: InteractionType?) {
+    override fun sendTextQuery(text: String, callback: Callback, context: Map<String, Any>?, interactionType: InteractionType?) {
         if (state == State.IDLE) {
             state = State.BUSY
             executeText(callback, text, context, interactionType)

@@ -4,6 +4,7 @@ import android.media.AudioFormat
 import android.media.AudioRecord
 import android.media.AudioRecord.RECORDSTATE_RECORDING
 import android.media.AudioRecord.RECORDSTATE_STOPPED
+import com.nhaarman.mockito_kotlin.any
 import com.nhaarman.mockito_kotlin.doAnswer
 import com.nhaarman.mockito_kotlin.doNothing
 import com.nhaarman.mockito_kotlin.doReturn
@@ -40,6 +41,7 @@ class AudioRecorderTest : ClientTest() {
         on { recordingState } doReturn RECORDSTATE_RECORDING doReturn RECORDSTATE_STOPPED
         on { audioFormat } doReturn AudioFormat.ENCODING_PCM_16BIT
         on { sampleRate } doReturn 16000
+        on { read(any<ByteArray>(), any(), any()) } doReturn 4096
     }
 
     @Before

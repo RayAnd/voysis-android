@@ -9,6 +9,7 @@ import com.voysis.events.WakeWordState.INPROGRESS
 import org.apache.commons.collections.buffer.CircularFifoBuffer
 import org.tensorflow.lite.Interpreter
 import java.nio.ByteBuffer
+import java.nio.ByteOrder
 import java.nio.channels.ReadableByteChannel
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
@@ -80,5 +81,14 @@ internal class WakeWordDetectorImpl(private val interpreter: Interpreter, privat
         val output = IntArray(1)
         interpreter.run(input, output)
         return output[0] != 0
+    }
+
+    private fun addBytesToBuffer(source: ByteBuffer, ringBuffer: CircularFifoBuffer) {
+        val array = ByteArray(byteWindowSize)
+        source.get(array, 0, byteWindowSize)
+        val shortBuffer = ByteBuffer.wrap(array).order(ByteOrder.LITTLE_ENDIAN).asShortBuffer()
+        while (shortBuffer.hasRemaining()) {
+            ringBuffer.add(shortBuffer.get().toFloat())
+        }
     }
 }
