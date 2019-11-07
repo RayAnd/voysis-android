@@ -14,9 +14,9 @@ interface WakeWordDetector {
 
     /**
      * stops wakeword
-     * @param callback notifies user when wakeword is no longer reading from audio source
+     * @param callback (optional) notifies user when wakeword is no longer reading from audio source
      */
-    fun stop(callback: (WakeWordState) -> Unit)
+    fun stop(callback: ((WakeWordState) -> Unit)? = null)
 
     /**
      * stops wakeword without notifying user

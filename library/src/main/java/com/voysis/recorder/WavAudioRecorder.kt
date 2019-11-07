@@ -38,7 +38,9 @@ class WavAudioRecorder(var wavFile: File? = null,
             try {
                 do {
                     val bytesRead = inputStream.read(buffer, 0, buffer.size)
-                    sink?.write(ByteBuffer.wrap(buffer))
+                    if (bytesRead > 0) {
+                        sink?.write(ByteBuffer.wrap(buffer, 0, bytesRead))
+                    }
                 } while (bytesRead >= 0)
             } catch (e: Exception) {
                 Log.e("complete", e.toString())

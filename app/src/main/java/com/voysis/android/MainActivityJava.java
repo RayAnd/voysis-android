@@ -143,7 +143,7 @@ public class MainActivityJava extends AppCompatActivity implements Callback {
             @Override
             public void run() {
                 try {
-                    service.startAudioQuery(null, MainActivityJava.this, null, null);
+                    service.startAudioQuery(MainActivityJava.this, null, null, null);
                 } catch (IOException e) {
                     Log.e(TAG, "checkPermissionAndStartQuery: ", e);
                 }

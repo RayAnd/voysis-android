@@ -17,13 +17,16 @@ import java.util.concurrent.atomic.AtomicReference
 internal class WakeWordDetectorImpl(private val interpreter: Interpreter, private val executor: ExecutorService = Executors.newSingleThreadExecutor()) : WakeWordDetector {
 
     companion object {
+        //size input into the wakeword model in bytes.
         const val byteSampleSize = 48000
+        //represents the byte stride of the sliding window scale.
         const val byteWindowSize = 800
+        //actual input size for wakeword model generated converting byteArray(byteSampleSize) to float array.
         const val sampleSize = 24000
     }
 
     private var state: AtomicReference<WakeWordState> = AtomicReference(IDLE)
-    private var callback: (WakeWordState) -> Unit = {}
+    private var callback: ((WakeWordState) -> Unit)? = {}
 
     override fun isActive(): Boolean = state.get() == INPROGRESS
     override fun cancel() = state.set(CANCELLED)
@@ -37,11 +40,11 @@ internal class WakeWordDetectorImpl(private val interpreter: Interpreter, privat
         }
     }
 
-    override fun stop(callback: (WakeWordState) -> Unit) {
-        if (state.get() != CANCELLED) {
+    override fun stop(callback: ((WakeWordState) -> Unit)?) {
+        if (callback != null) {
             this.callback = callback
-            state.set(IDLE)
         }
+        state.set(IDLE)
     }
 
     private fun processWakeWord(byteChannel: ReadableByteChannel) {
@@ -69,7 +72,7 @@ internal class WakeWordDetectorImpl(private val interpreter: Interpreter, privat
 
     private fun onComplete() {
         if (state.get() != CANCELLED) {
-            callback(state.get())
+            callback?.invoke(state.get())
         }
     }
 

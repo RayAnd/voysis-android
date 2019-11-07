@@ -6,7 +6,20 @@ import com.voysis.model.request.InteractionType
 
 interface WakeWordService : Service {
 
-    fun startListening(context: Map<String, Any>? = null, callback: Callback, interactionType: InteractionType? = null)
+    /**
+     * This method kicks off wakeword detection and executes a query upon successful
+     * detection of wakeword passing the input parameters to the query execution.
+     *
+     * stages and success/fail responses are captured in the callback interface.
+     *
+     * @param callback used by client application
+     * @param context (optional) context of previous query
+     * @param interactionType (optional) server parameter determining type of interaction. current are query, chatbot
+     */
+    fun startListening(callback: Callback, context: Map<String, Any>? = null, interactionType: InteractionType? = null)
 
+    /**
+     * This method stops the wakeword service
+     */
     fun stopListening()
 }

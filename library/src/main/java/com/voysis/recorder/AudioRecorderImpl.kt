@@ -43,8 +43,10 @@ class AudioRecorderImpl(
         try {
             val buffer = ByteArray(recordParams.readBufferSize!!)
             while (isRecording()) {
-                record?.read(buffer, 0, buffer.size)
-                sink?.write(ByteBuffer.wrap(buffer))
+                val bytesRead = record?.read(buffer, 0, buffer.size)
+                if (bytesRead != null && bytesRead > 0) {
+                    sink?.write(ByteBuffer.wrap(buffer, 0, bytesRead))
+                }
             }
         } catch (e: Exception) {
             Log.e("AudioRecorderImpl", e.toString(), e)

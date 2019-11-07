@@ -36,8 +36,8 @@ import java.util.concurrent.Executors
 
 class MainActivity : AppCompatActivity(), Callback {
 
-    private val url = "INSERT_URL"
-    private val config = DataConfig(isVadEnabled = true, serviceType = ServiceType.WAKEWORD, url = URL(url), refreshToken = "INSERT_TOKEN", userId = "", resourcePath = "resources")
+    private val url = "https://gary.staging.voysis.io"
+    private val config = DataConfig(isVadEnabled = true, serviceType = ServiceType.WAKEWORD, url = URL(url), refreshToken = "99f6hR6YTIBq6aU9O6i1ds7RnIXhNmSokhrPSeHFFAw5JhLZJZSU/Je6bSJjKeV7\n", userId = "", resourcePath = "resources")
     private lateinit var service: WakeWordService
     private val executor = Executors.newSingleThreadExecutor()
     private var context: Map<String, Any>? = null
@@ -80,13 +80,13 @@ class MainActivity : AppCompatActivity(), Callback {
         stop.setOnClickListener { service.finish() }
         send.setOnClickListener { onSendClicked() }
         cancel.setOnClickListener { service.cancel() }
-        wakeWordStart.setOnClickListener { service.startListening(context = context, callback = this) }
+        wakeWordStart.setOnClickListener { service.startListening(this, context) }
         wakeWordStop.setOnClickListener { service.stopListening() }
     }
 
     private fun onSendClicked() {
         val text = textInput.text.toString()
-        executor.submit { service.sendTextQuery(context, text, this) }
+        executor.submit { service.sendTextQuery(text, this, context) }
     }
 
     private fun onStartClicked() {
@@ -109,7 +109,7 @@ class MainActivity : AppCompatActivity(), Callback {
         submitFeedback(response)
         context = response.context
         setEventText("Query Complete")
-        setResposneText(response)
+        setResponseText(response)
 
     }
 
@@ -145,7 +145,7 @@ class MainActivity : AppCompatActivity(), Callback {
         }
     }
 
-    private fun setResposneText(response: StreamResponse) {
+    private fun setResponseText(response: StreamResponse) {
         runOnUiThread {
             responseText.text = gson.toJson(response, StreamResponse::class.java)
         }

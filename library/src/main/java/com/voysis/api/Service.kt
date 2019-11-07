@@ -30,23 +30,25 @@ interface Service : Closeable {
      * Note: this method will call back to the same thread that called `startAudioQuery`
      * for more information on the websocket api calls see https://developers.voysis.com/docs
      *
-     * @param context (optional) context of previous query
      * @param callback used by client application
+     * @param context (optional) context of previous query
+     * @param interactionType (optional) server parameter. Determines type of interaction. current are query, chatbot
      * @param source optional audio source
      * @throws IOException if reading/writing error occurs
      */
     @Throws(IOException::class)
-    fun startAudioQuery(context: Map<String, Any>? = null, callback: Callback, interactionType: InteractionType? = null, source: AudioRecorder? = null)
+    fun startAudioQuery(callback: Callback, context: Map<String, Any>? = null, interactionType: InteractionType? = null, source: AudioRecorder? = null)
 
     /**
      * This method executes a text query.
      * Note: this method will call back to the same thread that called `startTextQuery`
      *
-     * @param context (optional) context of previous query
      * @param text query to be executed
      * @param callback used by client application
+     * @param context (optional) context of previous query
+     * @param interactionType (optional) server parameter. Determines type of interaction. current are query, chatbot
      */
-    fun sendTextQuery(context: Map<String, Any>? = null, text: String, callback: Callback, interactionType: InteractionType? = null)
+    fun sendTextQuery(text: String, callback: Callback, context: Map<String, Any>? = null, interactionType: InteractionType? = null)
 
     /**
      * Call to manually stop recording audio and process request

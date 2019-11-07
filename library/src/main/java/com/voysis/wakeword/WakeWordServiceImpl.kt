@@ -17,34 +17,34 @@ internal class WakeWordServiceImpl(private val recorder: AudioRecorder,
     override val state: State
         get() = serviceImpl.state
 
-    override fun startListening(context: Map<String, Any>?, callback: Callback, interactionType: InteractionType?) {
+    override fun startListening(callback: Callback, context: Map<String, Any>?, interactionType: InteractionType?) {
         if (state == State.IDLE) {
             val pipe = recorder.start()
             wakeword.listen(pipe) {
                 callback.wakeword(it)
                 if (it == WakeWordState.DETECTED) {
-                    serviceImpl.startAudioQuery(context, callback, interactionType, recorder)
+                    serviceImpl.startAudioQuery(callback, context, interactionType, recorder)
                 }
             }
         }
     }
 
     override fun stopListening() {
-        wakeword.stop { }
+        wakeword.stop()
     }
 
-    override fun startAudioQuery(context: Map<String, Any>?, callback: Callback, interactionType: InteractionType?, source: AudioRecorder?) {
+    override fun startAudioQuery(callback: Callback, context: Map<String, Any>?, interactionType: InteractionType?, source: AudioRecorder?) {
         if (wakeword.isActive()) {
             wakeword.stop {
-                serviceImpl.startAudioQuery(context, callback, interactionType, recorder)
+                serviceImpl.startAudioQuery(callback, context, interactionType, recorder)
             }
         } else {
-            serviceImpl.startAudioQuery(context, callback, interactionType, recorder)
+            serviceImpl.startAudioQuery(callback, context, interactionType, recorder)
         }
     }
 
-    override fun sendTextQuery(context: Map<String, Any>?, text: String, callback: Callback, interactionType: InteractionType?) {
-        serviceImpl.sendTextQuery(context, text, callback, interactionType)
+    override fun sendTextQuery(text: String, callback: Callback, context: Map<String, Any>?, interactionType: InteractionType?) {
+        serviceImpl.sendTextQuery(text, callback, context, interactionType)
     }
 
     override fun finish() {
