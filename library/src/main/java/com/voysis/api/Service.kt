@@ -6,7 +6,6 @@ import com.voysis.events.VoysisException
 import com.voysis.model.request.FeedbackData
 import com.voysis.model.request.InteractionType
 import com.voysis.model.request.Token
-import com.voysis.recorder.AudioRecorder
 import java.io.Closeable
 import java.io.IOException
 import java.util.concurrent.ExecutionException
@@ -33,11 +32,10 @@ interface Service : Closeable {
      * @param callback used by client application
      * @param context (optional) context of previous query
      * @param interactionType (optional) server parameter. Determines type of interaction. current are query, chatbot
-     * @param source optional audio source
      * @throws IOException if reading/writing error occurs
      */
     @Throws(IOException::class)
-    fun startAudioQuery(callback: Callback, context: Map<String, Any>? = null, interactionType: InteractionType? = null, source: AudioRecorder? = null)
+    fun startAudioQuery(callback: Callback, context: Map<String, Any>? = null, interactionType: InteractionType? = null)
 
     /**
      * This method executes a text query.

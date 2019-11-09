@@ -23,7 +23,7 @@ internal class WakeWordServiceImpl(private val recorder: AudioRecorder,
             wakeword.listen(pipe) {
                 callback.wakeword(it)
                 if (it == WakeWordState.DETECTED) {
-                    serviceImpl.startAudioQuery(callback, context, interactionType, recorder)
+                    serviceImpl.startAudioQuery(callback, context, interactionType)
                 }
             }
         }
@@ -33,13 +33,13 @@ internal class WakeWordServiceImpl(private val recorder: AudioRecorder,
         wakeword.stop()
     }
 
-    override fun startAudioQuery(callback: Callback, context: Map<String, Any>?, interactionType: InteractionType?, source: AudioRecorder?) {
+    override fun startAudioQuery(callback: Callback, context: Map<String, Any>?, interactionType: InteractionType?) {
         if (wakeword.isActive()) {
             wakeword.stop {
-                serviceImpl.startAudioQuery(callback, context, interactionType, recorder)
+                serviceImpl.startAudioQuery(callback, context, interactionType)
             }
         } else {
-            serviceImpl.startAudioQuery(callback, context, interactionType, recorder)
+            serviceImpl.startAudioQuery(callback, context, interactionType)
         }
     }
 

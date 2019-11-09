@@ -100,8 +100,9 @@ class ServiceProvider {
                 val resourcesPath = LocalModelAssetProvider(context).extractModel(config.resourcePath!!)
                 val interpreter = Interpreter(File("$resourcesPath/wakeword.tflite"))
                 val wakeWordDetector = WakeWordDetectorImpl(interpreter)
-                val service = ServiceImpl(client, AudioRecorderImpl(generateAudioWavRecordParams(config)), converter, config.userId, tokenManager)
-                return WakeWordServiceImpl(audioRecorder, wakeWordDetector, service)
+                val recorder = AudioRecorderImpl(generateAudioWavRecordParams(config))
+                val service = ServiceImpl(client, recorder, converter, config.userId, tokenManager)
+                return WakeWordServiceImpl(recorder, wakeWordDetector, service)
             }
             else -> ServiceImpl(client, audioRecorder, converter, config.userId, tokenManager)
         }

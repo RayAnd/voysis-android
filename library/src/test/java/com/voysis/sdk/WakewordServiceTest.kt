@@ -46,7 +46,7 @@ class WakewordServiceTest : ClientTest() {
     @Test
     fun testStartAudioQuery() {
         wakeWordServcie.startAudioQuery(callback = callback)
-        verify(service).startAudioQuery(callback = callback, source = manager)
+        verify(service).startAudioQuery(callback = callback)
     }
 
     @Test

@@ -24,19 +24,16 @@ import java.util.concurrent.ExecutionException
 import java.util.concurrent.Future
 
 internal class ServiceImpl(private val client: Client,
-                           private var recorder: AudioRecorder,
+                           private val recorder: AudioRecorder,
                            private val converter: Converter,
                            private val userId: String?,
                            private val tokenManager: TokenManager) : Service {
     override var state = State.IDLE
 
     @Throws(IOException::class)
-    override fun startAudioQuery(callback: Callback, context: Map<String, Any>?, interactionType: InteractionType?, source: AudioRecorder?) {
+    override fun startAudioQuery(callback: Callback, context: Map<String, Any>?, interactionType: InteractionType?) {
         if (state == State.IDLE) {
             state = State.BUSY
-            if (source != null) {
-                recorder = source
-            }
             val pipe = recorder.start()
             callback.recordingStarted()
             executeAudio(callback, pipe, context, interactionType)
@@ -159,8 +156,8 @@ internal class ServiceImpl(private val client: Client,
     private fun handleSuccess(response: Future<String>, callback: Callback) {
         val stringResponse = validateResponse(response.get())
         val streamResponse = converter.convertResponse(stringResponse, StreamResponse::class.java)
-        callback.success(streamResponse)
         state = State.IDLE
+        callback.success(streamResponse)
     }
 
     private fun handleException(callback: Callback, e: Exception) {

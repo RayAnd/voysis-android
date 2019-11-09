@@ -33,9 +33,9 @@ internal class WakeWordDetectorImpl(private val interpreter: Interpreter, privat
     override fun cancel() = state.set(CANCELLED)
 
     override fun listen(source: ReadableByteChannel, callback: (WakeWordState) -> Unit) {
+        this.callback = callback
         executor.execute {
             state.set(INPROGRESS)
-            this.callback = callback
             callback(state.get())
             processWakeWord(source)
         }
