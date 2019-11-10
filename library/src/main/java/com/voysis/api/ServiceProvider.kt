@@ -43,7 +43,7 @@ class ServiceProvider {
     fun makeCloud(context: Context,
                   config: Config,
                   okClient: OkHttpClient? = null,
-                  audioRecorder: AudioRecorder = AudioRecorderImpl(generateAudioRecordParams(context, config))): Service {
+                  audioRecorder: AudioRecorder? = null): Service {
         val converter = Converter(getHeaders(context), Gson())
         val tokenManager = CloudTokenManager(config.refreshToken)
         return make(context, CloudClientProvider(config, generateOkHttpClient(okClient), converter), config, tokenManager, audioRecorder, converter)
@@ -57,7 +57,7 @@ class ServiceProvider {
      */
     fun makeCloud(context: Context,
                   config: Config,
-                  audioRecorder: AudioRecorder = AudioRecorderImpl(generateAudioRecordParams(context, config))): Service {
+                  audioRecorder: AudioRecorder? = null): Service {
         return makeCloud(context, config, null, audioRecorder)
     }
 
@@ -74,8 +74,7 @@ class ServiceProvider {
     @Throws(ClassNotFoundException::class)
     fun makeLocal(context: Context,
                   config: BaseConfig,
-                  audioRecorder: AudioRecorder = AudioRecorderImpl(generateAudioWavRecordParams(config))
-    ): Service {
+                  audioRecorder: AudioRecorder? = null): Service {
         val localTokenManager = object : TokenManager {
             override val refreshToken: String = REFRESH_TOKEN
             override val token: String = LOCAL_TOKEN
@@ -88,25 +87,32 @@ class ServiceProvider {
         val resourcesPath = LocalModelAssetProvider(context).extractModel(config.resourcePath!!)
         val clientProviderConstructor = clientProviderClass.getConstructor(String::class.java, BaseConfig::class.java, AudioRecorder::class.java)
         val clientProviderConstructorInstance = clientProviderConstructor.newInstance(resourcesPath, config, audioRecorder) as ClientProvider
-        return make(context, clientProviderConstructorInstance, config, localTokenManager, audioRecorder)
+        return make(context, clientProviderConstructorInstance, config, localTokenManager, AudioRecorderImpl(generateAudioWavRecordParams(config)))
     }
 
     private fun make(context: Context,
                      clientProvider: ClientProvider,
                      config: BaseConfig,
                      tokenManager: TokenManager,
-                     audioRecorder: AudioRecorder,
-                     converter: Converter = Converter(getHeaders(context), Gson())
-    ): Service {
+                     audioRecorder: AudioRecorder? = null,
+                     converter: Converter = Converter(getHeaders(context), Gson())): Service {
         val client = clientProvider.createClient()
+        val recorder = generateRecorder(audioRecorder, config, context)
         return when {
             config.serviceType == ServiceType.WAKEWORD -> {
                 val wakeWordDetector = makeWakeWordDetector(context, config.resourcePath!!, DetectorType.SINGLE)
-                val recorder = AudioRecorderImpl(generateAudioWavRecordParams(config))
                 val service = ServiceImpl(client, recorder, converter, config.userId, tokenManager)
                 return WakeWordServiceImpl(recorder, wakeWordDetector, service)
             }
-            else -> ServiceImpl(client, audioRecorder, converter, config.userId, tokenManager)
+            else -> ServiceImpl(client, recorder, converter, config.userId, tokenManager)
+        }
+    }
+
+    private fun generateRecorder(audioRecorder: AudioRecorder?, config: BaseConfig, context: Context): AudioRecorder {
+        return audioRecorder ?: if (config.serviceType == ServiceType.WAKEWORD) {
+            AudioRecorderImpl(generateAudioWavRecordParams(config))
+        } else {
+            AudioRecorderImpl(generateAudioRecordParams(context, config))
         }
     }
 
