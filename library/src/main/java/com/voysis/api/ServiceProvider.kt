@@ -87,7 +87,7 @@ class ServiceProvider {
         val resourcesPath = LocalModelAssetProvider(context).extractModel(config.resourcePath!!)
         val clientProviderConstructor = clientProviderClass.getConstructor(String::class.java, BaseConfig::class.java, AudioRecorder::class.java)
         val clientProviderConstructorInstance = clientProviderConstructor.newInstance(resourcesPath, config, audioRecorder) as ClientProvider
-        return make(context, clientProviderConstructorInstance, config, localTokenManager, AudioRecorderImpl(generateAudioWavRecordParams(config)))
+        return make(context, clientProviderConstructorInstance, config, localTokenManager, audioRecorder)
     }
 
     private fun make(context: Context,
