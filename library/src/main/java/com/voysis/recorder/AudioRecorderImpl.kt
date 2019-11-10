@@ -44,6 +44,10 @@ class AudioRecorderImpl(
         this.listener = listener
     }
 
+    override fun removeWriteListener() {
+        listener = null
+    }
+
     private fun write() {
         val sink = pipe?.sink()
         try {

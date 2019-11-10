@@ -16,6 +16,8 @@ interface AudioRecorder {
      */
     fun registerWriteListener(listener: (ByteBuffer) -> Unit)
 
+    fun removeWriteListener()
+
     /**
      * @return channel containing source to read from
      */
