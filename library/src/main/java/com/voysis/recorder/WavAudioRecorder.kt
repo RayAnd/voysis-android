@@ -36,6 +36,10 @@ class WavAudioRecorder(var wavFile: File? = null,
         this.listener = listener
     }
 
+    override fun removeWriteListener() {
+        listener = null
+    }
+
     private fun write() {
         if (exists()) {
             val inputStream = wavFile!!.inputStream()
