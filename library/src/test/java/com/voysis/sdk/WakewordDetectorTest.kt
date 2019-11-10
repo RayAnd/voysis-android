@@ -47,7 +47,7 @@ class WakewordDetectorTest : ClientTest() {
         wakeWordDetector.listen(source) {
             states.add(it)
         }
-        Assert.assertEquals(states[0], WakeWordState.INPROGRESS)
+        Assert.assertEquals(states[0], WakeWordState.ACTIVE)
         Assert.assertEquals(states[1], WakeWordState.IDLE)
     }
 
@@ -60,7 +60,7 @@ class WakewordDetectorTest : ClientTest() {
         wakeWordDetector.listen(source) {
             states.add(it)
         }
-        Assert.assertEquals(states[0], WakeWordState.INPROGRESS)
+        Assert.assertEquals(states[0], WakeWordState.ACTIVE)
         Assert.assertEquals(states[1], WakeWordState.DETECTED)
     }
 

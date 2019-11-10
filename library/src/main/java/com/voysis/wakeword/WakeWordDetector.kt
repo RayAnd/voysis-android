@@ -18,10 +18,5 @@ interface WakeWordDetector {
      */
     fun stop(callback: ((WakeWordState) -> Unit)? = null)
 
-    /**
-     * stops wakeword without notifying user
-     */
-    fun cancel()
-
     fun isActive(): Boolean
 }

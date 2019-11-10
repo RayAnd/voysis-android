@@ -54,7 +54,7 @@ internal class WakeWordServiceImpl(private val recorder: AudioRecorder,
     }
 
     override fun cancel() {
-        wakeword.cancel()
+        wakeword.stop()
         serviceImpl.cancel()
     }
 

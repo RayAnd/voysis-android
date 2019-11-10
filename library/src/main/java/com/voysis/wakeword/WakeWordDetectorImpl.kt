@@ -1,11 +1,9 @@
 package com.voysis.wakeword
 
-import android.util.Log
 import com.voysis.events.WakeWordState
-import com.voysis.events.WakeWordState.CANCELLED
+import com.voysis.events.WakeWordState.ACTIVE
 import com.voysis.events.WakeWordState.DETECTED
 import com.voysis.events.WakeWordState.IDLE
-import com.voysis.events.WakeWordState.INPROGRESS
 import org.apache.commons.collections.buffer.CircularFifoBuffer
 import org.tensorflow.lite.Interpreter
 import java.nio.ByteBuffer
@@ -15,7 +13,9 @@ import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicReference
 
-internal class WakeWordDetectorImpl(private val interpreter: Interpreter, private val executor: ExecutorService = Executors.newSingleThreadExecutor()) : WakeWordDetector {
+internal class WakeWordDetectorImpl(private val interpreter: Interpreter,
+                                    private val executor: ExecutorService = Executors.newSingleThreadExecutor(),
+                                    private val single: Boolean = true) : WakeWordDetector {
 
     companion object {
         //size input into the wakeword model in bytes.
@@ -27,16 +27,16 @@ internal class WakeWordDetectorImpl(private val interpreter: Interpreter, privat
     }
 
     private var state: AtomicReference<WakeWordState> = AtomicReference(IDLE)
+
     private var callback: ((WakeWordState) -> Unit)? = {}
 
-    override fun isActive(): Boolean = state.get() == INPROGRESS
-    override fun cancel() = state.set(CANCELLED)
+    override fun isActive(): Boolean = state.get() != IDLE
 
     override fun listen(source: ReadableByteChannel, callback: (WakeWordState) -> Unit) {
         this.callback = callback
         executor.execute {
-            state.set(INPROGRESS)
-            callback(state.get())
+            state.set(ACTIVE)
+            callback.invoke(state.get())
             processWakeWord(source)
         }
     }
@@ -59,22 +59,19 @@ internal class WakeWordDetectorImpl(private val interpreter: Interpreter, privat
                     val input = ringBuffer.toArray().map { it as Float }.toFloatArray()
                     if (processWakeword(input)) {
                         state.set(DETECTED)
-                        onComplete()
-                        return
+                        callback?.invoke(state.get())
+                        ringBuffer.clear()
+                        if (single) {
+                            return
+                        }
+                        break
                     }
-                    Log.d("Wakeword", "processing")
                 }
             }
             source.compact()
         }
         state.set(IDLE)
-        onComplete()
-    }
-
-    private fun onComplete() {
-        if (state.get() != CANCELLED) {
-            callback?.invoke(state.get())
-        }
+        callback?.invoke(state.get())
     }
 
     private fun processWakeword(input: FloatArray): Boolean {
