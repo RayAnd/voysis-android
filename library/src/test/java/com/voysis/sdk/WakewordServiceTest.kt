@@ -39,7 +39,7 @@ class WakewordServiceTest : ClientTest() {
 
     @Before
     fun setup() {
-        detector = WakeWordDetectorImpl(interpereter, executorService)
+        detector = WakeWordDetectorImpl(interpereter, executor = executorService)
         wakeWordServcie = WakeWordServiceImpl(manager, detector, service)
     }
 

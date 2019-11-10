@@ -13,9 +13,9 @@ import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicReference
 
-internal class WakeWordDetectorImpl(private val interpreter: Interpreter,
-                                    private val executor: ExecutorService = Executors.newSingleThreadExecutor(),
-                                    private val single: Boolean = true) : WakeWordDetector {
+class WakeWordDetectorImpl(private val interpreter: Interpreter,
+                           private val type: DetectorType = DetectorType.SINGLE,
+                           private val executor: ExecutorService = Executors.newSingleThreadExecutor()) : WakeWordDetector {
 
     companion object {
         //size input into the wakeword model in bytes.
@@ -61,7 +61,7 @@ internal class WakeWordDetectorImpl(private val interpreter: Interpreter,
                         state.set(DETECTED)
                         callback?.invoke(state.get())
                         ringBuffer.clear()
-                        if (single) {
+                        if (type == DetectorType.SINGLE) {
                             return
                         }
                         break

@@ -15,6 +15,7 @@ import com.voysis.recorder.AudioRecorderImpl
 import com.voysis.sevice.CloudTokenManager
 import com.voysis.sevice.Converter
 import com.voysis.sevice.ServiceImpl
+import com.voysis.wakeword.DetectorType
 import com.voysis.wakeword.WakeWordDetectorImpl
 import com.voysis.wakeword.WakeWordServiceImpl
 import okhttp3.OkHttpClient
@@ -32,6 +33,7 @@ class ServiceProvider {
     }
 
     /**
+     * @param context context android context
      * @param config config
      * @param okClient optional okhttp client
      * @param audioRecorder optional to override default recorder
@@ -48,6 +50,7 @@ class ServiceProvider {
     }
 
     /**
+     * @param context context android context
      * @param config config
      * @param audioRecorder optional to override default recorder
      * @return new `Service` instance
@@ -61,6 +64,7 @@ class ServiceProvider {
     /**
      * This method will block the current thread until the models are loaded
      *
+     * @param context context android context
      * @param config config
      * @param audioRecorder optional to override default local recorder
      * @throws ClassNotFoundException if it does not find its dependencies
@@ -97,14 +101,28 @@ class ServiceProvider {
         val client = clientProvider.createClient()
         return when {
             config.serviceType == ServiceType.WAKEWORD -> {
-                val resourcesPath = LocalModelAssetProvider(context).extractModel(config.resourcePath!!)
-                val interpreter = Interpreter(File("$resourcesPath/wakeword.tflite"))
-                val wakeWordDetector = WakeWordDetectorImpl(interpreter)
+                val wakeWordDetector = makeWakeWordDetector(context, config.resourcePath!!, DetectorType.SINGLE)
                 val recorder = AudioRecorderImpl(generateAudioWavRecordParams(config))
                 val service = ServiceImpl(client, recorder, converter, config.userId, tokenManager)
                 return WakeWordServiceImpl(recorder, wakeWordDetector, service)
             }
             else -> ServiceImpl(client, audioRecorder, converter, config.userId, tokenManager)
         }
+    }
+
+    /**
+     * This method will create a wakeword detector provided the wakeword.tflite
+     * model is at the path provided. Note: path must exist within assets directory
+     *
+     * @param context context android context
+     * @param path path to wakeword model
+     * @throws type DetectorType
+     *
+     * @return new `WakeWordDetectorImpl`
+     */
+    fun makeWakeWordDetector(context: Context, path: String, type: DetectorType): WakeWordDetectorImpl {
+        val resourcesPath = LocalModelAssetProvider(context).extractModel(path)
+        val interpreter = Interpreter(File("$resourcesPath/wakeword.tflite"))
+        return WakeWordDetectorImpl(interpreter, type)
     }
 }

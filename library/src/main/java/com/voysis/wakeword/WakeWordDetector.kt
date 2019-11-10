@@ -20,3 +20,10 @@ interface WakeWordDetector {
 
     fun isActive(): Boolean
 }
+
+enum class DetectorType {
+    //wakeword will stop executing after detection freeing up audio source
+    SINGLE,
+    //wakeword will continue to execute until stopped
+    CONTINIOUS
+}

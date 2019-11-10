@@ -36,7 +36,7 @@ class WakewordDetectorTest : ClientTest() {
             (invocation.getArgument<Any>(0) as Runnable).run()
             null
         }.whenever(executorService).execute(ArgumentMatchers.any(Runnable::class.java))
-        wakeWordDetector = WakeWordDetectorImpl(interpereter, executorService)
+        wakeWordDetector = WakeWordDetectorImpl(interpereter, executor = executorService)
     }
 
     @Test
