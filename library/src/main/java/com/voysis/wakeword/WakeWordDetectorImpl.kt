@@ -24,6 +24,8 @@ class WakeWordDetectorImpl(private val interpreter: Interpreter,
         const val byteWindowSize = 800
         //actual input size for wakeword model generated converting byteArray(byteSampleSize) to float array.
         const val sampleSize = 24000
+        //the amount of positive interpreter responses must be reached before wakeword detection is returned
+        const val detectionThreshold = 7
     }
 
     private var state: AtomicReference<WakeWordState> = AtomicReference(IDLE)
@@ -51,13 +53,15 @@ class WakeWordDetectorImpl(private val interpreter: Interpreter,
     private fun processWakeWord(byteChannel: ReadableByteChannel) {
         val source = ByteBuffer.allocate(byteSampleSize)
         val ringBuffer = CircularFifoBuffer(sampleSize)
+        var count = 0
         while (byteChannel.read(source) > -1 && isActive()) {
             source.flip()
             while (source.remaining() > byteWindowSize && isActive()) {
                 addBytesToBuffer(source, ringBuffer)
                 if (ringBuffer.size >= sampleSize) {
                     val input = ringBuffer.toArray().map { it as Float }.toFloatArray()
-                    if (processWakeword(input)) {
+                    count = if (processWakeword(input)) count + 1 else 0
+                    if (count == detectionThreshold) {
                         state.set(DETECTED)
                         callback?.invoke(state.get())
                         ringBuffer.clear()
