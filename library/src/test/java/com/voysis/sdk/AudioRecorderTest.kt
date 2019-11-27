@@ -50,7 +50,7 @@ class AudioRecorderTest : ClientTest() {
             (invocation.getArgument<Any>(0) as Runnable).run()
             null
         }.whenever(executorService).execute(ArgumentMatchers.any(Runnable::class.java))
-        audioRecorder = spy(AudioRecorderImpl(source, executorService))
+        audioRecorder = spy(AudioRecorderImpl(AudioRecordParams(-1, 4096, 16000), source, executorService))
     }
 
     @Test

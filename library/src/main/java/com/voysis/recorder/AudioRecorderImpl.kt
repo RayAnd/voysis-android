@@ -8,9 +8,9 @@ import java.nio.channels.WritableByteChannel
 import java.util.concurrent.Executor
 import java.util.concurrent.Executors
 
-class AudioRecorderImpl(
-        private val source: SourceManager,
-        private val executor: Executor = Executors.newSingleThreadExecutor()) : AudioRecorder {
+class AudioRecorderImpl(recordParams: AudioRecordParams,
+                        private val source: SourceManager = SourceManager(AudioRecordFactory(recordParams), recordParams),
+                        private val executor: Executor = Executors.newSingleThreadExecutor()) : AudioRecorder {
 
     private lateinit var readChannel: ReadableByteChannel
     private var listener: ((ByteBuffer) -> Unit)? = null

@@ -5,15 +5,12 @@ import com.google.gson.Gson
 import com.voysis.client.provider.ClientProvider
 import com.voysis.client.provider.CloudClientProvider
 import com.voysis.client.provider.LocalModelAssetProvider
-import com.voysis.generateAudioRecordParams
 import com.voysis.generateAudioWavRecordParams
 import com.voysis.generateOkHttpClient
 import com.voysis.getHeaders
 import com.voysis.model.request.Token
-import com.voysis.recorder.AudioRecordFactory
 import com.voysis.recorder.AudioRecorder
 import com.voysis.recorder.AudioRecorderImpl
-import com.voysis.recorder.SourceManager
 import com.voysis.sevice.CloudTokenManager
 import com.voysis.sevice.Converter
 import com.voysis.sevice.ServiceImpl
@@ -112,11 +109,9 @@ class ServiceProvider {
 
     private fun generateRecorder(audioRecorder: AudioRecorder?, config: BaseConfig, context: Context): AudioRecorder {
         return audioRecorder ?: if (config.serviceType == ServiceType.WAKEWORD) {
-            val params = generateAudioWavRecordParams(config)
-            AudioRecorderImpl(SourceManager(AudioRecordFactory(params), params))
+            AudioRecorderImpl(generateAudioWavRecordParams(config))
         } else {
-            val params = generateAudioRecordParams(context, config)
-            AudioRecorderImpl(SourceManager(AudioRecordFactory(params), params))
+            AudioRecorderImpl(generateAudioWavRecordParams(config))
         }
     }
 
