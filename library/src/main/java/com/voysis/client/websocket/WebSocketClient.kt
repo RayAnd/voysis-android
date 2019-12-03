@@ -56,7 +56,7 @@ internal class WebSocketClient(private val config: Config,
 
     override fun sendTextQuery(context: Map<String, Any>?, interactionType: InteractionType?, text: String, userId: String?, token: String): Future<String> {
         return sendString("/queries", RequestEntity(context, interactionType
-                ?: config.interactionType, userId, null, "test", TextQuery(text = text)), token)
+                ?: config.interactionType, userId, null, "text", TextQuery(text = text)), token)
     }
 
     override fun refreshSessionToken(refreshToken: String): Future<String> {
