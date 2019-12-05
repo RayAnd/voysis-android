@@ -67,7 +67,7 @@ class WebSocketClientTest : ClientTest() {
     @Test
     fun testExecuteTextQuery() {
         webSocketClient.sendTextQuery(null, interactionType, "text", "1", "123")
-        val textEntity = """"entity":{"interactionType":"QUERY","userId":"1","queryType":"test","textQuery":{"text":"text"},"locale":"en-US"},"requestId":"2","type":"request","method":"POST"}"""
+        val textEntity = """"entity":{"interactionType":"QUERY","userId":"1","queryType":"text","textQuery":{"text":"text"},"locale":"en-US"},"requestId":"2","type":"request","method":"POST"}"""
         argumentCaptor<String>().apply {
             verify(webSocket).send(capture())
             assertTrue(firstValue.contains(textEntity))
