@@ -55,7 +55,7 @@ class AudioRecorderTest : ClientTest() {
 
     @Test
     fun testWriteLoop() {
-        val buffer = ByteBuffer.allocate(WakeWordDetectorImpl.byteSampleSize)
+        val buffer = ByteBuffer.allocate(WakeWordDetectorImpl.sourceBufferSize)
         val source = audioRecorder.start()
         assertEquals(source.read(buffer) , 4096)
         assertEquals(source.read(buffer) , -1)

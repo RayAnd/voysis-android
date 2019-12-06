@@ -83,7 +83,7 @@ class WakewordDetectorTest : ClientTest() {
     private fun fillBuffer(buffer: ByteBuffer) {
         buffer.clear()
         var i = 0
-        while (i < WakeWordDetectorImpl.byteSampleSize) {
+        while (i < WakeWordDetectorImpl.sourceBufferSize) {
             buffer.put(0)
             i++
         }

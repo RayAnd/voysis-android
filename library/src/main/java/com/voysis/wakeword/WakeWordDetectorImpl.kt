@@ -18,11 +18,15 @@ class WakeWordDetectorImpl(private val interpreter: Interpreter,
                            private val executor: ExecutorService = Executors.newSingleThreadExecutor()) : WakeWordDetector {
 
     companion object {
-        //size input into the wakeword model in bytes.
-        const val byteSampleSize = 48000
+        /*
+          Source buffer reads from byteChannel. byteChannels default size is {@link AudioRecordImpl.DEFAULT_READ_BUFFER_SIZE}
+          but may be greater depending on latency. This buffer should be sifficently large enough to
+          read all incoming bytes from byteCahnnel
+         */
+        const val sourceBufferSize = 48000
         //represents the byte stride of the sliding window scale.
         const val byteWindowSize = 800
-        //actual input size for wakeword model generated converting byteArray(byteSampleSize) to float array.
+        //input size for wakeword model.
         const val sampleSize = 24000
         //the amount of positive interpreter responses must be reached before wakeword detection is returned
         const val detectionThreshold = 7
@@ -51,7 +55,7 @@ class WakeWordDetectorImpl(private val interpreter: Interpreter,
     }
 
     private fun processWakeWord(byteChannel: ReadableByteChannel) {
-        val source = ByteBuffer.allocate(byteSampleSize)
+        val source = ByteBuffer.allocate(sourceBufferSize)
         val ringBuffer = CircularFifoBuffer(sampleSize)
         var count = 0
         while (byteChannel.read(source) > -1 && isActive()) {
