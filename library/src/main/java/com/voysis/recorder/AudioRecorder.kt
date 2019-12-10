@@ -1,6 +1,7 @@
 package com.voysis.recorder
 
 import java.nio.ByteBuffer
+import java.nio.channels.ReadableByteChannel
 
 interface AudioRecorder {
 
@@ -10,31 +11,19 @@ interface AudioRecorder {
     fun stop()
 
     /**
-     * @param callback called periodically as data is returned from the mic.
+     * Audio data from audio source.
+     * @param listener called with ByteBuffer when audio data available.
      */
-    fun start(callback: OnDataResponse)
-}
+    fun registerWriteListener(listener: (ByteBuffer) -> Unit)
 
-interface AudioStopper {
-
-    fun onStop()
-}
-
-interface OnDataResponse {
+    fun removeWriteListener()
 
     /**
-     * called when ByteBuffer fills
-     * @param buffer containing recorded audio in bytes.
+     * Will create a ReadableByteChannel to be read from and will begin writing to channel using
+     * audio source. Subsequent calls will return the same channel until stop() is called
+     * @return channel containing source to read from
      */
-    fun onDataResponse(buffer: ByteBuffer)
+    fun start(): ReadableByteChannel
 
-    /**
-     * called when microphone begins recording audio
-     */
-    fun onRecordingStarted(mimeType: MimeType)
-
-    /**
-     * called when mic record loop completes
-     */
-    fun onComplete()
+    fun mimeType(): MimeType?
 }

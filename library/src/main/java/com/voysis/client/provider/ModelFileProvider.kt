@@ -32,21 +32,21 @@ internal class LocalModelAssetProvider(context: Context,
                                        private val filesDir: String = context.filesDir.absolutePath.toString(),
                                        private val assetManager: AssetManager = context.assets) : ModelFileProvider {
 
-    override fun extractModel(path: String): String {
+    override fun extractModel(fName: String): String {
         try {
             var fullPath: String
-            val assets = assetManager.list(path)
-            if (assets.isEmpty()) {
-                fullPath = path
-                copyFile(path)
+            val assets = assetManager.list(fName)
+            if (assets!!.isEmpty()) {
+                fullPath = fName
+                copyFile(fName)
             } else {
-                fullPath = filesDir.plus("/").plus(path)
+                fullPath = filesDir.plus("/").plus(fName)
                 val dir = File(fullPath)
                 fullPath = fullPath.plus("/")
                 if (!dir.exists())
                     dir.mkdir()
-                for (i in assets!!.indices) {
-                    extractModel(path.plus("/").plus(assets[i]))
+                for (i in assets.indices) {
+                    extractModel(fName.plus("/").plus(assets[i]))
                 }
             }
             return fullPath
@@ -64,7 +64,7 @@ internal class LocalModelAssetProvider(context: Context,
             copiedFileOutput.flush()
             copiedFileOutput.close()
         } catch (e: Exception) {
-            Log.e("AssetProvider", e.message)
+            Log.e("AssetProvider", "error copying file", e)
         }
     }
 }
