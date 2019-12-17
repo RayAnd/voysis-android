@@ -1,10 +1,12 @@
 package com.voysis.sdk
 
+import com.nhaarman.mockito_kotlin.any
 import com.nhaarman.mockito_kotlin.anyOrNull
 import com.nhaarman.mockito_kotlin.doAnswer
 import com.nhaarman.mockito_kotlin.doReturn
 import com.nhaarman.mockito_kotlin.whenever
 import com.voysis.events.WakeWordState
+import com.voysis.recorder.SourceManager
 import com.voysis.wakeword.WakeWordDetector
 import com.voysis.wakeword.WakeWordDetectorImpl
 import org.junit.Assert
@@ -16,7 +18,6 @@ import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
 import org.tensorflow.lite.Interpreter
 import java.nio.ByteBuffer
-import java.nio.channels.ReadableByteChannel
 import java.util.concurrent.ExecutorService
 
 @RunWith(MockitoJUnitRunner::class)
@@ -26,7 +27,7 @@ class WakewordDetectorTest : ClientTest() {
     @Mock
     private lateinit var executorService: ExecutorService
     @Mock
-    private lateinit var source: ReadableByteChannel
+    private lateinit var source: SourceManager
     @Mock
     private lateinit var interpereter: Interpreter
 
@@ -41,7 +42,6 @@ class WakewordDetectorTest : ClientTest() {
 
     @Test
     fun testListenStateStartStop() {
-        doReturn(-1).whenever(source).read(anyOrNull())
         Assert.assertEquals(wakeWordDetector.isActive(), false)
         val states = mutableListOf<WakeWordState>()
         wakeWordDetector.listen(source) {
@@ -54,7 +54,8 @@ class WakewordDetectorTest : ClientTest() {
     @Test
     fun testListenStateDetected() {
         triggerWakeword()
-        fillBuffer()
+        doReturn(true).whenever(source).isRecording()
+        doReturn(1).whenever(source).read(any<ShortArray>(), any(), any())
         Assert.assertEquals(wakeWordDetector.isActive(), false)
         val states = mutableListOf<WakeWordState>()
         wakeWordDetector.listen(source) {
@@ -62,14 +63,6 @@ class WakewordDetectorTest : ClientTest() {
         }
         Assert.assertEquals(states[0], WakeWordState.ACTIVE)
         Assert.assertEquals(states[1], WakeWordState.DETECTED)
-    }
-
-    private fun fillBuffer() {
-        doAnswer { invocation ->
-            val buffer = (invocation.getArgument<Any>(0) as ByteBuffer)
-            fillBuffer(buffer)
-            null
-        }.whenever(source).read(anyOrNull())
     }
 
     private fun triggerWakeword() {

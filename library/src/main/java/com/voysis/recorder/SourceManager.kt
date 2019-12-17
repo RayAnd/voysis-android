@@ -25,14 +25,18 @@ class SourceManager(private var audio: AudioRecordFactory, private val recordPar
     fun isRecording(): Boolean = isActive.get() && record.recordingState == AudioRecord.RECORDSTATE_RECORDING
 
     fun destroy() {
-        if (record.state != AudioRecord.STATE_UNINITIALIZED) {
-            isActive.set(false)
+        if (::record.isInitialized && record.state != AudioRecord.STATE_UNINITIALIZED) {
             record.stop()
             record.release()
         }
+        isActive.set(false)
     }
 
     fun read(buffer: ByteArray, i: Int, size: Int): Int {
+        return record.read(buffer, i, size)
+    }
+
+    fun read(buffer: ShortArray, i: Int, size: Int): Int {
         return record.read(buffer, i, size)
     }
 }
