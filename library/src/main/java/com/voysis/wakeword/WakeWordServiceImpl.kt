@@ -19,8 +19,7 @@ internal class WakeWordServiceImpl(private val recorder: AudioRecorder,
 
     override fun startListening(callback: Callback, context: Map<String, Any>?, interactionType: InteractionType?) {
         if (state == State.IDLE) {
-            val pipe = recorder.start()
-            wakeword.listen(pipe) {
+            wakeword.listen(recorder.getSource()) {
                 callback.wakeword(it)
                 if (it == WakeWordState.DETECTED) {
                     serviceImpl.startAudioQuery(callback, context, interactionType)

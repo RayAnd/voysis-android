@@ -97,8 +97,8 @@ class ServiceProvider {
                      converter: Converter = Converter(getHeaders(context), Gson())): Service {
         val client = clientProvider.createClient()
         val recorder = generateRecorder(audioRecorder, config, context)
-        return when {
-            config.serviceType == ServiceType.WAKEWORD -> {
+        return when (config.serviceType) {
+            ServiceType.WAKEWORD -> {
                 val wakeWordDetector = makeWakeWordDetector(context, config.resourcePath!!, DetectorType.SINGLE)
                 val service = ServiceImpl(client, recorder, converter, config.userId, tokenManager)
                 return WakeWordServiceImpl(recorder, wakeWordDetector, service)

@@ -26,4 +26,6 @@ interface AudioRecorder {
     fun start(): ReadableByteChannel
 
     fun mimeType(): MimeType?
+
+    fun getSource(): SourceManager
 }

@@ -1,7 +1,7 @@
 package com.voysis.wakeword
 
 import com.voysis.events.WakeWordState
-import java.nio.channels.ReadableByteChannel
+import com.voysis.recorder.SourceManager
 
 interface WakeWordDetector {
 
@@ -10,7 +10,7 @@ interface WakeWordDetector {
      * @param source audio source used for detection
      * @param callback notifies user of wakeword state
      */
-    fun listen(source: ReadableByteChannel, callback: (WakeWordState) -> Unit)
+    fun listen(source: SourceManager, callback: (WakeWordState) -> Unit)
 
     /**
      * stops wakeword

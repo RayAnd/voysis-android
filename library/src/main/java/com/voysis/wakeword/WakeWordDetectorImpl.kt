@@ -4,11 +4,10 @@ import com.voysis.events.WakeWordState
 import com.voysis.events.WakeWordState.ACTIVE
 import com.voysis.events.WakeWordState.DETECTED
 import com.voysis.events.WakeWordState.IDLE
+import com.voysis.recorder.SourceManager
 import org.apache.commons.collections.buffer.CircularFifoBuffer
 import org.tensorflow.lite.Interpreter
-import java.nio.ByteBuffer
-import java.nio.ByteOrder
-import java.nio.channels.ReadableByteChannel
+import java.nio.ShortBuffer
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicReference
@@ -38,12 +37,12 @@ class WakeWordDetectorImpl(private val interpreter: Interpreter,
 
     override fun isActive(): Boolean = state.get() != IDLE
 
-    override fun listen(source: ReadableByteChannel, callback: (WakeWordState) -> Unit) {
+    override fun listen(source: SourceManager, callback: (WakeWordState) -> Unit) {
         this.callback = callback
         executor.execute {
             state.set(ACTIVE)
             callback.invoke(state.get())
-            processWakeWord(source)
+            processWakeWord(source, callback)
         }
     }
 
@@ -54,20 +53,23 @@ class WakeWordDetectorImpl(private val interpreter: Interpreter,
         state.set(IDLE)
     }
 
-    private fun processWakeWord(byteChannel: ReadableByteChannel) {
-        val source = ByteBuffer.allocate(sourceBufferSize)
+    private fun processWakeWord(source: SourceManager, callback: (WakeWordState) -> Unit) {
+        val buffer = ShortBuffer.allocate(byteWindowSize * 2)
         val ringBuffer = CircularFifoBuffer(sampleSize)
+        val shortArray = ShortArray(byteWindowSize)
+        source.startRecording()
         var count = 0
-        while (byteChannel.read(source) > -1 && isActive()) {
-            source.flip()
-            while (source.remaining() > byteWindowSize && isActive()) {
-                addBytesToBuffer(source, ringBuffer)
+        while (source.isRecording() && isActive()) {
+            source.read(shortArray, 0, byteWindowSize)
+            buffer.put(shortArray)
+            if (buffer.position() >= byteWindowSize) {
+                fillRingBuffer(buffer, ringBuffer)
                 if (ringBuffer.size >= sampleSize) {
                     val input = ringBuffer.toArray().map { it as Float }.toFloatArray()
                     count = if (processWakeword(input)) count + 1 else 0
                     if (count == detectionThreshold) {
                         state.set(DETECTED)
-                        callback?.invoke(state.get())
+                        callback.invoke(state.get())
                         ringBuffer.clear()
                         if (type == DetectorType.SINGLE) {
                             return
@@ -76,24 +78,21 @@ class WakeWordDetectorImpl(private val interpreter: Interpreter,
                     }
                 }
             }
-            source.compact()
         }
         state.set(IDLE)
-        callback?.invoke(state.get())
+        callback.invoke(state.get())
+    }
+
+    private fun fillRingBuffer(buffer: ShortBuffer, ringBuffer: CircularFifoBuffer) {
+        val tempArray = ShortArray(byteWindowSize)
+        buffer.get(tempArray, 0, byteWindowSize)
+        tempArray.forEach { ringBuffer.add(it.toFloat()) }
+        buffer.compact()
     }
 
     private fun processWakeword(input: FloatArray): Boolean {
         val output = IntArray(1)
         interpreter.run(input, output)
         return output[0] != 0
-    }
-
-    private fun addBytesToBuffer(source: ByteBuffer, ringBuffer: CircularFifoBuffer) {
-        val array = ByteArray(byteWindowSize)
-        source.get(array, 0, byteWindowSize)
-        val shortBuffer = ByteBuffer.wrap(array).order(ByteOrder.LITTLE_ENDIAN).asShortBuffer()
-        while (shortBuffer.hasRemaining()) {
-            ringBuffer.add(shortBuffer.get().toFloat())
-        }
     }
 }

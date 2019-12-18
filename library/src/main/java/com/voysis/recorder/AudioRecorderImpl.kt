@@ -23,11 +23,11 @@ class AudioRecorderImpl(recordParams: AudioRecordParams,
     @Synchronized
     override fun start(): ReadableByteChannel {
         if (!source.isActive()) {
-            val pipe = Pipe.open()
-            readChannel = pipe.source()
             source.startRecording()
-            executor.execute { write(pipe.sink()) }
         }
+        val pipe = Pipe.open()
+        readChannel = pipe.source()
+        executor.execute { write(pipe.sink()) }
         return readChannel
     }
 
@@ -35,6 +35,8 @@ class AudioRecorderImpl(recordParams: AudioRecordParams,
     override fun stop() = source.destroy()
 
     override fun mimeType(): MimeType? = source.generateMimeType()
+
+    override fun getSource(): SourceManager = source
 
     override fun registerWriteListener(listener: (ByteBuffer) -> Unit) {
         this.listener = listener
