@@ -7,7 +7,6 @@ import com.voysis.events.WakeWordState.IDLE
 import com.voysis.recorder.SourceManager
 import org.apache.commons.collections.buffer.CircularFifoBuffer
 import org.tensorflow.lite.Interpreter
-import java.nio.ShortBuffer
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicReference
@@ -54,16 +53,15 @@ class WakeWordDetectorImpl(private val interpreter: Interpreter,
     }
 
     private fun processWakeWord(source: SourceManager, callback: (WakeWordState) -> Unit) {
-        val buffer = ShortBuffer.allocate(byteWindowSize * 2)
         val ringBuffer = CircularFifoBuffer(sampleSize)
         val shortArray = ShortArray(byteWindowSize)
         source.startRecording()
         var count = 0
+        var bytesRead = 0
         while (source.isRecording() && isActive()) {
-            source.read(shortArray, 0, byteWindowSize)
-            buffer.put(shortArray)
-            if (buffer.position() >= byteWindowSize) {
-                fillRingBuffer(buffer, ringBuffer)
+            bytesRead += source.read(shortArray, bytesRead, byteWindowSize)
+            if (bytesRead >= byteWindowSize) {
+                shortArray.forEach { ringBuffer.add(it.toFloat()) }
                 if (ringBuffer.size >= sampleSize) {
                     val input = ringBuffer.toArray().map { it as Float }.toFloatArray()
                     count = if (processWakeword(input)) count + 1 else 0
@@ -77,17 +75,11 @@ class WakeWordDetectorImpl(private val interpreter: Interpreter,
                         break
                     }
                 }
+                bytesRead = 0
             }
         }
         state.set(IDLE)
         callback.invoke(state.get())
-    }
-
-    private fun fillRingBuffer(buffer: ShortBuffer, ringBuffer: CircularFifoBuffer) {
-        val tempArray = ShortArray(byteWindowSize)
-        buffer.get(tempArray, 0, byteWindowSize)
-        tempArray.forEach { ringBuffer.add(it.toFloat()) }
-        buffer.compact()
     }
 
     private fun processWakeword(input: FloatArray): Boolean {
