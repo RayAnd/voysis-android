@@ -28,7 +28,7 @@ class WavAudioRecorder(var wavFile: File? = null,
 
     override fun mimeType(): MimeType? = MimeType(16000, 16, "signed-int", false, 1)
 
-    override fun getSource(): SourceManager {
+    override fun getSource(): AudioSource {
         throw NotImplementedError("this operation is not permitted")
     }
 
