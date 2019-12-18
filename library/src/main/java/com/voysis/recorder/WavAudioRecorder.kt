@@ -29,7 +29,7 @@ class WavAudioRecorder(var wavFile: File? = null,
     override fun mimeType(): MimeType? = MimeType(16000, 16, "signed-int", false, 1)
 
     override fun getSource(): SourceManager {
-       throw NotImplementedError("this operation is not permitted")
+        throw NotImplementedError("this operation is not permitted")
     }
 
     @Synchronized
