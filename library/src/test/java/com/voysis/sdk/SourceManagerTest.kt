@@ -9,7 +9,7 @@ import com.nhaarman.mockito_kotlin.spy
 import com.nhaarman.mockito_kotlin.whenever
 import com.voysis.recorder.AudioRecordFactory
 import com.voysis.recorder.AudioRecordParams
-import com.voysis.recorder.SourceManager
+import com.voysis.recorder.AudioSource
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
@@ -20,7 +20,7 @@ import org.mockito.junit.MockitoJUnitRunner
 @RunWith(MockitoJUnitRunner::class)
 class SourceManagerTest : ClientTest() {
 
-    private lateinit var source: SourceManager
+    private lateinit var source: AudioSource
 
     @Mock
     private lateinit var factory: AudioRecordFactory
@@ -34,7 +34,7 @@ class SourceManagerTest : ClientTest() {
     fun setup() {
         doReturn(record).whenever(factory).make()
         doNothing().whenever(record).startRecording()
-        source = spy(SourceManager(factory, AudioRecordParams(-1, 4096, 16000)))
+        source = spy(AudioSource(factory, AudioRecordParams(-1, 4096, 16000)))
     }
 
     @Test
@@ -50,7 +50,7 @@ class SourceManagerTest : ClientTest() {
     @Test(expected = RuntimeException::class)
     fun testGetMimeTypeThrowException() {
         doReturn(AudioFormat.ENCODING_INVALID).whenever(record).audioFormat
-        val source = spy(SourceManager(factory, AudioRecordParams(-1, 4096, 16000)))
+        val source = spy(AudioSource(factory, AudioRecordParams(-1, 4096, 16000)))
         source.startRecording()
         source.generateMimeType()
     }

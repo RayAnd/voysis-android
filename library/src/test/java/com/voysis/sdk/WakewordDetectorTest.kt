@@ -6,7 +6,7 @@ import com.nhaarman.mockito_kotlin.doAnswer
 import com.nhaarman.mockito_kotlin.doReturn
 import com.nhaarman.mockito_kotlin.whenever
 import com.voysis.events.WakeWordState
-import com.voysis.recorder.SourceManager
+import com.voysis.recorder.AudioSource
 import com.voysis.wakeword.WakeWordDetector
 import com.voysis.wakeword.WakeWordDetectorImpl
 import org.junit.Assert
@@ -27,7 +27,7 @@ class WakewordDetectorTest : ClientTest() {
     @Mock
     private lateinit var executorService: ExecutorService
     @Mock
-    private lateinit var source: SourceManager
+    private lateinit var source: AudioSource
     @Mock
     private lateinit var interpereter: Interpreter
 

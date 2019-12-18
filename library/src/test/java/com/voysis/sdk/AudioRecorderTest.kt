@@ -12,7 +12,7 @@ import com.voysis.recorder.AudioRecordFactory
 import com.voysis.recorder.AudioRecordParams
 import com.voysis.recorder.AudioRecorder
 import com.voysis.recorder.AudioRecorderImpl
-import com.voysis.recorder.SourceManager
+import com.voysis.recorder.AudioSource
 import com.voysis.wakeword.WakeWordDetectorImpl
 import org.junit.Assert.assertEquals
 import org.junit.Before
@@ -30,7 +30,7 @@ class AudioRecorderTest : ClientTest() {
     @Mock
     private lateinit var executorService: ExecutorService
 
-    private lateinit var source: SourceManager
+    private lateinit var source: AudioSource
 
     private lateinit var audioRecorder: AudioRecorder
 
@@ -45,7 +45,7 @@ class AudioRecorderTest : ClientTest() {
     @Before
     fun setup() {
         doReturn(record).whenever(factory).make()
-        source = SourceManager(factory, AudioRecordParams(-1, 4096, 16000))
+        source = AudioSource(factory, AudioRecordParams(-1, 4096, 16000))
         doAnswer { invocation ->
             (invocation.getArgument<Any>(0) as Runnable).run()
             null

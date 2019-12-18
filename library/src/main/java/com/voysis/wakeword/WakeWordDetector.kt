@@ -1,7 +1,7 @@
 package com.voysis.wakeword
 
 import com.voysis.events.WakeWordState
-import com.voysis.recorder.SourceManager
+import com.voysis.recorder.AudioSource
 
 interface WakeWordDetector {
 
@@ -10,7 +10,7 @@ interface WakeWordDetector {
      * @param source audio source used for detection
      * @param callback notifies user of wakeword state
      */
-    fun listen(source: SourceManager, callback: (WakeWordState) -> Unit)
+    fun listen(source: AudioSource, callback: (WakeWordState) -> Unit)
 
     /**
      * stops wakeword

@@ -27,5 +27,5 @@ interface AudioRecorder {
 
     fun mimeType(): MimeType?
 
-    fun getSource(): SourceManager
+    fun getSource(): AudioSource
 }

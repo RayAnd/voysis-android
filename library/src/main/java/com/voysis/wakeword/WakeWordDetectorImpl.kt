@@ -4,7 +4,7 @@ import com.voysis.events.WakeWordState
 import com.voysis.events.WakeWordState.ACTIVE
 import com.voysis.events.WakeWordState.DETECTED
 import com.voysis.events.WakeWordState.IDLE
-import com.voysis.recorder.SourceManager
+import com.voysis.recorder.AudioSource
 import org.apache.commons.collections.buffer.CircularFifoBuffer
 import org.tensorflow.lite.Interpreter
 import java.util.concurrent.ExecutorService
@@ -36,7 +36,7 @@ class WakeWordDetectorImpl(private val interpreter: Interpreter,
 
     override fun isActive(): Boolean = state.get() != IDLE
 
-    override fun listen(source: SourceManager, callback: (WakeWordState) -> Unit) {
+    override fun listen(source: AudioSource, callback: (WakeWordState) -> Unit) {
         this.callback = callback
         executor.execute {
             state.set(ACTIVE)
@@ -52,7 +52,7 @@ class WakeWordDetectorImpl(private val interpreter: Interpreter,
         state.set(IDLE)
     }
 
-    private fun processWakeWord(source: SourceManager, callback: (WakeWordState) -> Unit) {
+    private fun processWakeWord(source: AudioSource, callback: (WakeWordState) -> Unit) {
         val ringBuffer = CircularFifoBuffer(sampleSize)
         val shortArray = ShortArray(byteWindowSize)
         source.startRecording()
