@@ -4,7 +4,7 @@ import android.media.AudioRecord
 import com.voysis.generateMimeType
 import java.util.concurrent.atomic.AtomicBoolean
 
-class AudioSource(private var audio: AudioRecordFactory, private val recordParams: AudioRecordParams) {
+class AudioSource(private var source: AudioRecordFactory, private val recordParams: AudioRecordParams) {
     private val isActive = AtomicBoolean(false)
     private var record: AudioRecord? = null
 
@@ -12,7 +12,7 @@ class AudioSource(private var audio: AudioRecordFactory, private val recordParam
 
     fun startRecording() {
         destroy()
-        record = audio.make()
+        record = source.make()
         record?.startRecording()
         isActive.set(true)
     }
