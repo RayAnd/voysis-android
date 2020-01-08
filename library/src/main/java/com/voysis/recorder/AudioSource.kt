@@ -11,9 +11,10 @@ class AudioSource(private var audio: AudioRecordFactory, private val recordParam
     fun isActive(): Boolean = isActive.get()
 
     fun startRecording() {
-        isActive.set(true)
+        destroy()
         record = audio.make()
         record?.startRecording()
+        isActive.set(true)
     }
 
     fun generateMimeType(): MimeType? {
