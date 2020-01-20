@@ -9,7 +9,7 @@ import java.util.concurrent.Executor
 import java.util.concurrent.Executors
 
 class AudioRecorderImpl(recordParams: AudioRecordParams,
-                        override val source: AudioSource = AudioSource(AudioRecordFactory(recordParams)),
+                        override var source: AudioSource = AudioSource(AudioRecordFactory(recordParams)),
                         private val executor: Executor = Executors.newSingleThreadExecutor()) : AudioRecorder {
 
     private lateinit var readChannel: ReadableByteChannel
