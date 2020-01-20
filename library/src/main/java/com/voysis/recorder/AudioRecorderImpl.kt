@@ -9,7 +9,7 @@ import java.util.concurrent.Executor
 import java.util.concurrent.Executors
 
 class AudioRecorderImpl(recordParams: AudioRecordParams,
-                        private val source: AudioSource = AudioSource(AudioRecordFactory(recordParams), recordParams),
+                        override val source: AudioSource = AudioSource(AudioRecordFactory(recordParams)),
                         private val executor: Executor = Executors.newSingleThreadExecutor()) : AudioRecorder {
 
     private lateinit var readChannel: ReadableByteChannel
@@ -35,8 +35,6 @@ class AudioRecorderImpl(recordParams: AudioRecordParams,
     override fun stop() = source.destroy()
 
     override fun mimeType(): MimeType? = source.generateMimeType()
-
-    override fun getSource(): AudioSource = source
 
     override fun registerWriteListener(listener: (ByteBuffer) -> Unit) {
         this.listener = listener

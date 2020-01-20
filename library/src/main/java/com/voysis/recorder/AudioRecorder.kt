@@ -5,6 +5,8 @@ import java.nio.channels.ReadableByteChannel
 
 interface AudioRecorder {
 
+    val source: AudioSource
+
     /**
      * stop recording audio
      */
@@ -26,6 +28,4 @@ interface AudioRecorder {
     fun start(): ReadableByteChannel
 
     fun mimeType(): MimeType?
-
-    fun getSource(): AudioSource
 }
