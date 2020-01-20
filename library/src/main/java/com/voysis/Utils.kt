@@ -3,20 +3,19 @@ package com.voysis
 import android.content.Context
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
-import android.media.AudioManager
 import android.os.Build
 import android.util.Log
 import com.google.gson.GsonBuilder
 import com.voysis.api.BaseConfig
 import com.voysis.model.request.Headers
 import com.voysis.recorder.AudioRecordParams
-import com.voysis.recorder.AudioRecorderImpl
+import com.voysis.recorder.AudioRecorder
 import com.voysis.sdk.BuildConfig
 import okhttp3.OkHttpClient
 import java.text.SimpleDateFormat
+import java.util.UUID
 import java.util.Date
 import java.util.Locale
-import java.util.UUID
 import java.util.concurrent.TimeUnit
 
 fun getHeaders(context: Context): Headers {
@@ -39,8 +38,8 @@ fun getClientVersionInfo(context: Context): String {
     }
     val clientInfo = mapOf(
             "os" to mapOf(
-                "id" to "Android",
-                "version" to Build.VERSION.RELEASE
+                    "id" to "Android",
+                    "version" to Build.VERSION.RELEASE
             ),
             "sdk" to mapOf(
                     "id" to "voysis-android",
@@ -96,14 +95,10 @@ fun setAudioProfileId(preferences: SharedPreferences): String {
     return uuid
 }
 
-fun generateAudioRecordParams(context: Context, config: BaseConfig): AudioRecordParams {
-    val readBufferSize = generateReadBufferSize(config)
-    val recordBufferSize = config.audioRecordParams?.recordBufferSize
-            ?: AudioRecorderImpl.DEFAULT_RECORD_BUFFER_SIZE
-
-    val audioManager: AudioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
-    val rate = config.audioRecordParams?.sampleRate
-            ?: audioManager.getProperty(AudioManager.PROPERTY_OUTPUT_SAMPLE_RATE).toInt()
+fun generateDefaultAudioWavRecordParams(): AudioRecordParams {
+    val readBufferSize = AudioRecorder.DEFAULT_READ_BUFFER_SIZE
+    val recordBufferSize = AudioRecorder.DEFAULT_RECORD_BUFFER_SIZE
+    val rate = 16000
     return AudioRecordParams(rate, readBufferSize, recordBufferSize)
 }
 
@@ -114,14 +109,14 @@ fun generateAudioRecordParams(context: Context, config: BaseConfig): AudioRecord
 fun generateAudioWavRecordParams(config: BaseConfig): AudioRecordParams {
     val readBufferSize = generateReadBufferSize(config)
     val recordBufferSize = config.audioRecordParams?.recordBufferSize
-            ?: AudioRecorderImpl.DEFAULT_RECORD_BUFFER_SIZE
+            ?: AudioRecorder.DEFAULT_RECORD_BUFFER_SIZE
     val rate = 16000
     return AudioRecordParams(rate, readBufferSize, recordBufferSize)
 }
 
 fun generateReadBufferSize(config: BaseConfig): Int {
     return config.audioRecordParams?.readBufferSize
-            ?: AudioRecorderImpl.DEFAULT_READ_BUFFER_SIZE
+            ?: AudioRecorder.DEFAULT_READ_BUFFER_SIZE
 }
 
 fun calculateMaxRecordingLength(sampleRate: Int): Int {

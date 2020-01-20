@@ -6,6 +6,7 @@ import com.voysis.client.provider.ClientProvider
 import com.voysis.client.provider.CloudClientProvider
 import com.voysis.client.provider.LocalModelAssetProvider
 import com.voysis.generateAudioWavRecordParams
+import com.voysis.generateDefaultAudioWavRecordParams
 import com.voysis.generateOkHttpClient
 import com.voysis.getHeaders
 import com.voysis.model.request.Token
@@ -73,7 +74,7 @@ class ServiceProvider {
     @Throws(ClassNotFoundException::class)
     fun makeLocal(context: Context,
                   config: BaseConfig,
-                  audioRecorder: AudioRecorder? = null): Service {
+                  audioRecorder: AudioRecorder? = AudioRecorderImpl(generateAudioWavRecordParams(config))): Service {
         val localTokenManager = object : TokenManager {
             override val refreshToken: String = REFRESH_TOKEN
             override val token: String = LOCAL_TOKEN
@@ -86,32 +87,24 @@ class ServiceProvider {
         val resourcesPath = LocalModelAssetProvider(context).extractModel(config.resourcePath!!)
         val clientProviderConstructor = clientProviderClass.getConstructor(String::class.java, BaseConfig::class.java, AudioRecorder::class.java)
         val clientProviderConstructorInstance = clientProviderConstructor.newInstance(resourcesPath, config, audioRecorder) as ClientProvider
-        return make(context, clientProviderConstructorInstance, config, localTokenManager, audioRecorder)
+        return make(context, clientProviderConstructorInstance, config, localTokenManager, audioRecorder!!)
     }
 
     private fun make(context: Context,
                      clientProvider: ClientProvider,
                      config: BaseConfig,
                      tokenManager: TokenManager,
-                     audioRecorder: AudioRecorder? = null,
+                     recorder: AudioRecorder? = null,
                      converter: Converter = Converter(getHeaders(context), Gson())): Service {
         val client = clientProvider.createClient()
-        val recorder = generateRecorder(audioRecorder, config, context)
+        val audioRecorder = recorder ?: AudioRecorderImpl(generateAudioWavRecordParams(config))
+        val service = ServiceImpl(client, audioRecorder, converter, config.userId, tokenManager)
         return when (config.serviceType) {
             ServiceType.WAKEWORD -> {
-                val wakeWordDetector = makeWakeWordDetector(context, config.resourcePath!!, DetectorType.SINGLE)
-                val service = ServiceImpl(client, recorder, converter, config.userId, tokenManager)
-                return WakeWordServiceImpl(recorder, wakeWordDetector, service)
+                val wakeWordDetector = makeWakeWordDetector(context, config.resourcePath!!, DetectorType.SINGLE, audioRecorder)
+                return WakeWordServiceImpl(wakeWordDetector, service)
             }
-            else -> ServiceImpl(client, recorder, converter, config.userId, tokenManager)
-        }
-    }
-
-    private fun generateRecorder(audioRecorder: AudioRecorder?, config: BaseConfig, context: Context): AudioRecorder {
-        return audioRecorder ?: if (config.serviceType == ServiceType.WAKEWORD) {
-            AudioRecorderImpl(generateAudioWavRecordParams(config))
-        } else {
-            AudioRecorderImpl(generateAudioWavRecordParams(config))
+            else -> service
         }
     }
 
@@ -125,9 +118,12 @@ class ServiceProvider {
      *
      * @return new `WakeWordDetectorImpl`
      */
-    fun makeWakeWordDetector(context: Context, path: String, type: DetectorType): WakeWordDetectorImpl {
+    fun makeWakeWordDetector(context: Context,
+                             path: String,
+                             type: DetectorType,
+                             recorder: AudioRecorder = AudioRecorderImpl(generateDefaultAudioWavRecordParams())): WakeWordDetectorImpl {
         val resourcesPath = LocalModelAssetProvider(context).extractModel(path)
         val interpreter = Interpreter(File("$resourcesPath/wakeword.tflite"))
-        return WakeWordDetectorImpl(interpreter, type)
+        return WakeWordDetectorImpl(recorder, interpreter, type)
     }
 }

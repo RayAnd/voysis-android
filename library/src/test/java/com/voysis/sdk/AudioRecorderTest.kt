@@ -38,14 +38,14 @@ class AudioRecorderTest : ClientTest() {
     private lateinit var factory: AudioRecordFactory
 
     private var record = mock<AudioRecord> {
-        on { recordingState } doReturn AudioRecord.RECORDSTATE_RECORDING doReturn AudioRecord.RECORDSTATE_STOPPED
         on { read(any<ByteArray>(), any(), any()) } doReturn 4096
     }
 
     @Before
     fun setup() {
         doReturn(record).whenever(factory).make()
-        source = AudioSource(factory, AudioRecordParams(-1, 4096, 16000))
+        source = spy(AudioSource(factory))
+
         doAnswer { invocation ->
             (invocation.getArgument<Any>(0) as Runnable).run()
             null
@@ -55,10 +55,12 @@ class AudioRecorderTest : ClientTest() {
 
     @Test
     fun testWriteLoop() {
+        doReturn(ByteArray(4096)).whenever(source).generateBuffer()
+        doReturn(false).doReturn(true).doReturn(false).whenever(source).isRecording()
         val buffer = ByteBuffer.allocate(WakeWordDetectorImpl.sourceBufferSize)
-        val source = audioRecorder.start()
-        assertEquals(source.read(buffer) , 4096)
-        assertEquals(source.read(buffer) , -1)
+        val byteChannel = audioRecorder.start()
+        assertEquals(byteChannel.read(buffer), 4096)
+        assertEquals(byteChannel.read(buffer), -1)
     }
 
     @Test

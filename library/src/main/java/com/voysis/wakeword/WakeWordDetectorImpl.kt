@@ -4,14 +4,15 @@ import com.voysis.events.WakeWordState
 import com.voysis.events.WakeWordState.ACTIVE
 import com.voysis.events.WakeWordState.DETECTED
 import com.voysis.events.WakeWordState.IDLE
-import com.voysis.recorder.AudioSource
+import com.voysis.recorder.AudioRecorder
 import org.apache.commons.collections.buffer.CircularFifoBuffer
 import org.tensorflow.lite.Interpreter
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicReference
 
-class WakeWordDetectorImpl(private val interpreter: Interpreter,
+class WakeWordDetectorImpl(private val recorder: AudioRecorder,
+                           private val interpreter: Interpreter,
                            private val type: DetectorType = DetectorType.SINGLE,
                            private val executor: ExecutorService = Executors.newSingleThreadExecutor()) : WakeWordDetector {
 
@@ -36,12 +37,12 @@ class WakeWordDetectorImpl(private val interpreter: Interpreter,
 
     override fun isActive(): Boolean = state.get() != IDLE
 
-    override fun listen(source: AudioSource, callback: (WakeWordState) -> Unit) {
+    override fun listen(callback: (WakeWordState) -> Unit) {
         this.callback = callback
         executor.execute {
             state.set(ACTIVE)
             callback.invoke(state.get())
-            processWakeWord(source, callback)
+            processWakeWord(callback)
         }
     }
 
@@ -52,9 +53,10 @@ class WakeWordDetectorImpl(private val interpreter: Interpreter,
         state.set(IDLE)
     }
 
-    private fun processWakeWord(source: AudioSource, callback: (WakeWordState) -> Unit) {
+    private fun processWakeWord(callback: (WakeWordState) -> Unit) {
         val ringBuffer = CircularFifoBuffer(sampleSize)
         val shortArray = ShortArray(byteWindowSize)
+        val source = recorder.source
         source.startRecording()
         var count = 0
         var bytesRead = 0
@@ -72,7 +74,6 @@ class WakeWordDetectorImpl(private val interpreter: Interpreter,
                         if (type == DetectorType.SINGLE) {
                             return
                         }
-                        break
                     }
                 }
                 bytesRead = 0

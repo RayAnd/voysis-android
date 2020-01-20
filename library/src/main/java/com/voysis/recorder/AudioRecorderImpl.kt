@@ -9,20 +9,15 @@ import java.util.concurrent.Executor
 import java.util.concurrent.Executors
 
 class AudioRecorderImpl(recordParams: AudioRecordParams,
-                        private val source: AudioSource = AudioSource(AudioRecordFactory(recordParams), recordParams),
+                        override val source: AudioSource = AudioSource(AudioRecordFactory(recordParams)),
                         private val executor: Executor = Executors.newSingleThreadExecutor()) : AudioRecorder {
 
     private lateinit var readChannel: ReadableByteChannel
     private var listener: ((ByteBuffer) -> Unit)? = null
 
-    companion object {
-        const val DEFAULT_READ_BUFFER_SIZE = 4096
-        const val DEFAULT_RECORD_BUFFER_SIZE = 16384
-    }
-
     @Synchronized
     override fun start(): ReadableByteChannel {
-        if (!source.isActive()) {
+        if (!source.isRecording()) {
             source.startRecording()
         }
         val pipe = Pipe.open()
@@ -35,8 +30,6 @@ class AudioRecorderImpl(recordParams: AudioRecordParams,
     override fun stop() = source.destroy()
 
     override fun mimeType(): MimeType? = source.generateMimeType()
-
-    override fun getSource(): AudioSource = source
 
     override fun registerWriteListener(listener: (ByteBuffer) -> Unit) {
         this.listener = listener
