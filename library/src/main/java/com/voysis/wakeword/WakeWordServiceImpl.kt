@@ -8,10 +8,8 @@ import com.voysis.events.WakeWordState
 import com.voysis.model.request.FeedbackData
 import com.voysis.model.request.InteractionType
 import com.voysis.model.request.Token
-import com.voysis.recorder.AudioRecorder
 
-internal class WakeWordServiceImpl(private val recorder: AudioRecorder,
-                                   private val wakeword: WakeWordDetector,
+internal class WakeWordServiceImpl(private val wakeword: WakeWordDetector,
                                    private val serviceImpl: Service) : WakeWordService {
 
     override val state: State
@@ -19,7 +17,7 @@ internal class WakeWordServiceImpl(private val recorder: AudioRecorder,
 
     override fun startListening(callback: Callback, context: Map<String, Any>?, interactionType: InteractionType?) {
         if (state == State.IDLE) {
-            wakeword.listen(recorder.getSource()) {
+            wakeword.listen {
                 callback.wakeword(it)
                 if (it == WakeWordState.DETECTED) {
                     serviceImpl.startAudioQuery(callback, context, interactionType)

@@ -31,16 +31,15 @@ class WakewordServiceTest : ClientTest() {
     @Mock
     private lateinit var interpereter: Interpreter
     @Mock
-    private lateinit var manager: AudioRecorder
+    private lateinit var recorder: AudioRecorder
 
     private lateinit var detector: WakeWordDetector
-
     private lateinit var wakeWordServcie: WakeWordServiceImpl
 
     @Before
     fun setup() {
-        detector = WakeWordDetectorImpl(interpereter, executor = executorService)
-        wakeWordServcie = WakeWordServiceImpl(manager, detector, service)
+        detector = WakeWordDetectorImpl(recorder, interpereter, executor = executorService)
+        wakeWordServcie = WakeWordServiceImpl(detector, service)
     }
 
     @Test

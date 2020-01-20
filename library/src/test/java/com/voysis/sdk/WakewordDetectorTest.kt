@@ -6,6 +6,8 @@ import com.nhaarman.mockito_kotlin.doAnswer
 import com.nhaarman.mockito_kotlin.doReturn
 import com.nhaarman.mockito_kotlin.whenever
 import com.voysis.events.WakeWordState
+import com.voysis.generateDefaultAudioWavRecordParams
+import com.voysis.recorder.AudioRecorderImpl
 import com.voysis.recorder.AudioSource
 import com.voysis.wakeword.WakeWordDetector
 import com.voysis.wakeword.WakeWordDetectorImpl
@@ -26,10 +28,14 @@ class WakewordDetectorTest : ClientTest() {
     private lateinit var wakeWordDetector: WakeWordDetector
     @Mock
     private lateinit var executorService: ExecutorService
+
     @Mock
     private lateinit var source: AudioSource
+
     @Mock
     private lateinit var interpereter: Interpreter
+
+    private var params = generateDefaultAudioWavRecordParams()
 
     @Before
     fun setup() {
@@ -37,14 +43,15 @@ class WakewordDetectorTest : ClientTest() {
             (invocation.getArgument<Any>(0) as Runnable).run()
             null
         }.whenever(executorService).execute(ArgumentMatchers.any(Runnable::class.java))
-        wakeWordDetector = WakeWordDetectorImpl(interpereter, executor = executorService)
+        val recorder = AudioRecorderImpl(params, source)
+        wakeWordDetector = WakeWordDetectorImpl(recorder, interpereter, executor = executorService)
     }
 
     @Test
     fun testListenStateStartStop() {
         Assert.assertEquals(wakeWordDetector.isActive(), false)
         val states = mutableListOf<WakeWordState>()
-        wakeWordDetector.listen(source) {
+        wakeWordDetector.listen {
             states.add(it)
         }
         Assert.assertEquals(states[0], WakeWordState.ACTIVE)
@@ -58,7 +65,7 @@ class WakewordDetectorTest : ClientTest() {
         doReturn(1).whenever(source).read(any<ShortArray>(), any(), any())
         Assert.assertEquals(wakeWordDetector.isActive(), false)
         val states = mutableListOf<WakeWordState>()
-        wakeWordDetector.listen(source) {
+        wakeWordDetector.listen {
             states.add(it)
         }
         Assert.assertEquals(states[0], WakeWordState.ACTIVE)
