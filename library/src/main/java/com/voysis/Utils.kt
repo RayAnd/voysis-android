@@ -10,7 +10,6 @@ import com.voysis.api.BaseConfig
 import com.voysis.model.request.Headers
 import com.voysis.recorder.AudioRecordParams
 import com.voysis.recorder.AudioRecorder
-import com.voysis.recorder.AudioRecorderImpl
 import com.voysis.sdk.BuildConfig
 import okhttp3.OkHttpClient
 import java.text.SimpleDateFormat

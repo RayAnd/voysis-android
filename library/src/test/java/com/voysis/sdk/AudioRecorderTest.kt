@@ -45,8 +45,7 @@ class AudioRecorderTest : ClientTest() {
     fun setup() {
         doReturn(record).whenever(factory).make()
         source = spy(AudioSource(factory))
-        doReturn(ByteArray(4096)).whenever(source).generateBuffer()
-        doReturn(true).doReturn(false).whenever(source).isRecording()
+
         doAnswer { invocation ->
             (invocation.getArgument<Any>(0) as Runnable).run()
             null
@@ -56,6 +55,8 @@ class AudioRecorderTest : ClientTest() {
 
     @Test
     fun testWriteLoop() {
+        doReturn(ByteArray(4096)).whenever(source).generateBuffer()
+        doReturn(false).doReturn(true).doReturn(false).whenever(source).isRecording()
         val buffer = ByteBuffer.allocate(WakeWordDetectorImpl.sourceBufferSize)
         val byteChannel = audioRecorder.start()
         assertEquals(byteChannel.read(buffer), 4096)
