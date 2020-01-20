@@ -1,7 +1,6 @@
 package com.voysis.recorder
 
 interface Source {
-    fun isActive(): Boolean
     fun startRecording()
     fun generateMimeType(): MimeType?
     fun generateBuffer(): ByteArray

@@ -9,6 +9,7 @@ import com.google.gson.GsonBuilder
 import com.voysis.api.BaseConfig
 import com.voysis.model.request.Headers
 import com.voysis.recorder.AudioRecordParams
+import com.voysis.recorder.AudioRecorder
 import com.voysis.recorder.AudioRecorderImpl
 import com.voysis.sdk.BuildConfig
 import okhttp3.OkHttpClient
@@ -96,8 +97,8 @@ fun setAudioProfileId(preferences: SharedPreferences): String {
 }
 
 fun generateDefaultAudioWavRecordParams(): AudioRecordParams {
-    val readBufferSize = AudioRecorderImpl.DEFAULT_READ_BUFFER_SIZE
-    val recordBufferSize = AudioRecorderImpl.DEFAULT_RECORD_BUFFER_SIZE
+    val readBufferSize = AudioRecorder.DEFAULT_READ_BUFFER_SIZE
+    val recordBufferSize = AudioRecorder.DEFAULT_RECORD_BUFFER_SIZE
     val rate = 16000
     return AudioRecordParams(rate, readBufferSize, recordBufferSize)
 }
@@ -109,14 +110,14 @@ fun generateDefaultAudioWavRecordParams(): AudioRecordParams {
 fun generateAudioWavRecordParams(config: BaseConfig): AudioRecordParams {
     val readBufferSize = generateReadBufferSize(config)
     val recordBufferSize = config.audioRecordParams?.recordBufferSize
-            ?: AudioRecorderImpl.DEFAULT_RECORD_BUFFER_SIZE
+            ?: AudioRecorder.DEFAULT_RECORD_BUFFER_SIZE
     val rate = 16000
     return AudioRecordParams(rate, readBufferSize, recordBufferSize)
 }
 
 fun generateReadBufferSize(config: BaseConfig): Int {
     return config.audioRecordParams?.readBufferSize
-            ?: AudioRecorderImpl.DEFAULT_READ_BUFFER_SIZE
+            ?: AudioRecorder.DEFAULT_READ_BUFFER_SIZE
 }
 
 fun calculateMaxRecordingLength(sampleRate: Int): Int {

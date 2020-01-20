@@ -2,19 +2,14 @@ package com.voysis.recorder
 
 import android.media.AudioRecord
 import com.voysis.generateMimeType
-import java.util.concurrent.atomic.AtomicBoolean
 
 class AudioSource(private var source: AudioRecordFactory) : Source {
-    private val isActive = AtomicBoolean(false)
     private var record: AudioRecord? = null
-
-    override fun isActive(): Boolean = isActive.get()
 
     override fun startRecording() {
         destroy()
         record = source.make()
         record?.startRecording()
-        isActive.set(true)
     }
 
     override fun generateMimeType(): MimeType? {
@@ -23,7 +18,7 @@ class AudioSource(private var source: AudioRecordFactory) : Source {
 
     override fun generateBuffer(): ByteArray = ByteArray(source.recordParams.readBufferSize!!)
 
-    override fun isRecording(): Boolean = isActive.get() && record?.recordingState == AudioRecord.RECORDSTATE_RECORDING
+    override fun isRecording(): Boolean = record?.recordingState == AudioRecord.RECORDSTATE_RECORDING
 
     @Synchronized
     override fun destroy() {
@@ -31,7 +26,7 @@ class AudioSource(private var source: AudioRecordFactory) : Source {
             record?.stop()
             record?.release()
         }
-        isActive.set(false)
+        record = null
     }
 
     override fun read(buffer: ByteArray, i: Int, size: Int): Int {

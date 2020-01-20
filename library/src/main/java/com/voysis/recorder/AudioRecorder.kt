@@ -5,6 +5,11 @@ import java.nio.channels.ReadableByteChannel
 
 interface AudioRecorder {
 
+    companion object {
+        const val DEFAULT_READ_BUFFER_SIZE = 4096
+        const val DEFAULT_RECORD_BUFFER_SIZE = 16384
+    }
+
     val source: AudioSource
 
     /**

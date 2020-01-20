@@ -15,14 +15,9 @@ class AudioRecorderImpl(recordParams: AudioRecordParams,
     private lateinit var readChannel: ReadableByteChannel
     private var listener: ((ByteBuffer) -> Unit)? = null
 
-    companion object {
-        const val DEFAULT_READ_BUFFER_SIZE = 4096
-        const val DEFAULT_RECORD_BUFFER_SIZE = 16384
-    }
-
     @Synchronized
     override fun start(): ReadableByteChannel {
-        if (!source.isActive()) {
+        if (!source.isRecording()) {
             source.startRecording()
         }
         val pipe = Pipe.open()

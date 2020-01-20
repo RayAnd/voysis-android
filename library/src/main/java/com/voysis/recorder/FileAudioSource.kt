@@ -1,15 +1,13 @@
 package com.voysis.recorder
 
-import com.voysis.recorder.AudioRecorderImpl.Companion.DEFAULT_READ_BUFFER_SIZE
+import com.voysis.recorder.AudioRecorder.Companion.DEFAULT_READ_BUFFER_SIZE
 import java.io.File
 import java.io.InputStream
 
 class FileAudioSource(var wavFile: File? = null) : Source {
 
     private var inputStream: InputStream? = null
-    private var bytesRead = 1
-
-    override fun isActive(): Boolean = false
+    private var bytesRead = 0
 
     override fun startRecording() {
         inputStream = wavFile!!.inputStream()
@@ -20,7 +18,7 @@ class FileAudioSource(var wavFile: File? = null) : Source {
     override fun generateBuffer(): ByteArray = ByteArray(DEFAULT_READ_BUFFER_SIZE)
 
     override fun isRecording(): Boolean {
-        return bytesRead > 0
+        return bytesRead > -1
     }
 
     override fun destroy() {
