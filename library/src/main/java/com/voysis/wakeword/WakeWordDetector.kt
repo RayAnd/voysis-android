@@ -11,10 +11,18 @@ interface WakeWordDetector {
     fun listen(callback: (WakeWordState) -> Unit)
 
     /**
-     * stops wakeword
+     * Stops wakeword detection on source input. Note: Often a user will want to continue using
+     * the same source once detection has completed. This method stops the detection loop, freeing
+     * up the source for further use. Note: This method does not close the source input.
      * @param callback (optional) notifies user when wakeword is no longer reading from audio source
      */
-    fun stop(callback: ((WakeWordState) -> Unit)? = null)
+    fun stopDetection(callback: ((WakeWordState) -> Unit)? = null)
+
+    /**
+     * Closes the source recorder input. If WakeWordDetector is used in isolation, ie: outside wakewordService
+     * the source will need to be closed once the user has finished with detection.
+     */
+    fun closeSource()
 
     fun isActive(): Boolean
 }

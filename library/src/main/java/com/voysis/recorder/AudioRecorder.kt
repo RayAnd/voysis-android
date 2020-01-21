@@ -10,7 +10,7 @@ interface AudioRecorder {
         const val DEFAULT_RECORD_BUFFER_SIZE = 16384
     }
 
-    var source: AudioSource
+    var source: Source
 
     /**
      * stop recording audio

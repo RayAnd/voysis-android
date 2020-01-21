@@ -15,7 +15,6 @@ class WakeWordDetectorImpl(private val recorder: AudioRecorder,
                            private val interpreter: Interpreter,
                            private val type: DetectorType = DetectorType.SINGLE,
                            private val executor: ExecutorService = Executors.newSingleThreadExecutor()) : WakeWordDetector {
-
     companion object {
         /*
           Source buffer reads from byteChannel. byteChannels default size is {@link AudioRecordImpl.DEFAULT_READ_BUFFER_SIZE}
@@ -46,11 +45,15 @@ class WakeWordDetectorImpl(private val recorder: AudioRecorder,
         }
     }
 
-    override fun stop(callback: ((WakeWordState) -> Unit)?) {
+    override fun stopDetection(callback: ((WakeWordState) -> Unit)?) {
         if (callback != null) {
             this.callback = callback
         }
         state.set(IDLE)
+    }
+
+    override fun closeSource() {
+        recorder.stop()
     }
 
     private fun processWakeWord(callback: (WakeWordState) -> Unit) {

@@ -27,12 +27,12 @@ internal class WakeWordServiceImpl(private val wakeword: WakeWordDetector,
     }
 
     override fun stopListening() {
-        wakeword.stop()
+        wakeword.stopDetection()
     }
 
     override fun startAudioQuery(callback: Callback, context: Map<String, Any>?, interactionType: InteractionType?) {
         if (wakeword.isActive()) {
-            wakeword.stop {
+            wakeword.stopDetection {
                 serviceImpl.startAudioQuery(callback, context, interactionType)
             }
         } else {
@@ -51,7 +51,7 @@ internal class WakeWordServiceImpl(private val wakeword: WakeWordDetector,
     }
 
     override fun cancel() {
-        wakeword.stop()
+        wakeword.stopDetection()
         serviceImpl.cancel()
     }
 
