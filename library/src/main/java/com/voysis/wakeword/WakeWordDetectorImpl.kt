@@ -14,8 +14,7 @@ import java.util.concurrent.atomic.AtomicReference
 class WakeWordDetectorImpl(private val recorder: AudioRecorder,
                            private val interpreter: Interpreter,
                            private val type: DetectorType = DetectorType.SINGLE,
-                           private val executor: ExecutorService = Executors.newSingleThreadExecutor()) : WakeWordDetector  {
-
+                           private val executor: ExecutorService = Executors.newSingleThreadExecutor()) : WakeWordDetector {
     companion object {
         /*
           Source buffer reads from byteChannel. byteChannels default size is {@link AudioRecordImpl.DEFAULT_READ_BUFFER_SIZE}
