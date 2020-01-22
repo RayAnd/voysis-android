@@ -2,15 +2,17 @@ package com.voysis.recorder
 
 import com.voysis.recorder.AudioRecorder.Companion.DEFAULT_READ_BUFFER_SIZE
 import java.io.File
+import java.io.IOException
 import java.io.InputStream
 
 class FileAudioSource(var wavFile: File? = null) : Source {
 
     private var inputStream: InputStream? = null
-    private var bytesRead = 0
+    private var bytesRead = -1
 
     override fun startRecording() {
         inputStream = wavFile!!.inputStream()
+        bytesRead = 0
     }
 
     override fun generateMimeType(): MimeType? = MimeType(16000, 16, "signed-int", false, 1)
@@ -26,11 +28,16 @@ class FileAudioSource(var wavFile: File? = null) : Source {
     }
 
     override fun read(buffer: ByteArray, i: Int, size: Int): Int {
-        bytesRead = inputStream?.read(buffer, 0, buffer.size)!!
+        try {
+            bytesRead = inputStream?.read(buffer, 0, buffer.size)!!
+        } catch (e: IOException) {
+            return -1
+        }
         return bytesRead
     }
 
     override fun read(buffer: ShortArray, i: Int, size: Int): Int {
+        //InputStream implementation only reads to byteArray
         return bytesRead
     }
 }
