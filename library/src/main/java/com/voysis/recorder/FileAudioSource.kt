@@ -29,7 +29,7 @@ class FileAudioSource(var wavFile: File? = null) : Source {
 
     @Throws(IOException::class)
     override fun read(buffer: ByteArray, i: Int, size: Int): Int {
-        val bytesRead = inputStream?.get()?.read(buffer, 0, buffer.size)!!
+        val bytesRead = inputStream?.get()?.read(buffer, 0, buffer.size) ?: -1
         if (bytesRead <= -1) {
             destroy()
         }
