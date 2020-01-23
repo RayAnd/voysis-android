@@ -2,15 +2,16 @@ package com.voysis.recorder
 
 import com.voysis.recorder.AudioRecorder.Companion.DEFAULT_READ_BUFFER_SIZE
 import java.io.File
+import java.io.IOException
 import java.io.InputStream
+import java.util.concurrent.atomic.AtomicReference
 
 class FileAudioSource(var wavFile: File? = null) : Source {
 
-    private var inputStream: InputStream? = null
-    private var bytesRead = 0
+    private var inputStream: AtomicReference<InputStream>? = null
 
     override fun startRecording() {
-        inputStream = wavFile!!.inputStream()
+        inputStream = AtomicReference(wavFile!!.inputStream())
     }
 
     override fun generateMimeType(): MimeType? = MimeType(16000, 16, "signed-int", false, 1)
@@ -18,19 +19,24 @@ class FileAudioSource(var wavFile: File? = null) : Source {
     override fun generateBuffer(): ByteArray = ByteArray(DEFAULT_READ_BUFFER_SIZE)
 
     override fun isRecording(): Boolean {
-        return bytesRead > -1
+        return inputStream?.get() != null
     }
 
     override fun destroy() {
-        inputStream?.close()
+        val stream = inputStream?.getAndSet(null)
+        stream?.close()
     }
 
+    @Throws(IOException::class)
     override fun read(buffer: ByteArray, i: Int, size: Int): Int {
-        bytesRead = inputStream?.read(buffer, 0, buffer.size)!!
+        val bytesRead = inputStream?.get()?.read(buffer, 0, buffer.size) ?: -1
+        if (bytesRead <= -1) {
+            destroy()
+        }
         return bytesRead
     }
 
     override fun read(buffer: ShortArray, i: Int, size: Int): Int {
-        return bytesRead
+        throw NotImplementedError("InputStream implementation only reads to byteArray")
     }
 }
