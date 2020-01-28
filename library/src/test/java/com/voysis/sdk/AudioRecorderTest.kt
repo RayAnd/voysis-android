@@ -1,11 +1,13 @@
 package com.voysis.sdk
 
 import android.media.AudioRecord
-import com.nhaarman.mockito_kotlin.*
 import com.nhaarman.mockito_kotlin.any
+import com.nhaarman.mockito_kotlin.doAnswer
 import com.nhaarman.mockito_kotlin.doReturn
+import com.nhaarman.mockito_kotlin.mock
 import com.nhaarman.mockito_kotlin.spy
 import com.nhaarman.mockito_kotlin.whenever
+import com.nhaarman.mockito_kotlin.argumentCaptor
 import com.voysis.calculateMaxRecordingLength
 import com.voysis.metrics.AudioSaver
 import com.voysis.recorder.AudioRecordFactory
@@ -14,16 +16,13 @@ import com.voysis.recorder.AudioRecorder
 import com.voysis.recorder.AudioRecorderImpl
 import com.voysis.recorder.AudioSource
 import com.voysis.wakeword.WakeWordDetectorImpl
-import org.junit.Assert.*
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers
 import org.mockito.Mock
-import org.mockito.Mockito
-import org.mockito.Mockito.*
-import org.mockito.Mockito.argThat
 import org.mockito.Mockito.verify
 import org.mockito.junit.MockitoJUnitRunner
 import java.nio.ByteBuffer
