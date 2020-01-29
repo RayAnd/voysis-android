@@ -87,7 +87,7 @@ class AudioRecorderTest : ClientTest() {
         audioRecorder.invokeListener(shortArrayOf(312, 432))
         val captor = argumentCaptor<ByteBuffer>()
         verify(audioSaver).write(captor.capture())
-        assertEquals(4,captor.firstValue.array().size)
+        assertEquals(4, captor.firstValue.array().size)
         assertTrue(expectedBuffer.array().contentEquals(captor.firstValue.array()))
     }
 }
