@@ -23,7 +23,7 @@ class WakeWordDetectorImpl(private val recorder: AudioRecorder,
          */
         const val sourceBufferSize = 48000
         //represents the byte stride of the sliding window scale.
-        const val byteWindowSize = 800
+        const val sampleWindowSize = 800
         //input size for wakeword model.
         const val sampleSize = 24000
         //the amount of positive interpreter responses must be reached before wakeword detection is returned
@@ -58,15 +58,15 @@ class WakeWordDetectorImpl(private val recorder: AudioRecorder,
 
     private fun processWakeWord(callback: (WakeWordState) -> Unit) {
         val ringBuffer = CircularFifoBuffer(sampleSize)
-        val shortArray = ShortArray(byteWindowSize)
+        val shortArray = ShortArray(sampleWindowSize)
         val source = recorder.source
         source.startRecording()
         var count = 0
-        var bytesRead = 0
+        var samplesRead = 0
         while (source.isRecording() && isActive()) {
-            bytesRead += source.read(shortArray, bytesRead, byteWindowSize)
-            recorder.invokeListener(shortArray)
-            if (bytesRead >= byteWindowSize) {
+            samplesRead = source.read(shortArray, samplesRead, sampleWindowSize - samplesRead)
+            if (samplesRead >= sampleWindowSize) {
+                recorder.invokeListener(shortArray)
                 shortArray.forEach { ringBuffer.add(it.toFloat()) }
                 if (ringBuffer.size >= sampleSize) {
                     val input = ringBuffer.toArray().map { it as Float }.toFloatArray()
@@ -80,7 +80,7 @@ class WakeWordDetectorImpl(private val recorder: AudioRecorder,
                         }
                     }
                 }
-                bytesRead = 0
+                samplesRead = 0
             }
         }
         state.set(IDLE)

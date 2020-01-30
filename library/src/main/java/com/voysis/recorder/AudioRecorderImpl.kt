@@ -59,9 +59,11 @@ class AudioRecorderImpl(recordParams: AudioRecordParams,
 
     override fun invokeListener(array: ShortArray) {
         listener?.let {
-            val byteArray = ByteArray(array.size * 2)
-            ByteBuffer.wrap(byteArray).order(ByteOrder.LITTLE_ENDIAN).asShortBuffer().put(array)
-            it.invoke(ByteBuffer.wrap(byteArray))
+            val byteArray = ByteArray(array.size * Short.SIZE_BYTES)
+            val buf = ByteBuffer.wrap(byteArray).order(ByteOrder.LITTLE_ENDIAN)
+            buf.asShortBuffer().put(array)
+            buf.position(0).limit(array.size * Short.SIZE_BYTES)
+            it.invoke(buf)
         }
     }
 }
