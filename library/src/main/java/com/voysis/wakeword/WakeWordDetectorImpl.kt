@@ -22,7 +22,7 @@ class WakeWordDetectorImpl(private val recorder: AudioRecorder,
           read all incoming bytes from byteCahnnel
          */
         const val sourceBufferSize = 48000
-        //represents the byte stride of the sliding window scale.
+        //represents the sample size of the sliding window scale.
         const val sampleWindowSize = 800
         //input size for wakeword model.
         const val sampleSize = 24000
