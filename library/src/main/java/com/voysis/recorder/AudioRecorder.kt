@@ -33,4 +33,6 @@ interface AudioRecorder {
     fun start(): ReadableByteChannel
 
     fun mimeType(): MimeType?
+
+    fun invokeListener(array: ShortArray)
 }

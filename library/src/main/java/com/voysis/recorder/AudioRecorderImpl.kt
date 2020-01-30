@@ -2,6 +2,7 @@ package com.voysis.recorder
 
 import android.util.Log
 import java.nio.ByteBuffer
+import java.nio.ByteOrder
 import java.nio.channels.Pipe
 import java.nio.channels.ReadableByteChannel
 import java.nio.channels.WritableByteChannel
@@ -54,5 +55,15 @@ class AudioRecorderImpl(recordParams: AudioRecordParams,
             Log.e("AudioRecorderImpl", e.toString(), e)
         }
         sink.close()
+    }
+
+    override fun invokeListener(array: ShortArray) {
+        listener?.let {
+            val byteArray = ByteArray(array.size * Short.SIZE_BYTES)
+            val buf = ByteBuffer.wrap(byteArray).order(ByteOrder.LITTLE_ENDIAN)
+            buf.asShortBuffer().put(array)
+            buf.position(0).limit(array.size * Short.SIZE_BYTES)
+            it.invoke(buf)
+        }
     }
 }

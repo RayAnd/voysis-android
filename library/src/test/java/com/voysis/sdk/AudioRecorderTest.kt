@@ -4,10 +4,12 @@ import android.media.AudioRecord
 import com.nhaarman.mockito_kotlin.any
 import com.nhaarman.mockito_kotlin.doAnswer
 import com.nhaarman.mockito_kotlin.doReturn
-import com.nhaarman.mockito_kotlin.mock
 import com.nhaarman.mockito_kotlin.spy
 import com.nhaarman.mockito_kotlin.whenever
+import com.nhaarman.mockito_kotlin.argumentCaptor
+import com.nhaarman.mockito_kotlin.mock
 import com.voysis.calculateMaxRecordingLength
+import com.voysis.metrics.AudioSaver
 import com.voysis.recorder.AudioRecordFactory
 import com.voysis.recorder.AudioRecordParams
 import com.voysis.recorder.AudioRecorder
@@ -15,13 +17,17 @@ import com.voysis.recorder.AudioRecorderImpl
 import com.voysis.recorder.AudioSource
 import com.voysis.wakeword.WakeWordDetectorImpl
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers
 import org.mockito.Mock
+import org.mockito.Mockito.mock
+import org.mockito.Mockito.verify
 import org.mockito.junit.MockitoJUnitRunner
 import java.nio.ByteBuffer
+import java.nio.ByteOrder
 import java.util.concurrent.ExecutorService
 
 @RunWith(MockitoJUnitRunner::class)
@@ -68,5 +74,20 @@ class AudioRecorderTest : ClientTest() {
         assertEquals(320000, calculateMaxRecordingLength(16000))
         assertEquals(820000, calculateMaxRecordingLength(41000))
         assertEquals(960000, calculateMaxRecordingLength(48000))
+    }
+
+    @Test
+    fun testInvokeListener() {
+        val audioSaver = mock(AudioSaver::class.java)
+        val expectedBuffer = ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN)
+        expectedBuffer.putShort(312)
+        expectedBuffer.putShort(432)
+        audioRecorder.registerWriteListener { audioSaver.write(it) }
+
+        audioRecorder.invokeListener(shortArrayOf(312, 432))
+        val captor = argumentCaptor<ByteBuffer>()
+        verify(audioSaver).write(captor.capture())
+        assertEquals(4, captor.firstValue.array().size)
+        assertTrue(expectedBuffer.array().contentEquals(captor.firstValue.array()))
     }
 }
