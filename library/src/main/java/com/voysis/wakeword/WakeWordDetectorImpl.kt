@@ -64,7 +64,7 @@ class WakeWordDetectorImpl(private val recorder: AudioRecorder,
         var count = 0
         var samplesRead = 0
         while (source.isRecording() && isActive()) {
-            samplesRead = source.read(shortArray, samplesRead, sampleWindowSize - samplesRead)
+            samplesRead += source.read(shortArray, samplesRead, sampleWindowSize - samplesRead)
             if (samplesRead >= sampleWindowSize) {
                 recorder.invokeListener(shortArray)
                 shortArray.forEach { ringBuffer.add(it.toFloat()) }
