@@ -59,8 +59,8 @@ class WakeWordDetectorImpl(private val recorder: AudioRecorder,
                     ringBuffer.add(shortArray[i].toFloat())
                 }
                 if (ringBuffer.size >= config.sampleSize) {
-                    val result = processWakeword(ringBuffer, interpreter)
-                    countQueue.add(isAboveThreshold(result, config.probThreshold))
+                    val output = processWakeword(ringBuffer, interpreter)
+                    countQueue.add(isAboveThreshold(output, config.probThreshold))
                     if (detected(countQueue, config.thresholdCount)) {
                         state.set(DETECTED)
                         callback?.invoke(state.get())
