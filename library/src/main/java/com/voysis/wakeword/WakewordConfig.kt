@@ -7,5 +7,5 @@ data class WakewordConfig(
         val sampleSize: Int = 24000,
         //interpreter output needs to be above this threshold in order for activation to be recognised
         val probThreshold: Float = 0.55f,
-        //ammount of activations that need to be registered before detection registered
+        //amount of activations that need to be registered before detection registered
         val thresholdCount: Int = 11)
