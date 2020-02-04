@@ -14,21 +14,8 @@ import java.util.concurrent.atomic.AtomicReference
 class WakeWordDetectorImpl(private val recorder: AudioRecorder,
                            private val interpreter: Interpreter,
                            private val type: DetectorType = DetectorType.SINGLE,
-                           private val executor: ExecutorService = Executors.newSingleThreadExecutor()) : WakeWordDetector {
-    companion object {
-        /*
-          Source buffer reads from byteChannel. byteChannels default size is {@link AudioRecordImpl.DEFAULT_READ_BUFFER_SIZE}
-          but may be greater depending on latency. This buffer should be sifficently large enough to
-          read all incoming bytes from byteCahnnel
-         */
-        const val sourceBufferSize = 48000
-        //represents the sample size of the sliding window scale.
-        const val sampleWindowSize = 800
-        //input size for wakeword model.
-        const val sampleSize = 24000
-        //the amount of positive interpreter responses must be reached before wakeword detection is returned
-        const val detectionThreshold = 7
-    }
+                           private val executor: ExecutorService = Executors.newSingleThreadExecutor(),
+                           private val wakewordConfig: WakewordConfig = WakewordConfig()) : WakeWordDetector {
 
     private var state: AtomicReference<WakeWordState> = AtomicReference(IDLE)
 
@@ -57,21 +44,24 @@ class WakeWordDetectorImpl(private val recorder: AudioRecorder,
     }
 
     private fun processWakeWord(callback: (WakeWordState) -> Unit) {
-        val ringBuffer = CircularFifoBuffer(sampleSize)
-        val shortArray = ShortArray(sampleWindowSize)
+        val ringBuffer = CircularFifoBuffer(wakewordConfig.sampleSize)
+        val shortArray = ShortArray(wakewordConfig.sampleWindowSize)
         val source = recorder.source
         source.startRecording()
         var count = 0
         var samplesRead = 0
         while (source.isRecording() && isActive()) {
-            samplesRead += source.read(shortArray, samplesRead, sampleWindowSize - samplesRead)
-            if (samplesRead >= sampleWindowSize) {
+            val requestedSamplesSize = getRequestedSampleSize(ringBuffer, samplesRead)
+            samplesRead += source.read(shortArray, samplesRead, requestedSamplesSize)
+            if (samplesRead >= wakewordConfig.sampleWindowSize || ringBuffer.size + samplesRead == wakewordConfig.sampleSize) {
                 recorder.invokeListener(shortArray)
-                shortArray.forEach { ringBuffer.add(it.toFloat()) }
-                if (ringBuffer.size >= sampleSize) {
+                for (i in 0 until requestedSamplesSize) {
+                    ringBuffer.add(shortArray[i].toFloat())
+                }
+                if (ringBuffer.size >= wakewordConfig.sampleSize) {
                     val input = ringBuffer.toArray().map { it as Float }.toFloatArray()
                     count = if (processWakeword(input)) count + 1 else 0
-                    if (count == detectionThreshold) {
+                    if (count == wakewordConfig.detectionThreshold) {
                         state.set(DETECTED)
                         callback.invoke(state.get())
                         ringBuffer.clear()
@@ -91,5 +81,11 @@ class WakeWordDetectorImpl(private val recorder: AudioRecorder,
         val output = IntArray(1)
         interpreter.run(input, output)
         return output[0] != 0
+    }
+
+    private fun getRequestedSampleSize(ringBuffer: CircularFifoBuffer, samplesRead: Int) = if (!ringBuffer.isFull && ringBuffer.size + (wakewordConfig.sampleWindowSize - samplesRead) > wakewordConfig.sampleSize) {
+        wakewordConfig.sampleSize - ringBuffer.size
+    } else {
+        wakewordConfig.sampleWindowSize - samplesRead
     }
 }
