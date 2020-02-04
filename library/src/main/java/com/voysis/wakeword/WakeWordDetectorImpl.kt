@@ -28,7 +28,7 @@ class WakeWordDetectorImpl(private val recorder: AudioRecorder,
         executor.execute {
             state.set(ACTIVE)
             callback.invoke(state.get())
-            processWakeWord(callback)
+            processWakeWord()
         }
     }
 
@@ -43,7 +43,7 @@ class WakeWordDetectorImpl(private val recorder: AudioRecorder,
         recorder.stop()
     }
 
-    private fun processWakeWord(callback: (WakeWordState) -> Unit) {
+    private fun processWakeWord() {
         val ringBuffer = CircularFifoBuffer(wakewordConfig.sampleSize)
         val shortArray = ShortArray(wakewordConfig.sampleWindowSize)
         val source = recorder.source
@@ -63,7 +63,7 @@ class WakeWordDetectorImpl(private val recorder: AudioRecorder,
                     count = if (processWakeword(input)) count + 1 else 0
                     if (count == wakewordConfig.detectionThreshold) {
                         state.set(DETECTED)
-                        callback.invoke(state.get())
+                        callback?.invoke(state.get())
                         ringBuffer.clear()
                         if (type == DetectorType.SINGLE) {
                             return
@@ -74,7 +74,7 @@ class WakeWordDetectorImpl(private val recorder: AudioRecorder,
             }
         }
         state.set(IDLE)
-        callback.invoke(state.get())
+        callback?.invoke(state.get())
     }
 
     private fun processWakeword(input: FloatArray): Boolean {

@@ -162,13 +162,13 @@ internal class ServiceImpl(private val client: Client,
 
     private fun handleException(callback: Callback, e: Exception) {
         recorder.stop()
+        state = State.IDLE
         recordingFinishedCheck(callback, e)
         when {
             e is VoysisException -> callback.failure(e)
             e.cause is VoysisException -> callback.failure(e.cause as VoysisException)
             else -> callback.failure(VoysisException(e))
         }
-        state = State.IDLE
     }
 
     //If cancellation exception is thrown at any stage before recording finishes we track the callback here
