@@ -15,7 +15,6 @@ import com.voysis.recorder.AudioRecordParams
 import com.voysis.recorder.AudioRecorder
 import com.voysis.recorder.AudioRecorderImpl
 import com.voysis.recorder.AudioSource
-import com.voysis.wakeword.WakeWordDetectorImpl
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -63,7 +62,7 @@ class AudioRecorderTest : ClientTest() {
     fun testWriteLoop() {
         doReturn(ByteArray(4096)).whenever(source).generateBuffer()
         doReturn(false).doReturn(true).doReturn(false).whenever(source).isRecording()
-        val buffer = ByteBuffer.allocate(WakeWordDetectorImpl.sourceBufferSize)
+        val buffer = ByteBuffer.allocate(48000)
         val byteChannel = audioRecorder.start()
         assertEquals(byteChannel.read(buffer), 4096)
         assertEquals(byteChannel.read(buffer), -1)

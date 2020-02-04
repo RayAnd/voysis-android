@@ -11,6 +11,7 @@ import com.voysis.recorder.AudioRecorderImpl
 import com.voysis.recorder.AudioSource
 import com.voysis.wakeword.WakeWordDetector
 import com.voysis.wakeword.WakeWordDetectorImpl
+import com.voysis.wakeword.WakewordConfig
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
@@ -19,7 +20,6 @@ import org.mockito.ArgumentMatchers
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
 import org.tensorflow.lite.Interpreter
-import java.nio.ByteBuffer
 import java.util.concurrent.ExecutorService
 
 @RunWith(MockitoJUnitRunner::class)
@@ -59,10 +59,22 @@ class WakewordDetectorTest : ClientTest() {
     }
 
     @Test
-    fun testListenStateDetected() {
-        triggerWakeword()
+    fun testWindowingWithUnevenSampleSize() {
+        wakeWordDetector = WakeWordDetectorImpl(AudioRecorderImpl(params, source), interpereter, executor = executorService, wakewordConfig = WakewordConfig(sampleWindowSize = 2, sampleSize = 5, detectionThreshold = 8))
+        val expected = listOf(
+                floatArrayOf(0F, 1F, 2F, 3F, 4F),
+                floatArrayOf(2F, 3F, 4F, 5F, 6F),
+                floatArrayOf(4F, 5F, 6F, 7F, 8F),
+                floatArrayOf(6F, 7F, 8F, 9F, 10F),
+                floatArrayOf(8F, 9F, 10F, 11F, 12F),
+                floatArrayOf(10F, 11F, 12F, 13F, 14F),
+                floatArrayOf(12F, 13F, 14F, 15F, 16F),
+                floatArrayOf(14F, 15F, 16F, 17F, 18F)
+        )
+        val actual = mutableListOf<FloatArray>()
+        triggerWakeword(actual)
         doReturn(true).whenever(source).isRecording()
-        doReturn(1).whenever(source).read(any<ShortArray>(), any(), any())
+        mockSampleRead(18)
         Assert.assertEquals(wakeWordDetector.isActive(), false)
         val states = mutableListOf<WakeWordState>()
         wakeWordDetector.listen {
@@ -70,22 +82,61 @@ class WakewordDetectorTest : ClientTest() {
         }
         Assert.assertEquals(states[0], WakeWordState.ACTIVE)
         Assert.assertEquals(states[1], WakeWordState.DETECTED)
+        expected.forEachIndexed { index, expectedArray ->
+            Assert.assertTrue(actual[index] contentEquals expectedArray)
+        }
     }
 
-    private fun triggerWakeword() {
+    @Test
+    fun testWindowingWithEvenSampleSize() {
+        wakeWordDetector = WakeWordDetectorImpl(AudioRecorderImpl(params, source), interpereter, executor = executorService, wakewordConfig = WakewordConfig(sampleWindowSize = 3, sampleSize = 6, detectionThreshold = 5))
+        val expected = listOf(
+                floatArrayOf(0F, 1F, 2F, 3F, 4F, 5F),
+                floatArrayOf(3F, 4F, 5F, 6F, 7F, 8F),
+                floatArrayOf(6F, 7F, 8F, 9F, 10F, 11F),
+                floatArrayOf(9F, 10F, 11F, 12F, 13F, 14F),
+                floatArrayOf(12F, 13F, 14F, 15F, 16F, 17F)
+        )
+        val actual = mutableListOf<FloatArray>()
+        triggerWakeword(actual)
+        doReturn(true).whenever(source).isRecording()
+        mockSampleRead(17)
+        Assert.assertEquals(wakeWordDetector.isActive(), false)
+        val states = mutableListOf<WakeWordState>()
+        wakeWordDetector.listen {
+            states.add(it)
+        }
+        Assert.assertEquals(states[0], WakeWordState.ACTIVE)
+        Assert.assertEquals(states[1], WakeWordState.DETECTED)
+        expected.forEachIndexed { index, expectedArray ->
+            Assert.assertTrue(actual[index] contentEquals expectedArray)
+        }
+    }
+
+    private fun triggerWakeword(actual: MutableList<FloatArray>? = null) {
         doAnswer { invocation ->
-            val output = (invocation.getArgument<Any>(1) as IntArray)
+            actual?.add(invocation.getArgument<FloatArray>(0))
+            val output = (invocation.getArgument<IntArray>(1))
             output[0] = 1
             null
         }.whenever(interpereter).run(anyOrNull(), anyOrNull())
     }
 
-    private fun fillBuffer(buffer: ByteBuffer) {
-        buffer.clear()
-        var i = 0
-        while (i < WakeWordDetectorImpl.sourceBufferSize) {
-            buffer.put(0)
-            i++
-        }
+    private fun mockSampleRead(totalSamplesToRead: Int) {
+        var samples: Short = 0
+        var samplesRead = 0
+        doAnswer {
+            if (samples <= totalSamplesToRead) {
+                val shortArray = it.getArgument<ShortArray>(0)
+                samplesRead = it.getArgument<Int>(1)
+                val requestedSamples = it.getArgument<Int>(2)
+                for (i in 0 until requestedSamples) {
+                    shortArray[i] = samples
+                    samples = (samples + 1).toShort()
+                    samplesRead++
+                }
+            }
+            samplesRead
+        }.whenever(source).read(any<ShortArray>(), any(), any())
     }
 }
