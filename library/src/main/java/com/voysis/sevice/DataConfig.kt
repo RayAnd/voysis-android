@@ -13,4 +13,4 @@ data class DataConfig(override val isVadEnabled: Boolean = true,
                       override val audioRecordParams: AudioRecordParams? = null,
                       override val interactionType: InteractionType = InteractionType.QUERY,
                       override val serviceType: ServiceType = ServiceType.DEFAULT,
-                      override val resourcePath: String) : Config
+                      override val resourcePath: String = "") : Config
