@@ -16,7 +16,6 @@ fun isAboveThreshold(input: Float, threshold: Float): Int = if (input >= thresho
     0
 }
 
-
 fun detected(countQueue: CircularFifoBuffer, leftThreshold: Int): Boolean {
     val count = countQueue.toArray().map { it as Int }.toIntArray()
     return count.filter { it == 1 }.size > leftThreshold * 0.5
