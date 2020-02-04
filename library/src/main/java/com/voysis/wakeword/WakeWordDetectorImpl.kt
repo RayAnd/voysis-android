@@ -58,7 +58,7 @@ class WakeWordDetectorImpl(private val recorder: AudioRecorder,
                 for (i in 0 until requestedSampleSize) {
                     ringBuffer.add(shortArray[i].toFloat())
                 }
-                if (ringBuffer.size >=  config.sampleSize) {
+                if (ringBuffer.size >= config.sampleSize) {
                     val result = processWakeword(ringBuffer, interpreter)
                     countQueue.add(isAboveThreshold(result, config.probThreshold))
                     if (detected(countQueue, config.thresholdCount)) {
@@ -77,9 +77,11 @@ class WakeWordDetectorImpl(private val recorder: AudioRecorder,
         callback?.invoke(state.get())
     }
 
-    private fun getRequestedSampleSize(ringBuffer: CircularFifoBuffer, requestedSampleSize: Int) = if (!ringBuffer.isFull && ringBuffer.size + requestedSampleSize > config.sampleSize) {
-        config.sampleSize - ringBuffer.size
-    } else {
-        requestedSampleSize
+    private fun getRequestedSampleSize(ringBuffer: CircularFifoBuffer, requestedSampleSize: Int): Int {
+        return if (!ringBuffer.isFull && ringBuffer.size + requestedSampleSize > config.sampleSize) {
+            config.sampleSize - ringBuffer.size
+        } else {
+            requestedSampleSize
+        }
     }
 }
