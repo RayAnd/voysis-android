@@ -11,10 +11,6 @@ fun processWakeword(buffer: CircularFifoBuffer, interpreter: Interpreter): Float
 }
 
 fun isAboveThreshold(input: Float, threshold: Float): Int = if (input >= threshold) 1 else 0
-    1
-} else {
-    0
-}
 
 fun detected(countQueue: CircularFifoBuffer, leftThreshold: Int): Boolean {
     val count = countQueue.toArray().map { it as Int }.toIntArray()
