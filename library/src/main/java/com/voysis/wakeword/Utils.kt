@@ -10,7 +10,7 @@ fun processWakeword(buffer: CircularFifoBuffer, interpreter: Interpreter): Float
     return output[0][1]
 }
 
-fun isAboveThreshold(input: Float, threshold: Float): Int = if (input >= threshold) {
+fun isAboveThreshold(input: Float, threshold: Float): Int = if (input >= threshold) 1 else 0
     1
 } else {
     0
