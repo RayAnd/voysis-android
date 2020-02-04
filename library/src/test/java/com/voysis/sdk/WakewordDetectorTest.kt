@@ -115,8 +115,8 @@ class WakewordDetectorTest : ClientTest() {
 
     private fun triggerWakeword(actual: MutableList<FloatArray>? = null) {
         doAnswer { invocation ->
-            actual?.add(invocation.getArgument<Any>(0) as FloatArray)
-            val output = (invocation.getArgument<Any>(1) as IntArray)
+            actual?.add(invocation.getArgument<FloatArray>(0))
+            val output = (invocation.getArgument<IntArray>(1))
             output[0] = 1
             null
         }.whenever(interpereter).run(anyOrNull(), anyOrNull())
@@ -127,9 +127,9 @@ class WakewordDetectorTest : ClientTest() {
         var samplesRead = 0
         doAnswer {
             if (samples <= totalSamplesToRead) {
-                val shortArray = it.getArgument<Any>(0) as ShortArray
-                samplesRead = it.getArgument<Any>(1) as Int
-                val requestedSamples = it.getArgument<Any>(2) as Int
+                val shortArray = it.getArgument<ShortArray>(0)
+                samplesRead = it.getArgument<Int>(1)
+                val requestedSamples = it.getArgument<Int>(2)
                 for (i in 0 until requestedSamples) {
                     shortArray[i] = samples
                     samples = (samples + 1).toShort()
