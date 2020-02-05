@@ -116,6 +116,30 @@ class WakewordDetectorTest : ClientTest() {
         }
     }
 
+    @Test
+    fun testWindowingWhenNotAllRequestedSamplesAreReturnedInOneCall() {
+        wakeWordDetector = WakeWordDetectorImpl(AudioRecorderImpl(params, source), interpereter, executor = executorService, config = WakewordConfig(sampleWindowSize = 4, sampleSize = 8, probThreshold = 0.5f, thresholdCount = 10))
+        val expected = listOf(
+                floatArrayOf(0F, 1F, 2F, 3F, 4F, 5F, 6F, 7F),
+                floatArrayOf(4F, 5F, 6F, 7F, 8F, 9F, 10F, 11F),
+                floatArrayOf(8F, 9F, 10F, 11F, 12F, 13F, 14F, 15F)
+        )
+        val actual = mutableListOf<FloatArray>()
+        triggerWakeword(actual)
+        doReturn(true).whenever(source).isRecording()
+        mockSampleRead(15, 2)
+        Assert.assertEquals(wakeWordDetector.isActive(), false)
+        val states = mutableListOf<WakeWordState>()
+        wakeWordDetector.listen {
+            states.add(it)
+        }
+        Assert.assertEquals(states[0], WakeWordState.ACTIVE)
+        Assert.assertEquals(states[1], WakeWordState.DETECTED)
+        expected.forEachIndexed { index, expectedArray ->
+            Assert.assertTrue(actual[index] contentEquals expectedArray)
+        }
+    }
+
     private fun triggerWakeword(actual: MutableList<FloatArray>? = null) {
         doAnswer { invocation ->
             actual?.add(invocation.getArgument<FloatArray>(0))
@@ -125,21 +149,21 @@ class WakewordDetectorTest : ClientTest() {
         }.whenever(interpereter).run(anyOrNull(), anyOrNull())
     }
 
-    private fun mockSampleRead(totalSamplesToRead: Int) {
+    private fun mockSampleRead(totalSamplesToRead: Int, samplesToReadEachCall: Int? = null) {
         var samples: Short = 0
-        var samplesRead = 0
+        var requestedSamples = 0
         doAnswer {
             if (samples <= totalSamplesToRead) {
                 val shortArray = it.getArgument<ShortArray>(0)
-                samplesRead = it.getArgument<Int>(1)
-                val requestedSamples = it.getArgument<Int>(2)
+                var samplesRead = it.getArgument<Int>(1)
+                requestedSamples = samplesToReadEachCall ?: it.getArgument<Int>(2)
                 for (i in 0 until requestedSamples) {
-                    shortArray[i] = samples
+                    shortArray[samplesRead] = samples
                     samples = (samples + 1).toShort()
                     samplesRead++
                 }
             }
-            samplesRead
+            requestedSamples
         }.whenever(source).read(any<ShortArray>(), any(), any())
     }
 
