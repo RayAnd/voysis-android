@@ -55,7 +55,7 @@ class WakeWordDetectorImpl(private val recorder: AudioRecorder,
             samplesRead += source.read(shortArray, samplesRead, requestedSampleSize)
             if (samplesRead >= wakewordConfig.sampleWindowSize || ringBuffer.size + samplesRead == wakewordConfig.sampleSize) {
                 recorder.invokeListener(shortArray)
-                for (i in 0 until requestedSampleSize) {
+                for (i in 0 until samplesRead) {
                     ringBuffer.add(shortArray[i].toFloat())
                 }
                 if (ringBuffer.size >= wakewordConfig.sampleSize) {
