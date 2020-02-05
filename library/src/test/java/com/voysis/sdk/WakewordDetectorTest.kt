@@ -118,7 +118,7 @@ class WakewordDetectorTest : ClientTest() {
 
     @Test
     fun testWindowingWhenNotAllRequestedSamplesAreReturnedInOneCall() {
-        wakeWordDetector = WakeWordDetectorImpl(AudioRecorderImpl(params, source), interpereter, executor = executorService, wakewordConfig = WakewordConfig(sampleWindowSize = 4, sampleSize = 8, detectionThreshold = 5))
+        wakeWordDetector = WakeWordDetectorImpl(AudioRecorderImpl(params, source), interpereter, executor = executorService, config = WakewordConfig(sampleWindowSize = 4, sampleSize = 8, probThreshold = 0.5f, thresholdCount = 10))
         val expected = listOf(
                 floatArrayOf(0F, 1F, 2F, 3F, 4F, 5F, 6F, 7F),
                 floatArrayOf(4F, 5F, 6F, 7F, 8F, 9F, 10F, 11F),
