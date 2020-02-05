@@ -6,16 +6,19 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.widget.Toast
+import android.widget.Toast.LENGTH_SHORT
 import androidx.appcompat.app.AppCompatActivity
 import com.google.gson.GsonBuilder
-import com.voysis.api.Service
 import com.voysis.api.ServiceProvider
+import com.voysis.api.ServiceType
 import com.voysis.api.State
 import com.voysis.events.Callback
 import com.voysis.events.FinishedReason
 import com.voysis.events.VoysisException
+import com.voysis.events.WakeWordState
 import com.voysis.model.response.StreamResponse
 import com.voysis.sevice.DataConfig
+import com.voysis.wakeword.WakeWordService
 import kotlinx.android.synthetic.main.activity_main_wakeword.cancel
 import kotlinx.android.synthetic.main.activity_main_wakeword.eventText
 import kotlinx.android.synthetic.main.activity_main_wakeword.responseText
@@ -23,24 +26,27 @@ import kotlinx.android.synthetic.main.activity_main_wakeword.send
 import kotlinx.android.synthetic.main.activity_main_wakeword.start
 import kotlinx.android.synthetic.main.activity_main_wakeword.stop
 import kotlinx.android.synthetic.main.activity_main_wakeword.textInput
+import kotlinx.android.synthetic.main.activity_main_wakeword.wakeWordStart
+import kotlinx.android.synthetic.main.activity_main_wakeword.wakeWordStop
 import java.net.URL
 import java.util.concurrent.Executors
 
 /*
- * This activity describes the instantiation and usage of a default Voysis instance:
- * Can be used to make single queries against url endpoint or embedded service.
+ * This activity describes the instantiation and usage of a wakeword enabled Voysis instance:
+ * Can be used to make single queries against url endpoint or embedded service. Can be kicked off
+ * using specific wakeword.
  */
 
-class MainActivity : AppCompatActivity(), Callback {
-
-    private val config = DataConfig(isVadEnabled = true, url = URL("INSERT_URL"), refreshToken = "INSERT_TOKEN", userId = "")
+class MainActivityWakeword : AppCompatActivity(), Callback {
+    //resourcePath required for location of wakeword model
+    private val config = DataConfig(isVadEnabled = true, serviceType = ServiceType.WAKEWORD, url = URL("https://fake.com"), refreshToken = "INSERT_TOKEN", userId = "", resourcePath = "localResources")
     private val executor = Executors.newSingleThreadExecutor()
+    private lateinit var service: WakeWordService
     private var context: Map<String, Any>? = null
-    private lateinit var service: Service
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        setContentView(R.layout.activity_main_wakeword)
         acceptAudioPermissionIfNeeded()
     }
 
@@ -66,6 +72,10 @@ class MainActivity : AppCompatActivity(), Callback {
         setEventText(error.message.toString())
     }
 
+    override fun wakeword(state: WakeWordState) {
+        setEventText(state.name)
+    }
+
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
         if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
             init()
@@ -84,13 +94,13 @@ class MainActivity : AppCompatActivity(), Callback {
          * `makeCloud()` denotes service creation as a network service. Requires a URL endpoint and
          * refresh token. See documentation for more information
          */
-        service = ServiceProvider().makeCloud(applicationContext, config)
+        service = ServiceProvider().makeCloud(applicationContext, config) as WakeWordService
         setupClickListeners()
         /*
          *`makeLocal()` denotes service creation as a an embedded service. Requires a model files in assets folder.
          * See documentation for more information
          */
-        //service = ServiceProvider().makeLocal(applicationContext, config)
+        //service = ServiceProvider().makeLocal(applicationContext, config) as WakewordService
     }
 
     private fun setupClickListeners() {
@@ -98,6 +108,8 @@ class MainActivity : AppCompatActivity(), Callback {
         stop.setOnClickListener { service.finish() }
         send.setOnClickListener { onSendClicked() }
         cancel.setOnClickListener { service.cancel() }
+        wakeWordStart.setOnClickListener { service.startListening(this, context) }
+        wakeWordStop.setOnClickListener { service.stopListening() }
     }
 
     private fun onSendClicked() {
@@ -109,7 +121,7 @@ class MainActivity : AppCompatActivity(), Callback {
         if (service.state == State.IDLE) {
             executor.submit { startAudioQuery() }
         } else {
-            Toast.makeText(this, "query in progress ", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "query in progress ", LENGTH_SHORT).show()
         }
     }
 
@@ -142,5 +154,4 @@ class MainActivity : AppCompatActivity(), Callback {
     private fun checkAudioPermission(): Boolean {
         return checkSelfPermission(Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED
     }
-
 }
