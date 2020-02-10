@@ -62,7 +62,6 @@ internal class LocalModelAssetProvider(context: Context,
                 dir.mkdirs()
             }
             if (file.exists()) {
-                Log.println(Log.VERBOSE, "LocalModelAssetProvider", "File: $filename already exists in path: $filesDir")
                 processedFiles.add(newFileName)
                 return
             } else {
@@ -81,7 +80,6 @@ internal class LocalModelAssetProvider(context: Context,
     private fun deleteFilesInDir(dir: File) {
         dir.listFiles()?.forEach {
             if (!processedFiles.contains(it.path)) {
-                Log.println(Log.VERBOSE, "LocalModelAssetProvider", "Deleting file: ${it.name} from directory: $filesDir")
                 it.delete()
             }
         }
