@@ -1,10 +1,12 @@
 package com.voysis.api
 
 import android.content.Context
+import android.content.res.AssetManager
 import com.google.gson.Gson
 import com.voysis.client.provider.ClientProvider
 import com.voysis.client.provider.CloudClientProvider
 import com.voysis.client.provider.LocalModelAssetProvider
+import com.voysis.client.provider.TfLiteModelProvider
 import com.voysis.generateAudioWavRecordParams
 import com.voysis.generateDefaultAudioWavRecordParams
 import com.voysis.generateOkHttpClient
@@ -19,8 +21,6 @@ import com.voysis.wakeword.DetectorType
 import com.voysis.wakeword.WakeWordDetectorImpl
 import com.voysis.wakeword.WakeWordServiceImpl
 import okhttp3.OkHttpClient
-import org.tensorflow.lite.Interpreter
-import java.io.File
 
 /**
  * The Voysis.ServiceProvider is the sdk's primary object for making Voysis.Service instances.
@@ -84,9 +84,9 @@ class ServiceProvider {
             }
         }
         val clientProviderClass = Class.forName("com.voysis.client.provider.LocalClientProvider")
-        val resourcesPath = LocalModelAssetProvider(context).extractModel(config.resourcePath!!)
-        val clientProviderConstructor = clientProviderClass.getConstructor(String::class.java, BaseConfig::class.java, AudioRecorder::class.java)
-        val clientProviderConstructorInstance = clientProviderConstructor.newInstance(resourcesPath, config, audioRecorder) as ClientProvider
+        val resourcesPath = LocalModelAssetProvider(context).extractModel(config.resourcePath!!, "models")
+        val clientProviderConstructor = clientProviderClass.getConstructor(String::class.java, BaseConfig::class.java, AudioRecorder::class.java, AssetManager::class.java)
+        val clientProviderConstructorInstance = clientProviderConstructor.newInstance(resourcesPath, config, audioRecorder, context.assets) as ClientProvider
         return make(context, clientProviderConstructorInstance, config, localTokenManager, audioRecorder!!)
     }
 
@@ -122,8 +122,7 @@ class ServiceProvider {
                              path: String,
                              type: DetectorType,
                              recorder: AudioRecorder = AudioRecorderImpl(generateDefaultAudioWavRecordParams())): WakeWordDetectorImpl {
-        val resourcesPath = LocalModelAssetProvider(context).extractModel(path)
-        val interpreter = Interpreter(File("$resourcesPath/wakeword.tflite"))
+        val interpreter = TfLiteModelProvider(path, context.assets).createTfLiteInterpreter("wakeword.tflite")
         return WakeWordDetectorImpl(recorder, interpreter, type)
     }
 }

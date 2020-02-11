@@ -18,7 +18,7 @@ internal interface ModelFileProvider {
      * @param fName file Name to extract
      * @return model extracted file location
      */
-    fun extractModel(fName: String): String
+    fun extractModel(fName: String, subDir: String? = null): String
 }
 
 /**
@@ -32,21 +32,18 @@ internal class LocalModelAssetProvider(context: Context,
                                        private val filesDir: String = context.filesDir.absolutePath.toString(),
                                        private val assetManager: AssetManager = context.assets) : ModelFileProvider {
 
-    override fun extractModel(fName: String): String {
+    private val processedFiles = mutableSetOf<String>()
+
+    override fun extractModel(fName: String, subDir: String?): String {
         try {
-            var fullPath: String
-            val assets = assetManager.list(fName)
+            val fullPath = filesDir.plus("/").plus(fName).plus("/")
+            val assetPath = if (subDir != null) fName.plus("/$subDir") else fName
+            val assets = assetManager.list(assetPath)
             if (assets!!.isEmpty()) {
-                fullPath = fName
-                copyFile(fName)
+                copyFile(assetPath)
             } else {
-                fullPath = filesDir.plus("/").plus(fName)
-                val dir = File(fullPath)
-                fullPath = fullPath.plus("/")
-                if (!dir.exists())
-                    dir.mkdir()
                 for (i in assets.indices) {
-                    extractModel(fName.plus("/").plus(assets[i]))
+                    extractModel(assetPath.plus("/").plus(assets[i]))
                 }
             }
             return fullPath
@@ -59,12 +56,32 @@ internal class LocalModelAssetProvider(context: Context,
     private fun copyFile(filename: String) {
         try {
             val newFileName = filesDir.plus("/").plus(filename)
+            val file = File(newFileName)
+            val dir = File(file.parent!!)
+            if (!dir.exists()) {
+                dir.mkdirs()
+            }
+            if (file.exists()) {
+                processedFiles.add(newFileName)
+                return
+            } else {
+                deleteFilesInDir(dir)
+            }
             val copiedFileOutput = FileOutputStream(newFileName)
             assetManager.open(filename).copyTo(copiedFileOutput, 4096)
             copiedFileOutput.flush()
             copiedFileOutput.close()
+            processedFiles.add(newFileName)
         } catch (e: Exception) {
-            Log.e("AssetProvider", "error copying file", e)
+            Log.e("AssetProvider", "Error copying file: $filename", e)
+        }
+    }
+
+    private fun deleteFilesInDir(dir: File) {
+        dir.listFiles()?.forEach {
+            if (!processedFiles.contains(it.path)) {
+                it.delete()
+            }
         }
     }
 }
