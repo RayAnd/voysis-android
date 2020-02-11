@@ -23,7 +23,7 @@ data class Links(@field:SerializedName("self") val self: Self? = null,
                  @field:SerializedName("queries") val queries: Queries? = null,
                  @field:SerializedName("audio") val audio: Audio? = null)
 
-data class TextQuery(@field:SerializedName("text") val text: String? = null)
+data class TextQuery(@field:SerializedName("text") val text: String? = null, @field:SerializedName("lmOutput") val lmOutput: String? = text)
 
 data class AudioQuery(@field:SerializedName("mimeType") val mimeType: String? = "audio/pcm;bits=16;rate=16000")
 
