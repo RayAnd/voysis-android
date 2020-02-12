@@ -26,6 +26,11 @@ interface BaseConfig {
      * @return optional resourcePath is a reference to the necessary binary sets for local execution
      */
     val resourcePath: String? get() = ""
+
+    /**
+     * @return optional languageModelPath. If populated this path will be used for language model while in local execution
+     */
+    val languageModelPath: String? get() = ""
 }
 
 enum class ServiceType {
