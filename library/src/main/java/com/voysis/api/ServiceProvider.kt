@@ -1,7 +1,6 @@
 package com.voysis.api
 
 import android.content.Context
-import android.content.res.AssetManager
 import com.google.gson.Gson
 import com.voysis.client.provider.ClientProvider
 import com.voysis.client.provider.CloudClientProvider
