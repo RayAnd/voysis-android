@@ -5,7 +5,6 @@ import android.content.res.AssetManager
 import com.google.gson.Gson
 import com.voysis.client.provider.ClientProvider
 import com.voysis.client.provider.CloudClientProvider
-import com.voysis.client.provider.LocalModelAssetProvider
 import com.voysis.client.provider.TfLiteModelProvider
 import com.voysis.generateAudioWavRecordParams
 import com.voysis.generateDefaultAudioWavRecordParams
@@ -84,9 +83,8 @@ class ServiceProvider {
             }
         }
         val clientProviderClass = Class.forName("com.voysis.client.provider.LocalClientProvider")
-        val resourcesPath = LocalModelAssetProvider(context).extractModel(config.resourcePath!!, "models")
-        val clientProviderConstructor = clientProviderClass.getConstructor(String::class.java, BaseConfig::class.java, AudioRecorder::class.java, AssetManager::class.java)
-        val clientProviderConstructorInstance = clientProviderConstructor.newInstance(resourcesPath, config, audioRecorder, context.assets) as ClientProvider
+        val clientProviderConstructor = clientProviderClass.getConstructor(Context::class.java, BaseConfig::class.java, AudioRecorder::class.java, AssetManager::class.java)
+        val clientProviderConstructorInstance = clientProviderConstructor.newInstance(context, config, audioRecorder, context.assets) as ClientProvider
         return make(context, clientProviderConstructorInstance, config, localTokenManager, audioRecorder!!)
     }
 
